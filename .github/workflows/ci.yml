@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  python-tests:
+    name: Python tests (ml)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The test suite deliberately needs no heavy vision/ML deps
+      # (pose/keypoints.py keeps the schema import-light).
+      - run: pip install numpy scipy pytest
+      - run: python -m pytest tests/ -q
+
+  ios-tests:
+    name: iOS build + tests
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: iOS
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Using $XCODE"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - name: Pick a simulator
+        id: sim
+        run: |
+          DEST=$(xcrun simctl list devices available | grep -E "iPhone" | head -1 | sed -E 's/^ *([^(]*[^ (]) *\(.*/\1/')
+          echo "Simulator: $DEST"
+          echo "name=$DEST" >> "$GITHUB_OUTPUT"
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project SwimCoach.xcodeproj \
+            -scheme SwimCoach \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            | tail -60

@@ -18,7 +18,7 @@
 		39A0758B17361B3A08098E43 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98186D217795042F6E6B7D7A /* OnboardingView.swift */; };
 		425EEA4E5FE5FB6C3C333A82 /* PoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */; };
 		4CE292A8943BD4E8BA57E2E1 /* CoachingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F3A8523C913A0E0248CDD /* CoachingService.swift */; };
-		50D1AE085B8472446B1A7E08 /* FoundationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE9BA827876E8FAE3D764408 /* FoundationModels.framework */; };
+		50D1AE085B8472446B1A7E08 /* FoundationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE9BA827876E8FAE3D764408 /* FoundationModels.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		576F12DE83ED304722849181 /* AnalysisResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */; };
 		65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */; };
 		6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */; };

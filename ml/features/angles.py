@@ -3,7 +3,7 @@ Compute joint angles from pose keypoints.
 """
 
 import numpy as np
-from pose.extractor import KEYPOINT_NAMES
+from pose.keypoints import KEYPOINT_NAMES
 
 
 def _kp_idx(name: str) -> int:

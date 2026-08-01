@@ -4,7 +4,7 @@ Compute motion features: stroke cycles, wrist velocity, kick frequency.
 
 import numpy as np
 from scipy.signal import find_peaks
-from pose.extractor import KEYPOINT_NAMES
+from pose.keypoints import KEYPOINT_NAMES
 
 
 def _kp_idx(name: str) -> int:

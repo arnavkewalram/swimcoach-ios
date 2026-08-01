@@ -8,26 +8,7 @@ import mediapipe as mp
 import numpy as np
 from typing import Optional
 
-
-# MediaPipe landmark indices we care about
-KEYPOINT_INDICES = {
-    "nose": 0,
-    "left_shoulder": 11,
-    "right_shoulder": 12,
-    "left_elbow": 13,
-    "right_elbow": 14,
-    "left_wrist": 15,
-    "right_wrist": 16,
-    "left_hip": 23,
-    "right_hip": 24,
-    "left_knee": 25,
-    "right_knee": 26,
-    "left_ankle": 27,
-    "right_ankle": 28,
-}
-
-KEYPOINT_NAMES = list(KEYPOINT_INDICES.keys())
-N_KEYPOINTS = len(KEYPOINT_NAMES)
+from pose.keypoints import KEYPOINT_INDICES, KEYPOINT_NAMES, N_KEYPOINTS
 
 
 def extract_keypoints_from_video(

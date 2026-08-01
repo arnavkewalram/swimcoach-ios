@@ -21,7 +21,10 @@ targets:
         excludes:
           - "**/.DS_Store"
     dependencies:
+      # Weak-linked: only exists in the iOS 26 SDK. CoachingService guards all
+      # usage with canImport + availability, so older toolchains still build.
       - sdk: FoundationModels.framework
+        weak: true
     resources:
       - path: SwimCoach/Resources/swim_test.mp4
     info:
