@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+ml/.venv/
+output/
+
+# Xcode
+iOS/SwimCoach.xcodeproj/xcuserdata/
+iOS/SwimCoach.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+build/
+
+# Local tooling
+.gstack/
+.claude/
+
+# Preserved standalone git dir for ml/ (GitHub: arnavkewalram/swim-analyzer).
+# Restore with: mv .ml-standalone.git ml/.git
+.ml-standalone.git/
+
+# Coverage artifacts
+.coverage

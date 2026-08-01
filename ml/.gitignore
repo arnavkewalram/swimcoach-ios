@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pt
+*.npy
+*.mp4
+*.mov
+*.avi
+output/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.DS_Store

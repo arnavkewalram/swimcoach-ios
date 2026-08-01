@@ -1,0 +1,617 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */; };
+		116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */; };
+		1196B0A2E342B9F875B025C3 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */; };
+		15A029877A18065E055732B8 /* FeedbackEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */; };
+		1761B3D81C1BE2041A855BFB /* SwimSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C6D30A519EEDA7A9575174 /* SwimSession.swift */; };
+		2815930944855657E8A7EB06 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8EDC90DCD052513240CF58 /* HomeView.swift */; };
+		310CB56C4250CC47283D5AD5 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */; };
+		3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */; };
+		39A0758B17361B3A08098E43 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98186D217795042F6E6B7D7A /* OnboardingView.swift */; };
+		425EEA4E5FE5FB6C3C333A82 /* PoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */; };
+		4CE292A8943BD4E8BA57E2E1 /* CoachingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F3A8523C913A0E0248CDD /* CoachingService.swift */; };
+		50D1AE085B8472446B1A7E08 /* FoundationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE9BA827876E8FAE3D764408 /* FoundationModels.framework */; };
+		576F12DE83ED304722849181 /* AnalysisResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */; };
+		65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */; };
+		6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */; };
+		7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */; };
+		72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */; };
+		78B84EAA41F09EB2FF2417A3 /* AnalyzingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AC560CE3C7B75914B49079 /* AnalyzingView.swift */; };
+		882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E721FA48603268C362E7F84E /* SwimCoachApp.swift */; };
+		891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228631A15A23306938ED17ED /* TechniqueIssue.swift */; };
+		944F046C848F3370BA9966DA /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5321399BE9F3645B9111A95C /* RootView.swift */; };
+		99FD6C30E05CF624EE90AE1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50E3FF3C10BF299B700EBF8A /* Assets.xcassets */; };
+		9AB3F3314B67D293DBB5D3F7 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */; };
+		A58B3D216C76EE2B7B9460C1 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7CDB20F3A4841EE3E9036C /* CameraManager.swift */; };
+		AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */; };
+		C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */; };
+		D457186B47170F1CE985F528 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7BECFC0E9326C22CD9437B /* CameraView.swift */; };
+		D6C634BFF07A295BE4B5C063 /* BiomechanicsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6575546202E3DCF9FD9A8001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BB7B44C2545CE763E636EDD1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 101DD83805DD3500905E9CF4;
+			remoteInfo = SwimCoach;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		14AC560CE3C7B75914B49079 /* AnalyzingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzingView.swift; sourceTree = "<group>"; };
+		1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngineTests.swift; sourceTree = "<group>"; };
+		1D7CDB20F3A4841EE3E9036C /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		228631A15A23306938ED17ED /* TechniqueIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechniqueIssue.swift; sourceTree = "<group>"; };
+		24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngine.swift; sourceTree = "<group>"; };
+		2D8EDC90DCD052513240CF58 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunnerTests.swift; sourceTree = "<group>"; };
+		4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunner.swift; sourceTree = "<group>"; };
+		50E3FF3C10BF299B700EBF8A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52C6D30A519EEDA7A9575174 /* SwimSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimSession.swift; sourceTree = "<group>"; };
+		5321399BE9F3645B9111A95C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */ = {isa = PBXFileReference; path = swim_test.mp4; sourceTree = "<group>"; };
+		5B7BECFC0E9326C22CD9437B /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		730F3A8523C913A0E0248CDD /* CoachingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingService.swift; sourceTree = "<group>"; };
+		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
+		98186D217795042F6E6B7D7A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngine.swift; sourceTree = "<group>"; };
+		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngineTests.swift; sourceTree = "<group>"; };
+		A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractorTests.swift; sourceTree = "<group>"; };
+		B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractor.swift; sourceTree = "<group>"; };
+		BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseAnalyzer.swift; sourceTree = "<group>"; };
+		D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		D527CB27BAD9FD1888FABA4D /* SwimCoachTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SwimCoachTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisResult.swift; sourceTree = "<group>"; };
+		E721FA48603268C362E7F84E /* SwimCoachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimCoachApp.swift; sourceTree = "<group>"; };
+		E7492F849CC9B8B622B93939 /* SwimCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SwimCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE9BA827876E8FAE3D764408 /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		162ED30EA5492D374847645C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50D1AE085B8472446B1A7E08 /* FoundationModels.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		030CC4B701E8B3B721AF2672 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				2D8EDC90DCD052513240CF58 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		250B5A246B05DC00B6BD27FA /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */,
+				730F3A8523C913A0E0248CDD /* CoachingService.swift */,
+				BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */,
+				24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */,
+				BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */,
+				4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		2C46DC385735A4FEE49AF1FB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */,
+				5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		376F99D216F528CB58C092EE /* Results */ = {
+			isa = PBXGroup;
+			children = (
+				B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */,
+			);
+			path = Results;
+			sourceTree = "<group>";
+		};
+		4823989B8E396A3B6EA90A60 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EE9BA827876E8FAE3D764408 /* FoundationModels.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4E96E1D33E1430720C185F8E = {
+			isa = PBXGroup;
+			children = (
+				D5A268019C1A284F1EB74BEB /* SwimCoach */,
+				5E925C04E56CF821FEBF46A5 /* SwimCoachTests */,
+				4823989B8E396A3B6EA90A60 /* Frameworks */,
+				EB36CC50D7B15DF66951170B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5E925C04E56CF821FEBF46A5 /* SwimCoachTests */ = {
+			isa = PBXGroup;
+			children = (
+				9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */,
+				A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */,
+				1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */,
+				40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */,
+			);
+			path = SwimCoachTests;
+			sourceTree = "<group>";
+		};
+		76FC1E5FE7DD59E3E0B37563 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				98186D217795042F6E6B7D7A /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		93DC94BA38AC773578EAE7BD /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				1D7CDB20F3A4841EE3E9036C /* CameraManager.swift */,
+				5B7BECFC0E9326C22CD9437B /* CameraView.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		A1FB475000FB096051047F86 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */,
+				52C6D30A519EEDA7A9575174 /* SwimSession.swift */,
+				228631A15A23306938ED17ED /* TechniqueIssue.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		C87DA6BF23BA100226A2DB28 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				DDDAB9A82EC9DE971ED49060 /* Analyzing */,
+				93DC94BA38AC773578EAE7BD /* Camera */,
+				EEC15F3EF56DF8A02DF296D3 /* History */,
+				030CC4B701E8B3B721AF2672 /* Home */,
+				76FC1E5FE7DD59E3E0B37563 /* Onboarding */,
+				376F99D216F528CB58C092EE /* Results */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		D5A268019C1A284F1EB74BEB /* SwimCoach */ = {
+			isa = PBXGroup;
+			children = (
+				250B5A246B05DC00B6BD27FA /* Core */,
+				E7B4DA7C9D8F20AF439E2770 /* Design */,
+				C87DA6BF23BA100226A2DB28 /* Features */,
+				A1FB475000FB096051047F86 /* Models */,
+				EA1CC372BAB91BE92087F818 /* Navigation */,
+				2C46DC385735A4FEE49AF1FB /* Resources */,
+				50E3FF3C10BF299B700EBF8A /* Assets.xcassets */,
+				99AB87293A2C7FE01697E04D /* Info.plist */,
+				E721FA48603268C362E7F84E /* SwimCoachApp.swift */,
+			);
+			path = SwimCoach;
+			sourceTree = "<group>";
+		};
+		DDDAB9A82EC9DE971ED49060 /* Analyzing */ = {
+			isa = PBXGroup;
+			children = (
+				14AC560CE3C7B75914B49079 /* AnalyzingView.swift */,
+			);
+			path = Analyzing;
+			sourceTree = "<group>";
+		};
+		E7B4DA7C9D8F20AF439E2770 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		EA1CC372BAB91BE92087F818 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */,
+				5321399BE9F3645B9111A95C /* RootView.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		EB36CC50D7B15DF66951170B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E7492F849CC9B8B622B93939 /* SwimCoach.app */,
+				D527CB27BAD9FD1888FABA4D /* SwimCoachTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EEC15F3EF56DF8A02DF296D3 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		101DD83805DD3500905E9CF4 /* SwimCoach */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9C59477B52C910D60751F38F /* Build configuration list for PBXNativeTarget "SwimCoach" */;
+			buildPhases = (
+				CCD2221A460B95124595516F /* Sources */,
+				FC2BD6FCB778C7C95819DE01 /* Resources */,
+				162ED30EA5492D374847645C /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SwimCoach;
+			packageProductDependencies = (
+			);
+			productName = SwimCoach;
+			productReference = E7492F849CC9B8B622B93939 /* SwimCoach.app */;
+			productType = "com.apple.product-type.application";
+		};
+		12C2C982386DAD7AB47F8355 /* SwimCoachTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 452CDC7648D173302D66CD0D /* Build configuration list for PBXNativeTarget "SwimCoachTests" */;
+			buildPhases = (
+				4908D754B53E791559F8E6AF /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				79ADD63486B2E577B2CFCBEB /* PBXTargetDependency */,
+			);
+			name = SwimCoachTests;
+			packageProductDependencies = (
+			);
+			productName = SwimCoachTests;
+			productReference = D527CB27BAD9FD1888FABA4D /* SwimCoachTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BB7B44C2545CE763E636EDD1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 008CC1079702032A5836EE2B /* Build configuration list for PBXProject "SwimCoach" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 4E96E1D33E1430720C185F8E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EB36CC50D7B15DF66951170B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				101DD83805DD3500905E9CF4 /* SwimCoach */,
+				12C2C982386DAD7AB47F8355 /* SwimCoachTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FC2BD6FCB778C7C95819DE01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99FD6C30E05CF624EE90AE1A /* Assets.xcassets in Resources */,
+				65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4908D754B53E791559F8E6AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */,
+				AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */,
+				C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */,
+				116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCD2221A460B95124595516F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				576F12DE83ED304722849181 /* AnalysisResult.swift in Sources */,
+				78B84EAA41F09EB2FF2417A3 /* AnalyzingView.swift in Sources */,
+				310CB56C4250CC47283D5AD5 /* AppRouter.swift in Sources */,
+				D6C634BFF07A295BE4B5C063 /* BiomechanicsEngine.swift in Sources */,
+				A58B3D216C76EE2B7B9460C1 /* CameraManager.swift in Sources */,
+				D457186B47170F1CE985F528 /* CameraView.swift in Sources */,
+				4CE292A8943BD4E8BA57E2E1 /* CoachingService.swift in Sources */,
+				6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */,
+				3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */,
+				15A029877A18065E055732B8 /* FeedbackEngine.swift in Sources */,
+				9AB3F3314B67D293DBB5D3F7 /* HistoryView.swift in Sources */,
+				2815930944855657E8A7EB06 /* HomeView.swift in Sources */,
+				39A0758B17361B3A08098E43 /* OnboardingView.swift in Sources */,
+				425EEA4E5FE5FB6C3C333A82 /* PoseAnalyzer.swift in Sources */,
+				1196B0A2E342B9F875B025C3 /* ResultsView.swift in Sources */,
+				944F046C848F3370BA9966DA /* RootView.swift in Sources */,
+				882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */,
+				1761B3D81C1BE2041A855BFB /* SwimSession.swift in Sources */,
+				7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */,
+				891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */,
+				72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		79ADD63486B2E577B2CFCBEB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 101DD83805DD3500905E9CF4 /* SwimCoach */;
+			targetProxy = 6575546202E3DCF9FD9A8001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		03138372CAD10D6A3C34AA5E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5;
+			};
+			name = Release;
+		};
+		0CE2589D63D4CE326EE8711E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.arnavkewalram.SwimCoachTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwimCoach.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SwimCoach";
+			};
+			name = Debug;
+		};
+		518A25460A378A135536977A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = SwimCoach/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.arnavkewalram.SwimCoach;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		98750CF93F926564239931B2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = SwimCoach/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.arnavkewalram.SwimCoach;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		9903B06A56AC0832F9916BEF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.arnavkewalram.SwimCoachTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SwimCoach.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SwimCoach";
+			};
+			name = Release;
+		};
+		C42D8411764008D64C4D9B18 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		008CC1079702032A5836EE2B /* Build configuration list for PBXProject "SwimCoach" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C42D8411764008D64C4D9B18 /* Debug */,
+				03138372CAD10D6A3C34AA5E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		452CDC7648D173302D66CD0D /* Build configuration list for PBXNativeTarget "SwimCoachTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0CE2589D63D4CE326EE8711E /* Debug */,
+				9903B06A56AC0832F9916BEF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9C59477B52C910D60751F38F /* Build configuration list for PBXNativeTarget "SwimCoach" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				518A25460A378A135536977A /* Debug */,
+				98750CF93F926564239931B2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BB7B44C2545CE763E636EDD1 /* Project object */;
+}
