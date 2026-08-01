@@ -13,18 +13,15 @@ struct OnboardingView: View {
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
-            AmbientGlow()
-                .accessibilityHidden(true)
 
             VStack(spacing: 0) {
-                // Skip — always available before the last page
                 HStack {
                     Spacer()
                     if currentPage < 2 {
                         Button("Skip") { hasSeenOnboarding = true }
-                            .font(.system(size: 15, weight: .medium, design: .rounded))
-                            .foregroundStyle(Color.white.opacity(0.55))
-                            .padding(.horizontal, 20)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(DS.inkSecondary)
+                            .padding(.horizontal, 24)
                             .padding(.vertical, 12)
                     }
                 }
@@ -52,7 +49,7 @@ private struct PageDots: View {
         HStack(spacing: 8) {
             ForEach(0..<total, id: \.self) { i in
                 Capsule()
-                    .fill(i == current ? DS.accent : Color.white.opacity(0.25))
+                    .fill(i == current ? DS.accent : DS.border)
                     .frame(width: i == current ? 20 : 6, height: 6)
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: current)
             }
@@ -69,16 +66,7 @@ private struct CTAButton: View {
 
     var body: some View {
         Button(action: action) {
-            Text(label)
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(
-                    LinearGradient(colors: [DS.accent, DS.accentBlue], startPoint: .leading, endPoint: .trailing)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: DS.accent.opacity(0.35), radius: 20, x: 0, y: 8)
+            PrimaryButtonLabel(title: label)
         }
         .buttonStyle(ScaleButtonStyle())
         .padding(.horizontal, 28)
@@ -86,19 +74,14 @@ private struct CTAButton: View {
     }
 }
 
-private struct PageIcon: View {
-    let name: String
+private struct PageKicker: View {
+    let text: String
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(DS.accent.opacity(0.12))
-                .frame(width: 108, height: 108)
-            Image(systemName: name)
-                .font(.system(size: 70))
-                .foregroundStyle(DS.accent)
-        }
-        .accessibilityHidden(true)
+        Text(text.uppercased())
+            .font(.sectionLabel)
+            .tracking(2.0)
+            .foregroundStyle(DS.accent)
     }
 }
 
@@ -108,26 +91,27 @@ private struct WelcomePage: View {
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            PageIcon(name: "figure.pool.swim")
-            Spacer().frame(height: 32)
-            Text("SWIMCOACH")
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-                .tracking(3)
-                .foregroundStyle(DS.accent.opacity(0.8))
+            Image(systemName: "figure.pool.swim")
+                .font(.system(size: 56, weight: .medium))
+                .foregroundStyle(DS.accent)
+                .accessibilityHidden(true)
+            Spacer().frame(height: 28)
+            PageKicker(text: "SwimCoach")
             Spacer().frame(height: 12)
             Text("An AI swim coach\nin your pocket")
-                .font(.system(size: 30, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.grotesk(30, .bold))
+                .foregroundStyle(DS.ink)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer().frame(height: 14)
-            Text("Upload a side-on poolside video and get detailed biomechanics feedback in seconds.")
+            Text("Film a swim from the pool deck and get detailed biomechanics feedback in seconds — no account, all on device.")
                 .font(.system(size: 15))
-                .foregroundStyle(Color.white.opacity(0.65))
+                .lineSpacing(3)
+                .foregroundStyle(DS.inkSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 44)
             Spacer()
-            CTAButton(label: "Get Started", action: onNext)
+            CTAButton(label: "Get started", action: onNext)
         }
     }
 }
@@ -137,40 +121,52 @@ private struct CameraPage: View {
 
     private let tips = [
         "Stable phone, waist height",
-        "2–5 metres from the swimmer",
+        "3–6 metres from the swimmer",
         "Bright lighting preferred"
     ]
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            PageIcon(name: "video.badge.checkmark")
-            Spacer().frame(height: 32)
+            Image(systemName: "video")
+                .font(.system(size: 52, weight: .medium))
+                .foregroundStyle(DS.accent)
+                .accessibilityHidden(true)
+            Spacer().frame(height: 28)
+            PageKicker(text: "Setup")
+            Spacer().frame(height: 12)
             Text("Film from the side")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.grotesk(30, .bold))
+                .foregroundStyle(DS.ink)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
             Spacer().frame(height: 14)
-            Text("Stand at the pool edge, film the full lane. Make sure your entire body is visible from head to feet.")
+            Text("Stand at the pool edge and film the full lane, with the swimmer's entire body visible from head to feet.")
                 .font(.system(size: 15))
-                .foregroundStyle(Color.white.opacity(0.65))
+                .lineSpacing(3)
+                .foregroundStyle(DS.inkSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            Spacer().frame(height: 32)
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(tips, id: \.self) { tip in
+                .padding(.horizontal, 44)
+            Spacer().frame(height: 28)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(tips.enumerated()), id: \.offset) { i, tip in
                     HStack(spacing: 12) {
-                        Image(systemName: "checkmark.circle.fill")
+                        Text(String(format: "%02d", i + 1))
+                            .font(.grotesk(13, .bold))
                             .foregroundStyle(DS.accent)
-                            .accessibilityHidden(true)
                         Text(tip)
                             .font(.system(size: 15))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(DS.ink)
+                        Spacer()
+                    }
+                    .padding(.vertical, 12)
+                    if i < tips.count - 1 {
+                        Rectangle().fill(DS.border).frame(height: 1)
                     }
                 }
             }
-            .padding(.horizontal, 48)
+            .padding(.horizontal, 16)
+            .glassCard()
+            .padding(.horizontal, 40)
             Spacer()
             CTAButton(label: "Next", action: onNext)
         }
@@ -181,31 +177,26 @@ private struct ResultsPage: View {
     let onFinish: () -> Void
 
     private struct ResultCard: View {
-        let icon: String
+        let index: String
         let title: String
         let description: String
 
         var body: some View {
-            VStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 26))
+            VStack(alignment: .leading, spacing: 8) {
+                Text(index)
+                    .font(.grotesk(13, .bold))
                     .foregroundStyle(DS.accent)
-                    .accessibilityHidden(true)
                 Text(title)
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
+                    .font(.grotesk(14, .medium))
+                    .foregroundStyle(DS.ink)
                 Text(description)
                     .font(.system(size: 12))
-                    .foregroundStyle(Color.white.opacity(0.60))
-                    .multilineTextAlignment(.center)
+                    .lineSpacing(2)
+                    .foregroundStyle(DS.inkSecondary)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
-            .padding(.horizontal, 10)
-            .background(DS.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(DS.border, lineWidth: 1))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .glassCard()
             .accessibilityElement(children: .combine)
         }
     }
@@ -213,22 +204,23 @@ private struct ResultsPage: View {
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            PageIcon(name: "chart.bar.doc.horizontal")
-            Spacer().frame(height: 32)
+            PageKicker(text: "Every session")
+            Spacer().frame(height: 12)
             Text("What you'll get")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Spacer().frame(height: 36)
-            HStack(spacing: 12) {
-                ResultCard(icon: "chart.bar.fill", title: "Technique Score", description: "0–100 biomechanics score")
-                ResultCard(icon: "exclamationmark.triangle.fill", title: "Issues Detected", description: "Named faults with severity")
-                ResultCard(icon: "lightbulb.fill", title: "Drill Tips", description: "Specific exercises to fix each fault")
+                .font(.grotesk(30, .bold))
+                .foregroundStyle(DS.ink)
+            Spacer().frame(height: 32)
+            VStack(spacing: 10) {
+                ResultCard(index: "01", title: "Technique score",
+                           description: "A 0–100 biomechanics score with a letter grade")
+                ResultCard(index: "02", title: "Issues detected",
+                           description: "Named stroke faults, each with a severity rating")
+                ResultCard(index: "03", title: "Drill tips",
+                           description: "Specific exercises to fix each fault")
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 40)
             Spacer()
-            CTAButton(label: "Start Analyzing", action: onFinish)
+            CTAButton(label: "Start analyzing", action: onFinish)
         }
     }
 }

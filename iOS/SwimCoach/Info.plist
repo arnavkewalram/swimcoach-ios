@@ -26,6 +26,12 @@
 	<string>SwimCoach records audio alongside video.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SwimCoach can analyze swimming videos from your photo library.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SpaceGrotesk-Regular.ttf</string>
+		<string>SpaceGrotesk-Medium.ttf</string>
+		<string>SpaceGrotesk-Bold.ttf</string>
+	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

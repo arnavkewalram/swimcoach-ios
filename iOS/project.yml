@@ -27,9 +27,14 @@ targets:
         weak: true
     resources:
       - path: SwimCoach/Resources/swim_test.mp4
+      - path: SwimCoach/Resources/Fonts
     info:
       path: SwimCoach/Info.plist
       properties:
+        UIAppFonts:
+          - SpaceGrotesk-Regular.ttf
+          - SpaceGrotesk-Medium.ttf
+          - SpaceGrotesk-Bold.ttf
         NSCameraUsageDescription: "SwimCoach records swimming videos to analyze your stroke technique."
         NSMicrophoneUsageDescription: "SwimCoach records audio alongside video."
         NSPhotoLibraryUsageDescription: "SwimCoach can analyze swimming videos from your photo library."

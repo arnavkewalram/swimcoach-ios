@@ -10,8 +10,6 @@ struct HomeView: View {
     @State private var showFilePicker = false
     @State private var docsVideoURL: URL? = nil
     #endif
-    @State private var shimmerPhase: CGFloat = -1.0
-    @State private var headerAppeared = false
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
@@ -23,50 +21,36 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
-            AmbientGlow()
 
             ScrollView {
-                VStack(spacing: 28) {
-                    // Header — editorial lockup
-                    VStack(spacing: 0) {
-                        // Greeting chip
+                VStack(alignment: .leading, spacing: 0) {
+
+                    // ── Masthead ──────────────────────────────────────────
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(greeting.uppercased())
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .font(.sectionLabel)
                             .tracking(2.0)
-                            .foregroundStyle(DS.accent.opacity(0.7))
-                            .padding(.bottom, 14)
-                            .opacity(headerAppeared ? 1 : 0)
-                            .offset(y: headerAppeared ? 0 : -4)
-                            .animation(.easeOut(duration: 0.45).delay(0.1), value: headerAppeared)
-
-                        // Icon + wordmark — compact horizontal
-                        HStack(alignment: .center, spacing: 10) {
-                            ZStack {
-                                Circle()
-                                    .fill(DS.accent.opacity(0.12))
-                                    .frame(width: 48, height: 48)
-                                Image(systemName: "figure.pool.swim")
-                                    .font(.system(size: 22, weight: .semibold))
-                                    .foregroundStyle(DS.accent)
-                            }
-                            .shadow(color: DS.accent.opacity(0.4), radius: 12, x: 0, y: 0)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("SwimCoach")
-                                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
-                                Text("AI Technique Analysis")
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(Color.white.opacity(0.55))
-                            }
+                            .foregroundStyle(DS.inkTertiary)
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("SwimCoach")
+                                .font(.grotesk(34, .bold))
+                                .foregroundStyle(DS.ink)
+                            Image(systemName: "figure.pool.swim")
+                                .font(.system(size: 20, weight: .medium))
+                                .foregroundStyle(DS.accent)
+                                .accessibilityHidden(true)
                         }
-                        .opacity(headerAppeared ? 1 : 0)
-                        .offset(y: headerAppeared ? 0 : 6)
-                        .animation(.spring(response: 0.55, dampingFraction: 0.78).delay(0.05), value: headerAppeared)
+                        Text("Technique analysis, on device")
+                            .font(.system(size: 13))
+                            .foregroundStyle(DS.inkSecondary)
                     }
                     .padding(.top, 24)
+                    .padding(.bottom, 24)
 
-                    // Last session card — or a first-run welcome when empty
+                    LaneRule()
+                        .padding(.bottom, 24)
+
+                    // ── Last session / first run ──────────────────────────
                     if let last = sessions.first {
                         LastSessionCard(
                             session: last,
@@ -76,173 +60,51 @@ struct HomeView: View {
                                 router.push(.results(result))
                             }
                         }
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .padding(.bottom, 16)
                     } else {
                         FirstRunCard()
+                            .padding(.bottom, 16)
                     }
 
-                    // Stats strip
+                    // ── Record strip ──────────────────────────────────────
                     if !sessions.isEmpty {
-                        StatsStrip(sessions: sessions)
+                        RecordStrip(sessions: sessions)
+                            .padding(.bottom, 24)
                     }
 
-                    // Primary CTA
+                    // ── Actions ───────────────────────────────────────────
                     Button {
                         router.push(.camera)
                     } label: {
-                        ZStack {
-                            Label("Analyze Swim", systemImage: "video.fill")
-                                .font(.title3.bold())
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 18)
-                                .foregroundStyle(.white)
-
-                            // Shimmer overlay
-                            GeometryReader { geo in
-                                Rectangle()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [
-                                                .white.opacity(0),
-                                                .white.opacity(0.22),
-                                                .white.opacity(0)
-                                            ],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(width: geo.size.width * 0.4)
-                                    .offset(x: shimmerPhase * geo.size.width * 1.4)
-                                    .clipped()
-                            }
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .allowsHitTesting(false)
-                        }
-                        .background(
-                            LinearGradient(
-                                colors: [DS.accent, DS.accentBlue],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: DS.accent.opacity(0.35), radius: 16, x: 0, y: 6)
+                        PrimaryButtonLabel(title: "Analyze a swim", icon: "video.fill")
                     }
                     .buttonStyle(ScaleButtonStyle())
+                    .padding(.bottom, 10)
 
-                    // History
                     if !sessions.isEmpty {
                         Button {
                             router.push(.history)
                         } label: {
-                            Label("View History (\(sessions.count))", systemImage: "clock.arrow.circlepath")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(DS.surface)
-                                .foregroundStyle(.white.opacity(0.85))
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .stroke(DS.border, lineWidth: 1)
-                                )
+                            SecondaryButtonLabel(title: "History · \(sessions.count)",
+                                                 icon: "clock.arrow.circlepath")
                         }
                         .buttonStyle(ScaleButtonStyle())
                     }
 
-                    // Debug
+                    // ── Dev tools (DEBUG builds only) ─────────────────────
                     #if DEBUG
-                    VStack(spacing: 8) {
-                        Text("DEV TOOLS")
-                            .font(.system(size: 9, weight: .semibold))
-                            .tracking(2)
-                            .foregroundStyle(.white.opacity(0.25))
-                        VStack(spacing: 8) {
-                            HStack(spacing: 12) {
-                                Button {
-                                    if let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
-                                        router.push(.analyzing(url))
-                                    } else {
-                                        router.push(.results(AnalysisResult.demo))
-                                    }
-                                } label: {
-                                    Label("Demo", systemImage: "sparkles")
-                                        .font(.subheadline.bold())
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color.purple.opacity(0.18))
-                                        .foregroundStyle(.purple.opacity(0.8))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.purple.opacity(0.3), lineWidth: 1)
-                                        )
-                                }
-
-                                Button {
-                                    showFilePicker = true
-                                } label: {
-                                    Label("Load Video", systemImage: "folder.badge.plus")
-                                        .font(.subheadline.bold())
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color.orange.opacity(0.15))
-                                        .foregroundStyle(.orange.opacity(0.8))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-                                        )
-                                }
-                            }
-                            if let mp4 = docsVideoURL {
-                                Button {
-                                    router.push(.analyzing(mp4))
-                                } label: {
-                                    Label("Docs: \(mp4.lastPathComponent)", systemImage: "play.circle.fill")
-                                        .font(.subheadline.bold())
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color.green.opacity(0.15))
-                                        .foregroundStyle(.green.opacity(0.85))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                                        )
-                                }
-                            }
-                        }
-                        .opacity(0.5)
-                    }
-                    .fileImporter(
-                        isPresented: $showFilePicker,
-                        allowedContentTypes: [.movie, .mpeg4Movie, .quickTimeMovie],
-                        allowsMultipleSelection: false
-                    ) { result in
-                        if case .success(let urls) = result, let url = urls.first {
-                            let accessed = url.startAccessingSecurityScopedResource()
-                            let tmp = FileManager.default.temporaryDirectory
-                                .appendingPathComponent(url.lastPathComponent)
-                            try? FileManager.default.copyItem(at: url, to: tmp)
-                            if accessed { url.stopAccessingSecurityScopedResource() }
-                            router.push(.analyzing(tmp))
-                        }
-                    }
+                    devTools
+                        .padding(.top, 28)
                     #endif
 
                     Spacer(minLength: 40)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
             }
         }
         .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) { OnboardingView() }
         .navigationBarHidden(true)
         .onAppear {
-            headerAppeared = true
-            withAnimation(.easeInOut(duration: 1.1).delay(0.35)) {
-                shimmerPhase = 1.4
-            }
             #if DEBUG
             if let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first,
                let found = try? FileManager.default.contentsOfDirectory(at: docsDir, includingPropertiesForKeys: nil)
@@ -268,44 +130,97 @@ struct HomeView: View {
             #endif
         }
     }
+
+    // MARK: - Dev tools
+
+    #if DEBUG
+    private var devTools: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Dev tools")
+            HStack(spacing: 10) {
+                Button {
+                    if let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
+                        router.push(.analyzing(url))
+                    } else {
+                        router.push(.results(AnalysisResult.demo))
+                    }
+                } label: {
+                    devButton("Demo", icon: "sparkles")
+                }
+                Button {
+                    showFilePicker = true
+                } label: {
+                    devButton("Load video", icon: "folder")
+                }
+                if let mp4 = docsVideoURL {
+                    Button {
+                        router.push(.analyzing(mp4))
+                    } label: {
+                        devButton(mp4.lastPathComponent, icon: "play.circle")
+                    }
+                }
+            }
+        }
+        .fileImporter(
+            isPresented: $showFilePicker,
+            allowedContentTypes: [.movie, .mpeg4Movie, .quickTimeMovie],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first {
+                let accessed = url.startAccessingSecurityScopedResource()
+                let tmp = FileManager.default.temporaryDirectory
+                    .appendingPathComponent(url.lastPathComponent)
+                try? FileManager.default.copyItem(at: url, to: tmp)
+                if accessed { url.stopAccessingSecurityScopedResource() }
+                router.push(.analyzing(tmp))
+            }
+        }
+    }
+
+    private func devButton(_ title: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 11))
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
+                .lineLimit(1)
+        }
+        .foregroundStyle(DS.inkSecondary)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(DS.border, lineWidth: 1))
+    }
+    #endif
 }
 
 // MARK: - First-run welcome card
 
 private struct FirstRunCard: View {
     var body: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(DS.accent.opacity(0.10))
-                    .frame(width: 64, height: 64)
-                Image(systemName: "video.badge.waveform")
-                    .font(.system(size: 26))
-                    .foregroundStyle(DS.accent)
-            }
-            .accessibilityHidden(true)
-
+        VStack(alignment: .leading, spacing: 10) {
+            Text("FIRST SESSION")
+                .font(.sectionLabel)
+                .tracking(1.6)
+                .foregroundStyle(DS.accent)
             Text("Film your first swim")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-
-            Text("Record a side-on video from the pool deck and get a technique score, detected faults, and drills in under a minute.")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.60))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 8)
+                .font(.grotesk(22, .bold))
+                .foregroundStyle(DS.ink)
+            Text("Record a side-on video from the pool deck, 3–6 m from the swimmer. You'll get a technique score, detected faults, and drills in under a minute.")
+                .font(.system(size: 14))
+                .lineSpacing(3)
+                .foregroundStyle(DS.inkSecondary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
-        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
         .glassCard()
         .accessibilityElement(children: .combine)
     }
 }
 
-// MARK: - Stats Strip
+// MARK: - Record strip (session count · best · average)
 
-private struct StatsStrip: View {
+private struct RecordStrip: View {
     let sessions: [SwimSession]
 
     private var bestScore: Int { sessions.map(\.score).max() ?? 0 }
@@ -316,39 +231,29 @@ private struct StatsStrip: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            MicroStat(value: "\(sessions.count)", label: "sessions", icon: "list.bullet")
-            Divider().frame(height: 28).background(DS.border)
-            MicroStat(value: "\(bestScore)", label: "best", icon: "star.fill")
-            Divider().frame(height: 28).background(DS.border)
-            MicroStat(value: "\(avgScore)", label: "avg", icon: "chart.bar.fill")
+            cell(value: "\(sessions.count)", label: "SESSIONS")
+            divider
+            cell(value: "\(bestScore)", label: "BEST")
+            divider
+            cell(value: "\(avgScore)", label: "AVERAGE")
         }
-        .padding(.vertical, 10)
-        .background(DS.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(DS.border, lineWidth: 1)
-        )
+        .padding(.vertical, 14)
+        .glassCard()
     }
-}
 
-private struct MicroStat: View {
-    let value: String
-    let label: String
-    let icon: String
+    private var divider: some View {
+        Rectangle().fill(DS.border).frame(width: 1, height: 34)
+    }
 
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 9))
-                .foregroundStyle(DS.accent.opacity(0.7))
-                .accessibilityHidden(true)
+    private func cell(value: String, label: String) -> some View {
+        VStack(spacing: 3) {
             Text(value)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.grotesk(22, .bold))
+                .foregroundStyle(DS.ink)
             Text(label)
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
+                .font(.statUnit)
+                .tracking(1.2)
+                .foregroundStyle(DS.inkTertiary)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -371,100 +276,52 @@ private struct LastSessionCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 0) {
-                // Left accent border
-                Rectangle()
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("LAST SESSION")
+                        .font(.sectionLabel)
+                        .tracking(1.6)
+                        .foregroundStyle(DS.inkTertiary)
+                    Spacer()
+                    Text(session.analyzedAt.formatted(date: .abbreviated, time: .omitted).uppercased())
+                        .font(.sectionLabel)
+                        .tracking(0.8)
+                        .foregroundStyle(DS.inkTertiary)
+                }
+                .padding(.bottom, 14)
+
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text("\(session.score)")
+                        .font(.grotesk(52, .bold))
+                        .foregroundStyle(DS.ink)
+                    Text(session.grade)
+                        .font(.grotesk(22, .bold))
+                        .foregroundStyle(gradeColor)
+                    if let d = delta, d != 0 {
+                        Text(d > 0 ? "▲\(d)" : "▼\(-d)")
+                            .font(.grotesk(13, .medium))
+                            .foregroundStyle(d > 0 ? DS.severityMinor : DS.severityModerate)
+                    }
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(DS.inkTertiary)
+                        .accessibilityHidden(true)
+                }
+                .padding(.bottom, 10)
+
+                Text("\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
+                    .font(.system(size: 13))
+                    .foregroundStyle(DS.inkSecondary)
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .glassCard()
+            .overlay(alignment: .leading) {
+                UnevenRoundedRectangle(topLeadingRadius: 12, bottomLeadingRadius: 12)
                     .fill(gradeColor)
                     .frame(width: 4)
-                    .clipShape(
-                        UnevenRoundedRectangle(
-                            topLeadingRadius: 16,
-                            bottomLeadingRadius: 16,
-                            bottomTrailingRadius: 0,
-                            topTrailingRadius: 0
-                        )
-                    )
-
-                VStack(alignment: .leading, spacing: 12) {
-                    // Header row
-                    HStack {
-                        Text("LAST SESSION")
-                            .font(.system(size: 10, weight: .semibold))
-                            .tracking(1.5)
-                            .foregroundStyle(.white.opacity(0.4))
-                        Spacer()
-                        Text(session.analyzedAt.formatted(date: .abbreviated, time: .omitted))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    // Score + details
-                    HStack(alignment: .center, spacing: 16) {
-                        // Mini score ring
-                        ZStack {
-                            Circle()
-                                .stroke(Color.white.opacity(0.08), lineWidth: 5)
-                                .frame(width: 44, height: 44)
-                            Circle()
-                                .trim(from: 0, to: CGFloat(session.score) / 100)
-                                .stroke(gradeColor, style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                                .frame(width: 44, height: 44)
-                                .rotationEffect(.degrees(-90))
-                        }
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Text("\(session.score)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.white)
-
-                                // Grade badge
-                                Text(session.grade)
-                                    .font(.system(size: 13, weight: .bold))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(gradeColor.opacity(0.22))
-                                    .foregroundStyle(gradeColor)
-                                    .clipShape(Capsule())
-
-                                // Delta badge — only when the score actually moved
-                                if let d = delta, d != 0 {
-                                    Text(d > 0 ? "+\(d)" : "\(d)")
-                                        .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(d > 0 ? .green : .orange)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background((d > 0 ? Color.green : Color.orange).opacity(0.15))
-                                        .clipShape(Capsule())
-                                }
-                            }
-
-                            HStack(spacing: 10) {
-                                Label("\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s")",
-                                      systemImage: "exclamationmark.circle")
-                                Label("\(session.strokeCount) strokes",
-                                      systemImage: "arrow.left.arrow.right")
-                            }
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .padding(16)
             }
-            .background(DS.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(gradeColor.opacity(0.25), lineWidth: 1)
-            )
-            .shadow(color: gradeColor.opacity(0.08), radius: 12, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
         .accessibilityElement(children: .ignore)
@@ -472,15 +329,5 @@ private struct LastSessionCard: View {
             "Last session: score \(session.score), grade \(session.grade), " +
             "\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s"). Opens full results."
         )
-    }
-}
-
-// MARK: - Scale button style
-
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
