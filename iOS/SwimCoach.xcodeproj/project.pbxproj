@@ -34,7 +34,9 @@
 		AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */; };
 		C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */; };
 		D457186B47170F1CE985F528 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7BECFC0E9326C22CD9437B /* CameraView.swift */; };
+		D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */; };
 		D6C634BFF07A295BE4B5C063 /* BiomechanicsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */; };
+		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,7 @@
 		228631A15A23306938ED17ED /* TechniqueIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechniqueIssue.swift; sourceTree = "<group>"; };
 		24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngine.swift; sourceTree = "<group>"; };
 		2D8EDC90DCD052513240CF58 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealFootageFixtures.swift; sourceTree = "<group>"; };
 		40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunnerTests.swift; sourceTree = "<group>"; };
 		4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunner.swift; sourceTree = "<group>"; };
 		50E3FF3C10BF299B700EBF8A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -79,6 +82,7 @@
 		E721FA48603268C362E7F84E /* SwimCoachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimCoachApp.swift; sourceTree = "<group>"; };
 		E7492F849CC9B8B622B93939 /* SwimCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SwimCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE9BA827876E8FAE3D764408 /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
+		F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealFootageParityTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +159,8 @@
 				9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */,
 				A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */,
 				1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */,
+				38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */,
+				F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */,
 				40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */,
 			);
 			path = SwimCoachTests;
@@ -349,6 +355,8 @@
 				09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */,
 				AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */,
 				C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */,
+				EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */,
+				D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */,
 				116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

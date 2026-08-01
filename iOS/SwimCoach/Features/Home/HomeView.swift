@@ -249,11 +249,21 @@ struct HomeView: View {
                    .first(where: { $0.pathExtension.lowercased() == "mp4" }) {
                 docsVideoURL = found
             }
-            // Launch-argument hooks for automated screenshot capture
+            // Launch-argument hooks for automated screenshot capture / testing
             let args = ProcessInfo.processInfo.arguments
             if router.path.isEmpty {
-                if args.contains("-demoResults") { router.push(.results(AnalysisResult.demo)) }
-                else if args.contains("-openHistory") { router.push(.history) }
+                if args.contains("-demoResults") {
+                    router.push(.results(AnalysisResult.demo))
+                } else if args.contains("-openHistory") {
+                    router.push(.history)
+                } else if let i = args.firstIndex(of: "-analyzeDocs"), i + 1 < args.count,
+                          let docsDir = FileManager.default.urls(
+                              for: .documentDirectory, in: .userDomainMask).first {
+                    let url = docsDir.appendingPathComponent(args[i + 1])
+                    if FileManager.default.fileExists(atPath: url.path) {
+                        router.push(.analyzing(url))
+                    }
+                }
             }
             #endif
         }
