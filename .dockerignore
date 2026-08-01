@@ -1,0 +1,9 @@
+# Keep the backend image context lean
+.git/
+.ml-standalone.git/
+ml/.venv/
+**/__pycache__/
+iOS/
+.github/
+.gstack/
+.claude/

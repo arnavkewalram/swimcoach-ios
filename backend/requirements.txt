@@ -1,0 +1,15 @@
+# Pipeline deps (mirror ml/requirements.txt, headless OpenCV for servers)
+opencv-python-headless>=4.8.0
+# mediapipe >= 0.10.30 removed the legacy mp.solutions API used by pose/extractor.py
+mediapipe>=0.10.0,<0.10.30
+numpy>=1.24.0
+scipy>=1.11.0
+torch>=2.0.0
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
+
+# Server
+fastapi>=0.110
+uvicorn[standard]>=0.29
+httpx>=0.27
+pydantic>=2.6

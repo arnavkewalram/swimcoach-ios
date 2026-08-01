@@ -11,7 +11,13 @@ platforms — there is no rule-based fallback anywhere.
   `SwimTCNRunner` (CoreML) → `FeedbackEngine` (decode) → SwiftData history.
 - `ml/` — Python pipeline: MediaPipe extraction → windowed SwimTCN →
   report. Also: synthetic datagen, training, CoreML conversion.
-  Tracked standalone in `.ml-standalone.git` → github.com/arnavkewalram/swim-analyzer.
+- `backend/` — FastAPI Cloud Run service wrapping ml/ (same gate + windowed
+  detector as the CLI). Build from REPO ROOT: `docker build -f
+  backend/Dockerfile .`; deploy with `./backend/deploy.sh`. Not covered by
+  CI (no gcloud/docker on runners); smoke-test imports locally before merge.
+
+This monorepo is canonical for the entire product. The old separate repos
+(swim-analyzer, swim-analyzer-backend, SwimCoach Flutter app) are archived.
 
 ## Commands
 
