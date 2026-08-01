@@ -1,9 +1,12 @@
 import Foundation
+#if canImport(FoundationModels)
 import FoundationModels
+#endif
 
 struct CoachingService {
 
     static func generateTips(for result: AnalysisResult) async -> [String] {
+        #if canImport(FoundationModels)
         if #available(iOS 26.0, *) {
             let model = SystemLanguageModel.default
             guard case .available = model.availability else {
@@ -11,11 +14,13 @@ struct CoachingService {
             }
             return await generateOnDevice(for: result)
         }
+        #endif
         return fallbackTips(for: result)
     }
 
     // MARK: - On-device via Apple Intelligence (iOS 26+, free, no API key)
 
+    #if canImport(FoundationModels)
     @available(iOS 26.0, *)
     private static func generateOnDevice(for result: AnalysisResult) async -> [String] {
         let issueLines = result.issues.isEmpty
@@ -59,6 +64,7 @@ struct CoachingService {
             return fallbackTips(for: result)
         }
     }
+    #endif
 
     // MARK: - Fallback (no model available)
 

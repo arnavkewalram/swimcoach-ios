@@ -8,7 +8,7 @@ from features.motion import (
     detect_kick_frequency,
     compute_motion_features,
 )
-from pose.extractor import KEYPOINT_NAMES, N_KEYPOINTS
+from pose.keypoints import KEYPOINT_NAMES, N_KEYPOINTS
 
 
 def make_keypoints(n_frames=60, value=0.0):

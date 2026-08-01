@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 from features.angles import angle_between_three_points, compute_angles
-from pose.extractor import KEYPOINT_NAMES, N_KEYPOINTS
+from pose.keypoints import KEYPOINT_NAMES, N_KEYPOINTS
 
 
 def make_keypoints(n_frames=10, value=0.0):

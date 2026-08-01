@@ -4,7 +4,7 @@ Draw skeleton overlay and technique annotations on video frames.
 
 import cv2
 import numpy as np
-from pose.extractor import KEYPOINT_NAMES, N_KEYPOINTS
+from pose.keypoints import KEYPOINT_NAMES, N_KEYPOINTS
 
 # Skeleton connections: (joint_a, joint_b)
 SKELETON_CONNECTIONS = [
