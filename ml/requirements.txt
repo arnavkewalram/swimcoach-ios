@@ -1,0 +1,11 @@
+opencv-python>=4.8.0
+# mediapipe >= 0.10.30 removed the legacy mp.solutions API used by pose/extractor.py
+mediapipe>=0.10.0,<0.10.30
+numpy>=1.24.0
+matplotlib>=3.7.0
+scipy>=1.11.0
+# ML detector (primary detection path)
+torch>=2.0.0
+# annotated video output (visualization/overlay.py)
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.9
