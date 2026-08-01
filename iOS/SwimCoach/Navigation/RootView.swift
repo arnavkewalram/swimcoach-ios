@@ -21,6 +21,7 @@ struct RootView: View {
                 }
         }
         .environment(router)
-        .preferredColorScheme(.dark)
+        // Deliberate single-appearance design: light "meet sheet" editorial.
+        .preferredColorScheme(.light)
     }
 }

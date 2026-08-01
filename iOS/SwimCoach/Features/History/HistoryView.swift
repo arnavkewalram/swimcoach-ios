@@ -32,44 +32,26 @@ struct HistoryView: View {
                     )
                 } else {
                     ScrollView {
-                        VStack(spacing: 16) {
-                            // Stats summary card
-                            HStack(spacing: 0) {
-                                HistoryStat(value: "\(sessions.count)", label: "sessions", icon: "list.bullet")
-                                Divider().frame(height: 32).background(DS.border)
-                                HistoryStat(value: "\(bestScore)", label: "best", icon: "star.fill")
-                                Divider().frame(height: 32).background(DS.border)
-                                HistoryStat(value: "\(avgScore)", label: "average", icon: "chart.bar.fill")
-                            }
-                            .padding(.vertical, 12)
-                            .background(.ultraThinMaterial)
-                            .background(DS.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .stroke(DS.border, lineWidth: 1)
-                            )
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
+                        VStack(alignment: .leading, spacing: 16) {
+                            summaryStrip
+                                .padding(.top, 8)
 
-                            // Score trend chart (shown when 2+ sessions)
                             if sessions.count >= 2 {
                                 ScoreTrendChart(sessions: chronologicalSessions) { session in
                                     if let result = session.decoded() {
                                         router.push(.results(result))
                                     }
                                 }
-                                .padding(.horizontal, 16)
                             }
 
-                            // Issue frequency chart (shown when 2+ sessions)
                             if sessions.count >= 2 {
                                 IssueFrequencyChart(sessions: sessions)
-                                    .padding(.horizontal, 16)
                             }
 
-                            // Session rows
-                            LazyVStack(spacing: 10) {
+                            SectionHeader(title: "Sessions")
+                                .padding(.top, 8)
+
+                            LazyVStack(spacing: 8) {
                                 ForEach(sessions) { session in
                                     Button {
                                         if let result = session.decoded() {
@@ -79,7 +61,6 @@ struct HistoryView: View {
                                         SessionRow(session: session)
                                     }
                                     .buttonStyle(ScaleButtonStyle())
-                                    .padding(.horizontal, 16)
                                     .contextMenu {
                                         Button {
                                             sessionToRename = session
@@ -98,6 +79,7 @@ struct HistoryView: View {
                             }
                             .padding(.bottom, 32)
                         }
+                        .padding(.horizontal, 24)
                     }
                     .scrollContentBackground(.hidden)
                 }
@@ -108,31 +90,37 @@ struct HistoryView: View {
         }
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(DS.background, for: .navigationBar)
     }
-}
 
-// MARK: - History stat cell
+    private var summaryStrip: some View {
+        HStack(spacing: 0) {
+            summaryCell(value: "\(sessions.count)", label: "SESSIONS")
+            summaryDivider
+            summaryCell(value: "\(bestScore)", label: "BEST")
+            summaryDivider
+            summaryCell(value: "\(avgScore)", label: "AVERAGE")
+        }
+        .padding(.vertical, 14)
+        .glassCard()
+    }
 
-private struct HistoryStat: View {
-    let value: String
-    let label: String
-    let icon: String
+    private var summaryDivider: some View {
+        Rectangle().fill(DS.border).frame(width: 1, height: 34)
+    }
 
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 10))
-                .foregroundStyle(DS.accent.opacity(0.7))
-            VStack(alignment: .leading, spacing: 1) {
-                Text(value)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                Text(label)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.secondary)
-            }
+    private func summaryCell(value: String, label: String) -> some View {
+        VStack(spacing: 3) {
+            Text(value)
+                .font(.grotesk(22, .bold))
+                .foregroundStyle(DS.ink)
+            Text(label)
+                .font(.statUnit)
+                .tracking(1.2)
+                .foregroundStyle(DS.inkTertiary)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -144,92 +132,38 @@ private struct SessionRow: View {
     private var gradeColor: Color { DS.gradeColor(session.grade) }
 
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(spacing: 14) {
-                // Grade badge
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(
-                            LinearGradient(
-                                colors: [gradeColor.opacity(0.3), gradeColor.opacity(0.15)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 46, height: 46)
-                    Text(session.grade)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundStyle(gradeColor)
-                }
+        HStack(spacing: 14) {
+            Text(session.grade)
+                .font(.grotesk(22, .bold))
+                .foregroundStyle(gradeColor)
+                .frame(width: 34)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    if !session.name.isEmpty {
-                        Text(session.name)
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white)
-                        Text(session.analyzedAt.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text(session.analyzedAt.formatted(date: .abbreviated, time: .shortened))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                    }
-
-                    HStack(spacing: 8) {
-                        Text("Score: \(session.score)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        // Issue dots
-                        IssueDots(count: session.issueCount)
-
-                        Text("·")
-                            .font(.caption)
-                            .foregroundStyle(.secondary.opacity(0.5))
-
-                        Text("\(session.strokeCount) strokes")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(session.name.isEmpty
+                     ? session.analyzedAt.formatted(date: .abbreviated, time: .shortened)
+                     : session.name)
+                    .font(.grotesk(15, .medium))
+                    .foregroundStyle(DS.ink)
+                Text("Score \(session.score) · \(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
+                    .font(.system(size: 12))
+                    .foregroundStyle(DS.inkSecondary)
             }
 
-            // Score progress bar
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.white.opacity(0.06))
-                        .frame(height: 3)
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(
-                            LinearGradient(
-                                colors: [gradeColor, gradeColor.opacity(0.5)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(
-                            width: geo.size.width * CGFloat(session.score) / 100,
-                            height: 3
-                        )
-                }
-            }
-            .frame(height: 3)
+            Spacer()
+
+            Image(systemName: "arrow.right")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(DS.inkTertiary)
+                .accessibilityHidden(true)
         }
-        .padding(14)
-        .background(DS.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(DS.border, lineWidth: 1)
-        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .glassCard()
+        .overlay(alignment: .leading) {
+            UnevenRoundedRectangle(topLeadingRadius: 12, bottomLeadingRadius: 12)
+                .fill(gradeColor)
+                .frame(width: 3)
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             "\(session.name.isEmpty ? session.analyzedAt.formatted(date: .abbreviated, time: .shortened) : session.name), " +
@@ -245,15 +179,11 @@ private struct ScoreTrendChart: View {
     let onSelect: (SwimSession) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                Label("Score Trend", systemImage: "chart.line.uptrend.xyaxis")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                Text("Tap a point to view session")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Score trend")
+            Text("Tap a point to open that session")
+                .font(.system(size: 12))
+                .foregroundStyle(DS.inkTertiary)
 
             Chart {
                 ForEach(Array(sessions.enumerated()), id: \.offset) { idx, session in
@@ -262,60 +192,45 @@ private struct ScoreTrendChart: View {
                         y: .value("Score", session.score)
                     )
                     .foregroundStyle(DS.accent)
-                    .interpolationMethod(.catmullRom)
-
-                    AreaMark(
-                        x: .value("Session", idx + 1),
-                        yStart: .value("Base", 0),
-                        yEnd: .value("Score", session.score)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [DS.accent.opacity(0.3), DS.accent.opacity(0)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .interpolationMethod(.catmullRom)
 
                     PointMark(
                         x: .value("Session", idx + 1),
                         y: .value("Score", session.score)
                     )
                     .foregroundStyle(DS.gradeColor(session.grade))
-                    .symbolSize(40)
+                    .symbolSize(46)
                 }
 
-                // Average reference line
                 let avg = sessions.map(\.score).reduce(0, +) / sessions.count
                 RuleMark(y: .value("Average", avg))
-                    .foregroundStyle(Color.white.opacity(0.2))
+                    .foregroundStyle(DS.inkTertiary)
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .annotation(position: .trailing) {
-                        Text("avg")
-                            .font(.system(size: 9))
-                            .foregroundStyle(.secondary)
+                    .annotation(position: .topLeading, alignment: .leading) {
+                        Text("AVG \(avg)")
+                            .font(.statUnit)
+                            .tracking(0.8)
+                            .foregroundStyle(DS.inkTertiary)
                     }
             }
             .chartYScale(domain: 0...100)
             .chartXAxis {
                 AxisMarks(values: .automatic) { _ in
-                    AxisGridLine().foregroundStyle(Color.white.opacity(0.06))
+                    AxisGridLine().foregroundStyle(DS.border.opacity(0.6))
                     AxisTick().foregroundStyle(Color.clear)
                     AxisValueLabel()
-                        .foregroundStyle(Color.secondary)
+                        .foregroundStyle(DS.inkTertiary)
                         .font(.system(size: 10))
                 }
             }
             .chartYAxis {
-                AxisMarks(values: [0, 25, 50, 75, 100]) { value in
-                    AxisGridLine().foregroundStyle(Color.white.opacity(0.06))
+                AxisMarks(values: [0, 25, 50, 75, 100]) { _ in
+                    AxisGridLine().foregroundStyle(DS.border.opacity(0.6))
                     AxisValueLabel()
-                        .foregroundStyle(Color.secondary)
+                        .foregroundStyle(DS.inkTertiary)
                         .font(.system(size: 10))
                 }
             }
-            .frame(height: 140)
+            .frame(height: 150)
             .chartOverlay { proxy in
                 GeometryReader { geo in
                     Rectangle()
@@ -332,13 +247,8 @@ private struct ScoreTrendChart: View {
                 }
             }
         }
-        .padding(14)
-        .background(DS.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(DS.border, lineWidth: 1)
-        )
+        .padding(16)
+        .glassCard()
     }
 }
 
@@ -372,71 +282,34 @@ private struct IssueFrequencyChart: View {
     var body: some View {
         let issues = topIssues
         if !issues.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: "COMMON ISSUES", icon: "chart.bar.xaxis")
+            VStack(alignment: .leading, spacing: 12) {
+                SectionHeader(title: "Common issues")
 
                 Chart(issues, id: \.name) { item in
                     BarMark(
                         x: .value("Count", item.count),
                         y: .value("Issue", item.shortName)
                     )
-                    .foregroundStyle(DS.accent.opacity(0.8))
-                    .cornerRadius(4)
+                    .foregroundStyle(DS.accent.opacity(0.85))
+                    .cornerRadius(3)
                     .annotation(position: .trailing) {
                         Text("\(item.count)")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(.secondary)
+                            .font(.grotesk(11, .bold))
+                            .foregroundStyle(DS.inkSecondary)
                     }
                 }
                 .chartXAxis(.hidden)
                 .chartYAxis {
                     AxisMarks { _ in
                         AxisValueLabel()
-                            .foregroundStyle(Color.white.opacity(0.7))
+                            .foregroundStyle(DS.ink)
                             .font(.system(size: 11))
                     }
                 }
                 .frame(height: CGFloat(issues.count) * 34 + 16)
             }
-            .padding(14)
-            .background(DS.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(DS.border, lineWidth: 1)
-            )
-        }
-    }
-}
-
-// MARK: - Issue dots
-
-private struct IssueDots: View {
-    let count: Int
-
-    private var dots: [(Color, String)] {
-        // For display: up to 3 colored dots then "+N"
-        // We don't have severity per session, so use a neutral orange for all
-        let visible = min(count, 3)
-        return (0..<visible).map { _ in (.orange, "") }
-    }
-
-    var body: some View {
-        if count == 0 {
-            EmptyView()
-        } else {
-            HStack(spacing: 3) {
-                ForEach(0..<min(count, 3), id: \.self) { _ in
-                    Circle()
-                        .fill(Color.orange)
-                        .frame(width: 5, height: 5)
-                }
-                if count > 3 {
-                    Text("+\(count - 3)")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.orange)
-                }
-            }
+            .padding(16)
+            .glassCard()
         }
     }
 }
@@ -460,14 +333,14 @@ private struct RenameSessionSheet: View {
 
                 VStack(spacing: 20) {
                     TextField("Session name", text: $name)
-                        .font(.system(size: 16, weight: .regular, design: .rounded))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 16))
+                        .foregroundStyle(DS.ink)
                         .padding(12)
-                        .background(DS.surface2)
+                        .background(DS.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(DS.border, lineWidth: 1)
+                                .stroke(DS.borderBold, lineWidth: 1)
                         )
                         .padding(.horizontal, 20)
                         .padding(.top, 24)
@@ -482,7 +355,7 @@ private struct RenameSessionSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(DS.inkSecondary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -490,7 +363,7 @@ private struct RenameSessionSheet: View {
                         dismiss()
                     }
                     .foregroundStyle(DS.accent)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .semibold))
                 }
             }
         }

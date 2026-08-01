@@ -25,8 +25,6 @@ struct AnalyzingView: View {
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
-            AmbientGlow()
-            AnimatedWaves()
 
             if failed {
                 failureView
@@ -47,67 +45,62 @@ struct AnalyzingView: View {
     // MARK: - Sub-views
 
     private var analysisView: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
-            // Title
-            VStack(spacing: 6) {
-                Text("ANALYZING")
-                    .font(.system(size: 11, weight: .semibold))
-                    .tracking(3)
-                    .foregroundStyle(DS.accent.opacity(0.7))
-                Text("Your Swim")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
+            Text("ANALYZING")
+                .font(.sectionLabel)
+                .tracking(2.0)
+                .foregroundStyle(DS.accent)
+                .padding(.bottom, 8)
+
+            Text("Reading your\nstroke mechanics")
+                .font(.grotesk(30, .bold))
+                .foregroundStyle(DS.ink)
+                .padding(.bottom, 36)
+
+            // Percentage + flat progress rule
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("\(Int(progress * 100))")
+                    .font(.grotesk(64, .bold))
+                    .foregroundStyle(DS.ink)
+                    .contentTransition(.numericText())
+                    .animation(.easeInOut, value: Int(progress * 100))
+                Text("%")
+                    .font(.grotesk(24, .medium))
+                    .foregroundStyle(DS.inkTertiary)
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 12)
 
-            // Progress ring
-            ZStack {
-                // Background track
-                Circle()
-                    .stroke(Color.white.opacity(0.07), lineWidth: 14)
-                    .frame(width: 160, height: 160)
-
-                // Progress arc — cyan → blue → purple gradient
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(
-                        AngularGradient(
-                            colors: [DS.accent, DS.accentBlue, .purple, DS.accent],
-                            center: .center
-                        ),
-                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
-                    )
-                    .frame(width: 160, height: 160)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 0.3), value: progress)
-
-                // Pulsing swim icon
-                PulsingIcon()
-            }
-
-            // Percentage label below ring
-            Text("\(Int(progress * 100))%")
-                .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .contentTransition(.numericText())
-                .padding(.top, 18)
-                .animation(.easeInOut, value: Int(progress * 100))
-
-            // Step indicators
-            HStack(spacing: 10) {
-                ForEach(Array(steps.enumerated()), id: \.offset) { i, step in
-                    StepPill(label: step, state: stepState(for: i))
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Rectangle().fill(DS.border)
+                    Rectangle()
+                        .fill(DS.accent)
+                        .frame(width: geo.size.width * progress)
+                        .animation(.linear(duration: 0.3), value: progress)
                 }
             }
-            .padding(.top, 28)
-            .padding(.horizontal, 16)
+            .frame(height: 6)
+            .clipShape(Capsule())
+            .padding(.bottom, 32)
+
+            // Step checklist
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { i, step in
+                    StepRow(index: i, label: step, state: stepState(for: i))
+                    if i < steps.count - 1 {
+                        Rectangle().fill(DS.border).frame(height: 1)
+                    }
+                }
+            }
+            .glassCard()
 
             Spacer()
             Spacer()
         }
-        .padding()
+        .padding(.horizontal, 28)
+        .accessibilityElement(children: .contain)
     }
 
     private func stepState(for index: Int) -> StepState {
@@ -117,41 +110,44 @@ struct AnalyzingView: View {
     }
 
     private var failureView: some View {
-        VStack(spacing: 24) {
-            ZStack {
-                Circle()
-                    .fill(Color.orange.opacity(0.15))
-                    .frame(width: 80, height: 80)
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 36))
-                    .foregroundStyle(.orange)
-            }
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer()
 
-            VStack(spacing: 8) {
-                Text("Analysis Failed")
-                    .font(.title2.bold())
-                    .foregroundStyle(.white)
-                Text(failureMessage)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
-            }
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 34, weight: .medium))
+                .foregroundStyle(DS.severityModerate)
+                .padding(.bottom, 20)
+                .accessibilityHidden(true)
 
-            Button("Try Again") {
+            Text("ANALYSIS FAILED")
+                .font(.sectionLabel)
+                .tracking(2.0)
+                .foregroundStyle(DS.severityModerate)
+                .padding(.bottom, 8)
+
+            Text("Couldn't read\nthis footage")
+                .font(.grotesk(30, .bold))
+                .foregroundStyle(DS.ink)
+                .padding(.bottom, 14)
+
+            Text(failureMessage)
+                .font(.system(size: 14))
+                .lineSpacing(3)
+                .foregroundStyle(DS.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.bottom, 32)
+
+            Button {
                 failed = false
                 Task { await runAnalysis() }
+            } label: {
+                PrimaryButtonLabel(title: "Try again")
             }
-            .font(.headline)
-            .padding(.horizontal, 32)
-            .padding(.vertical, 14)
-            .background(
-                LinearGradient(colors: [DS.accent, DS.accentBlue],
-                               startPoint: .leading, endPoint: .trailing)
-            )
-            .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .buttonStyle(ScaleButtonStyle())
+
+            Spacer()
         }
-        .padding()
+        .padding(.horizontal, 28)
     }
 
     // MARK: - Pipeline
@@ -381,74 +377,51 @@ struct AnalyzingView: View {
     }
 }
 
-// MARK: - Pulsing swim icon
-
-private struct PulsingIcon: View {
-    @State private var pulse = false
-
-    var body: some View {
-        Image(systemName: "figure.pool.swim")
-            .font(.system(size: 32))
-            .foregroundStyle(DS.accent)
-            .scaleEffect(pulse ? 1.08 : 0.95)
-            .opacity(pulse ? 1.0 : 0.75)
-            .animation(
-                .easeInOut(duration: 1.1).repeatForever(autoreverses: true),
-                value: pulse
-            )
-            .onAppear { pulse = true }
-    }
-}
-
-// MARK: - Step states & pill
+// MARK: - Step states & row
 
 enum StepState { case completed, active, pending }
 
-private struct StepPill: View {
+private struct StepRow: View {
+    let index: Int
     let label: String
     let state: StepState
 
-    @State private var glowing = false
-
     var body: some View {
-        VStack(spacing: 6) {
-            ZStack {
-                Circle()
-                    .fill(dotBackground)
-                    .frame(width: 10, height: 10)
-                if state == .active {
-                    Circle()
-                        .fill(DS.accent.opacity(glowing ? 0.4 : 0.1))
-                        .frame(width: 18, height: 18)
-                        .animation(
-                            .easeInOut(duration: 0.9).repeatForever(autoreverses: true),
-                            value: glowing
-                        )
-                        .onAppear { glowing = true }
+        HStack(spacing: 12) {
+            Group {
+                switch state {
+                case .completed:
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(DS.severityMinor)
+                case .active:
+                    Text(String(format: "%02d", index + 1))
+                        .font(.grotesk(12, .bold))
+                        .foregroundStyle(DS.accent)
+                case .pending:
+                    Text(String(format: "%02d", index + 1))
+                        .font(.grotesk(12, .medium))
+                        .foregroundStyle(DS.inkTertiary)
                 }
             }
+            .frame(width: 22, alignment: .leading)
+            .accessibilityHidden(true)
+
             Text(label)
-                .font(.system(size: 9, weight: state == .active ? .semibold : .regular))
-                .foregroundStyle(labelColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity)
-    }
+                .font(state == .active ? .grotesk(14, .medium) : .system(size: 14))
+                .foregroundStyle(state == .pending ? DS.inkTertiary : DS.ink)
 
-    private var dotBackground: Color {
-        switch state {
-        case .completed: return DS.accent
-        case .active:    return DS.accent
-        case .pending:   return Color.white.opacity(0.15)
-        }
-    }
+            Spacer()
 
-    private var labelColor: Color {
-        switch state {
-        case .completed: return DS.accent
-        case .active:    return .white
-        case .pending:   return .secondary
+            if state == .active {
+                ProgressView()
+                    .controlSize(.small)
+                    .tint(DS.accent)
+            }
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 13)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(state == .completed ? "done" : state == .active ? "in progress" : "pending")")
     }
 }
