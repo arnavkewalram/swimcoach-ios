@@ -30,7 +30,7 @@ struct ResultsView: View {
                     Text(result.summary)
                         .font(.system(size: 14))
                         .multilineTextAlignment(.center)
-                        .foregroundStyle(Color.white.opacity(0.45))
+                        .foregroundStyle(Color.white.opacity(0.62))
                         .padding(.horizontal, 32)
                         .padding(.bottom, 28)
                         .staggerIn(sectionsVisible, delay: 0.15)
@@ -142,20 +142,23 @@ struct ResultsView: View {
             if result.grade == "A" || result.grade == "B" {
                 RingParticles(color: DS.gradeColor(result.grade))
                     .frame(width: 224, height: 224)
+                    .accessibilityHidden(true)
             }
 
-            VStack(spacing: 1) {
+            VStack(spacing: 2) {
                 Text("\(Int(animatedScore))")
                     .font(.system(size: 56, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .contentTransition(.numericText())
                     .animation(.easeOut(duration: 1.4), value: animatedScore)
-                Text(result.grade)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                Text("GRADE \(result.grade)")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .tracking(2)
                     .foregroundStyle(gradeColor)
-                    .tracking(1)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Technique score \(result.score) out of 100, grade \(result.grade)")
     }
 
     // MARK: - Grade banner
@@ -363,6 +366,7 @@ private struct ResultStat: View {
                 .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -400,6 +404,8 @@ private struct IssueCard: View {
                 .padding(.vertical, 14)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(issue.displayName), \(issue.severity.rawValue) severity")
+            .accessibilityHint(expanded ? "Collapses detail" : "Shows detail and drill tip")
 
             // Expanded detail
             if expanded {

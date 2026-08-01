@@ -101,10 +101,11 @@ struct CameraView: View {
                 Image(systemName: "xmark")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.white)
-                    .padding(10)
+                    .padding(12)
                     .background(.ultraThinMaterial)
                     .clipShape(Circle())
             }
+            .accessibilityLabel("Close camera")
 
             Spacer()
 
@@ -165,17 +166,18 @@ struct CameraView: View {
                     )
                     .fill(Color.clear)
                     .frame(width: w, height: h)
-                    .foregroundStyle(.white.opacity(0.25))
+                    .foregroundStyle(.white.opacity(0.45))
                     .position(x: geo.size.width / 2, y: geo.size.height / 2)
 
                 // Label
                 Text("Position swimmer here")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.4))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.65))
+                    .shadow(color: .black.opacity(0.5), radius: 3)
                     .position(x: geo.size.width / 2, y: y + h + 18)
             }
-            .opacity(0.25)
             .allowsHitTesting(false)
+            .accessibilityHidden(true)
         }
         .ignoresSafeArea()
     }
@@ -245,6 +247,7 @@ struct CameraView: View {
             .animation(.easeInOut(duration: 0.25), value: camera.isRecording)
         }
         .disabled(!camera.isReady)
+        .accessibilityLabel(camera.isRecording ? "Stop recording" : "Start recording")
     }
 
     // MARK: - Helpers

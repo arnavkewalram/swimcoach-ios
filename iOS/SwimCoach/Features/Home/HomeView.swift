@@ -15,9 +15,9 @@ struct HomeView: View {
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        if h < 12 { return "Good morning, Coach" }
-        if h < 17 { return "Good afternoon, Coach" }
-        return "Good evening, Coach"
+        if h < 12 { return "Good morning" }
+        if h < 17 { return "Good afternoon" }
+        return "Good evening"
     }
 
     var body: some View {
@@ -57,7 +57,7 @@ struct HomeView: View {
                                     .foregroundStyle(.white)
                                 Text("AI Technique Analysis")
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundStyle(Color.white.opacity(0.38))
+                                    .foregroundStyle(Color.white.opacity(0.55))
                             }
                         }
                         .opacity(headerAppeared ? 1 : 0)
@@ -66,7 +66,7 @@ struct HomeView: View {
                     }
                     .padding(.top, 24)
 
-                    // Last session card
+                    // Last session card — or a first-run welcome when empty
                     if let last = sessions.first {
                         LastSessionCard(
                             session: last,
@@ -77,6 +77,8 @@ struct HomeView: View {
                             }
                         }
                         .transition(.move(edge: .top).combined(with: .opacity))
+                    } else {
+                        FirstRunCard()
                     }
 
                     // Stats strip
@@ -247,8 +249,47 @@ struct HomeView: View {
                    .first(where: { $0.pathExtension.lowercased() == "mp4" }) {
                 docsVideoURL = found
             }
+            // Launch-argument hooks for automated screenshot capture
+            let args = ProcessInfo.processInfo.arguments
+            if router.path.isEmpty {
+                if args.contains("-demoResults") { router.push(.results(AnalysisResult.demo)) }
+                else if args.contains("-openHistory") { router.push(.history) }
+            }
             #endif
         }
+    }
+}
+
+// MARK: - First-run welcome card
+
+private struct FirstRunCard: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(DS.accent.opacity(0.10))
+                    .frame(width: 64, height: 64)
+                Image(systemName: "video.badge.waveform")
+                    .font(.system(size: 26))
+                    .foregroundStyle(DS.accent)
+            }
+            .accessibilityHidden(true)
+
+            Text("Film your first swim")
+                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            Text("Record a side-on video from the pool deck and get a technique score, detected faults, and drills in under a minute.")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.white.opacity(0.60))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 16)
+        .glassCard()
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -291,6 +332,7 @@ private struct MicroStat: View {
             Image(systemName: icon)
                 .font(.system(size: 9))
                 .foregroundStyle(DS.accent.opacity(0.7))
+                .accessibilityHidden(true)
             Text(value)
                 .font(.system(size: 14, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
@@ -299,6 +341,7 @@ private struct MicroStat: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -374,14 +417,14 @@ private struct LastSessionCard: View {
                                     .foregroundStyle(gradeColor)
                                     .clipShape(Capsule())
 
-                                // Delta badge
-                                if let d = delta {
-                                    Text(d >= 0 ? "+\(d)" : "\(d)")
+                                // Delta badge — only when the score actually moved
+                                if let d = delta, d != 0 {
+                                    Text(d > 0 ? "+\(d)" : "\(d)")
                                         .font(.system(size: 11, weight: .semibold))
-                                        .foregroundStyle(d >= 0 ? .green : .orange)
+                                        .foregroundStyle(d > 0 ? .green : .orange)
                                         .padding(.horizontal, 6)
                                         .padding(.vertical, 2)
-                                        .background((d >= 0 ? Color.green : Color.orange).opacity(0.15))
+                                        .background((d > 0 ? Color.green : Color.orange).opacity(0.15))
                                         .clipShape(Capsule())
                                 }
                             }
@@ -414,6 +457,11 @@ private struct LastSessionCard: View {
             .shadow(color: gradeColor.opacity(0.08), radius: 12, x: 0, y: 4)
         }
         .buttonStyle(ScaleButtonStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "Last session: score \(session.score), grade \(session.grade), " +
+            "\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s"). Opens full results."
+        )
     }
 }
 
