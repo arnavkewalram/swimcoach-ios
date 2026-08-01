@@ -178,6 +178,7 @@ struct AmbientGlow: View {
             }
         }
         .allowsHitTesting(false)
+        .accessibilityHidden(true)
         .blur(radius: 72)
         .ignoresSafeArea()
     }
@@ -228,6 +229,7 @@ struct AnimatedWaves: View {
             }
         }
         .allowsHitTesting(false)
+        .accessibilityHidden(true)
         .ignoresSafeArea()
     }
 }
@@ -254,6 +256,7 @@ struct ConfettiView: View {
             }
         }
         .allowsHitTesting(false)
+        .accessibilityHidden(true)
         .onAppear {
             particles = (0..<40).map { i in
                 ConfettiParticle(

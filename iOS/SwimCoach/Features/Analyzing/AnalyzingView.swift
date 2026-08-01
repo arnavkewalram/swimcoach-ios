@@ -262,7 +262,9 @@ struct AnalyzingView: View {
 
             await MainActor.run {
                 progress = 1.0
-                router.push(.results(result))
+                // replaceTop: Back from Results must not land on this screen —
+                // its .task would re-run the whole analysis and save a duplicate.
+                router.replaceTop(with: .results(result))
             }
 
         } catch {
@@ -362,7 +364,7 @@ struct AnalyzingView: View {
 
         await MainActor.run {
             progress = 1.0
-            router.push(.results(result))
+            router.replaceTop(with: .results(result))
         }
     }
 

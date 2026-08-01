@@ -230,6 +230,11 @@ private struct SessionRow: View {
             RoundedRectangle(cornerRadius: 14)
                 .stroke(DS.border, lineWidth: 1)
         )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "\(session.name.isEmpty ? session.analyzedAt.formatted(date: .abbreviated, time: .shortened) : session.name), " +
+            "score \(session.score), grade \(session.grade), \(session.issueCount) issues"
+        )
     }
 }
 
@@ -366,8 +371,7 @@ private struct IssueFrequencyChart: View {
 
     var body: some View {
         let issues = topIssues
-        if issues.isEmpty { return AnyView(EmptyView()) }
-        return AnyView(
+        if !issues.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeader(title: "COMMON ISSUES", icon: "chart.bar.xaxis")
 
@@ -401,7 +405,7 @@ private struct IssueFrequencyChart: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(DS.border, lineWidth: 1)
             )
-        )
+        }
     }
 }
 
