@@ -64,10 +64,10 @@
 		50E3FF3C10BF299B700EBF8A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		52C6D30A519EEDA7A9575174 /* SwimSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimSession.swift; sourceTree = "<group>"; };
 		5321399BE9F3645B9111A95C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */ = {isa = PBXFileReference; path = swim_test.mp4; sourceTree = "<group>"; };
+		5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = swim_test.mp4; sourceTree = "<group>"; };
 		5B7BECFC0E9326C22CD9437B /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		730F3A8523C913A0E0248CDD /* CoachingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingService.swift; sourceTree = "<group>"; };
-		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
+		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
 		98186D217795042F6E6B7D7A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngine.swift; sourceTree = "<group>"; };
 		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -80,7 +80,7 @@
 		D527CB27BAD9FD1888FABA4D /* SwimCoachTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SwimCoachTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisResult.swift; sourceTree = "<group>"; };
 		E721FA48603268C362E7F84E /* SwimCoachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimCoachApp.swift; sourceTree = "<group>"; };
-		E7492F849CC9B8B622B93939 /* SwimCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SwimCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7492F849CC9B8B622B93939 /* SwimCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwimCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE9BA827876E8FAE3D764408 /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
 		F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealFootageParityTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -312,8 +312,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = 008CC1079702032A5836EE2B /* Build configuration list for PBXProject "SwimCoach" */;
 			developmentRegion = en;
@@ -479,6 +477,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				INFOPLIST_FILE = SwimCoach/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -496,6 +495,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				INFOPLIST_FILE = SwimCoach/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

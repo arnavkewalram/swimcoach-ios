@@ -9,6 +9,8 @@ options:
 settings:
   SWIFT_VERSION: "5"
   IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+  DEVELOPMENT_TEAM: 4VH58A4KM6
+  CODE_SIGN_STYLE: Automatic
 
 targets:
   SwimCoach:
