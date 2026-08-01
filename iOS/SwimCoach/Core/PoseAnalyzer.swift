@@ -1,5 +1,6 @@
 import Vision
 import AVFoundation
+import CoreML
 import Foundation
 
 // Extracts VNHumanBodyPoseObservation from every sampleRate-th frame of a video.
@@ -49,6 +50,11 @@ struct PoseAnalyzer {
             throw AnalysisError.readerFailed(reader.error?.localizedDescription ?? "unknown")
         }
 
+        // NOTE: VNDetectHumanBodyPoseRequest cannot run in the iOS Simulator
+        // (every frame fails with error 9 "Unable to setup request"; neither
+        // usesCPUOnly nor setComputeDevice(.cpu) helps on the iOS 26 runtime).
+        // Real pose extraction requires a physical device. The simulator path
+        // fails gracefully into the "No horizontal swimmer detected" message.
         let request = VNDetectHumanBodyPoseRequest()
         var observations = [VNHumanBodyPoseObservation]()
         var frameIndex = 0
