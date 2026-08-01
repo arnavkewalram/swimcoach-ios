@@ -25,6 +25,7 @@ from pose.extractor import extract_keypoints_from_video
 from features.angles import compute_angles
 from features.motion import compute_motion_features
 from analysis.feedback import generate_report
+from analysis.gating import validate_footage, LOW_DETECTION_RATE
 try:
     from ml.detector_ml import detect_issues_ml
 except ImportError as e:
@@ -61,6 +62,10 @@ def parse_args():
         "--quiet", action="store_true",
         help="Suppress progress output"
     )
+    p.add_argument(
+        "--force", action="store_true",
+        help="Analyze even if footage fails the input-quality gate (results untrustworthy)"
+    )
     return p.parse_args()
 
 
@@ -93,6 +98,27 @@ def main():
 
     if not args.quiet:
         print(f"      → {n_frames} frames, {fps:.1f} fps")
+
+    # ── Input-quality gate (same rules as the iOS app) ─────────────────
+    gate_ok, gate_reason, gate_stats = validate_footage(keypoints)
+    if not gate_ok:
+        print(f"Error: {gate_reason}", file=sys.stderr)
+        print(
+            f"       (frames: {gate_stats['total_frames']}, with pose: "
+            f"{gate_stats['detected_frames']}, plausible swimmer: "
+            f"{gate_stats['swimmer_frames']})",
+            file=sys.stderr,
+        )
+        if not args.force:
+            sys.exit(2)
+        print("WARNING: --force set — analyzing rejected footage; "
+              "results are untrustworthy.", file=sys.stderr)
+    elif gate_stats["detection_rate"] < LOW_DETECTION_RATE and not args.quiet:
+        print(
+            f"      WARNING: low detection quality "
+            f"({gate_stats['detection_rate']*100:.0f}% of frames) — "
+            "results may be less accurate."
+        )
 
     # Optionally save keypoints
     if args.save_keypoints:
