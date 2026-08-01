@@ -67,6 +67,69 @@
 			<key>uniqueIdentifier</key>
 			<string>0B26EA8C-52B2-4EB4-A9D0-BE3E42AFB670</string>
 		</dict>
+		<key>71268E2D-B0C8-4AAF-9936-94E94274239C</key>
+		<dict>
+			<key>auxiliaryLogUniqueIdentifier</key>
+			<string>E0595E48-1FA3-430A-BD26-BF44ADD23672</string>
+			<key>auxiliaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>className</key>
+			<string>IDESchemeActionsInvocationRecord</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>com.apple.dt.unit.cocoaUnitTest</string>
+			<key>fileName</key>
+			<string>Test-SwimCoach-2026.08.01_16-12-10--0700.xcresult</string>
+			<key>hasAuxiliaryLog</key>
+			<true/>
+			<key>hasCoverageData</key>
+			<true/>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalCodeCoverage</key>
+				<real>0.34061646507998439</real>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>SwimCoach project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>SwimCoach</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Test SwimCoach</string>
+			<key>timeStartedRecording</key>
+			<real>807318730.88133597</real>
+			<key>timeStoppedRecording</key>
+			<real>807318920.28421199</real>
+			<key>title</key>
+			<string>Test SwimCoach</string>
+			<key>uniqueIdentifier</key>
+			<string>71268E2D-B0C8-4AAF-9936-94E94274239C</string>
+		</dict>
 	</dict>
 </dict>
 </plist>
