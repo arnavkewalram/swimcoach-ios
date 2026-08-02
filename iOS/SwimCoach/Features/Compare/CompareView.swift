@@ -85,6 +85,13 @@ struct CompareView: View {
         }
         .navigationTitle("Compare")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Compare")
+                    .font(.grotesk(17, .medium))
+                    .foregroundStyle(DS.ink)
+            }
+        }
         .toolbarBackground(DS.background, for: .navigationBar)
     }
 

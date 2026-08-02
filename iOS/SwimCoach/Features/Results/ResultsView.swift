@@ -135,6 +135,13 @@ struct ResultsView: View {
         }
         .navigationTitle("Results")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Results")
+                    .font(.grotesk(17, .medium))
+                    .foregroundStyle(DS.ink)
+            }
+        }
         .toolbarBackground(DS.background, for: .navigationBar)
         .toolbar {
             if let reportImage {
@@ -300,9 +307,13 @@ struct ResultsView: View {
                 .lineSpacing(2)
                 .foregroundStyle(DS.inkSecondary)
         }
-        .padding(14)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(color.opacity(0.45), lineWidth: 1))
+        .overlay(alignment: .leading) {
+            Rectangle().fill(color.opacity(0.7)).frame(width: 3)
+        }
+        .background(color.opacity(0.05))
     }
 
     // MARK: - Metrics
@@ -319,8 +330,7 @@ struct ResultsView: View {
                    label: "ASYMMETRY",
                    valueColor: result.strokeAsymmetry > 0.3 ? DS.severityModerate : DS.ink)
         }
-        .padding(.vertical, 16)
-        .glassCard()
+        .padding(.vertical, 8)
     }
 
     private var metricDivider: some View {

@@ -103,6 +103,13 @@ struct HistoryView: View {
         }
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("History")
+                    .font(.grotesk(17, .medium))
+                    .foregroundStyle(DS.ink)
+            }
+        }
         .toolbarBackground(DS.background, for: .navigationBar)
         .toolbar {
             if sessions.count >= 2 {
@@ -141,8 +148,7 @@ struct HistoryView: View {
             summaryDivider
             summaryCell(value: "\(avgScore)", label: "AVERAGE")
         }
-        .padding(.vertical, 14)
-        .glassCard()
+        .padding(.vertical, 6)
     }
 
     private var summaryDivider: some View {
