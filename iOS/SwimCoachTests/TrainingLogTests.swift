@@ -64,6 +64,29 @@ final class TrainingLogTests: XCTestCase {
         XCTAssertEqual(scores, [15, 20, 25, 30, 35, 40, 45, 50, 55, 60])
     }
 
+    func testGoalTicksNilWhenNoGoal() {
+        XCTAssertNil(TrainingLog.goalTicks(sessionCount: 5, goal: 0))
+        XCTAssertNil(TrainingLog.goalTicks(sessionCount: 5, goal: -1))
+    }
+
+    func testGoalTicksPartialAndMet() {
+        let partial = TrainingLog.goalTicks(sessionCount: 2, goal: 3)
+        XCTAssertEqual(partial, TrainingLog.GoalTicks(filled: 2, total: 3, overflow: 0))
+        XCTAssertFalse(partial?.isMet ?? true)
+
+        let met = TrainingLog.goalTicks(sessionCount: 3, goal: 3)
+        XCTAssertTrue(met?.isMet ?? false)
+    }
+
+    func testGoalTicksOverflowAndNegativeCount() {
+        let over = TrainingLog.goalTicks(sessionCount: 5, goal: 3)
+        XCTAssertEqual(over, TrainingLog.GoalTicks(filled: 3, total: 3, overflow: 2))
+        XCTAssertTrue(over?.isMet ?? false)
+
+        let negative = TrainingLog.goalTicks(sessionCount: -2, goal: 3)
+        XCTAssertEqual(negative, TrainingLog.GoalTicks(filled: 0, total: 3, overflow: 0))
+    }
+
     func testSparklinePointsNormalization() {
         let size = CGSize(width: 100, height: 50)
         let pts = Sparkline.points(for: [50, 100, 75], in: size)

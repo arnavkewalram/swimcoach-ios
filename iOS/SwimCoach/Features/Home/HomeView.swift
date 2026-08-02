@@ -301,6 +301,8 @@ struct HomeView: View {
 
 private struct TrainingLogPanel: View {
     let sessions: [SwimSession]
+    @AppStorage("weeklyGoal") private var weeklyGoal: Int = 0
+    @State private var showGoalSheet = false
 
     private var entries: [TrainingLog.Entry] {
         sessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) }
@@ -344,9 +346,82 @@ private struct TrainingLogPanel: View {
                     .foregroundStyle(d > 0 ? DS.severityMinor : DS.severityModerate)
                 }
             }
+
+            goalRow
+        }
+        .sheet(isPresented: $showGoalSheet) {
+            WeeklyGoalSheet()
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(trainingLogAccessibilityLabel)
+    }
+
+    @ViewBuilder
+    private var goalRow: some View {
+        Button {
+            showGoalSheet = true
+        } label: {
+            HStack(spacing: 10) {
+                if let ticks = TrainingLog.goalTicks(
+                    sessionCount: thisWeek.sessionCount, goal: weeklyGoal) {
+                    HStack(spacing: 4) {
+                        ForEach(0..<ticks.total, id: \.self) { i in
+                            Rectangle()
+                                .fill(i < ticks.filled ? DS.accent : Color.clear)
+                                .frame(width: 14, height: 6)
+                                .overlay(Rectangle().stroke(
+                                    i < ticks.filled ? DS.accent : DS.borderBold, lineWidth: 1))
+                        }
+                        if ticks.overflow > 0 {
+                            Text("+\(ticks.overflow)")
+                                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                .tracking(0.8)
+                                .foregroundStyle(DS.accent)
+                        }
+                    }
+                    Text("\(ticks.filled) OF \(ticks.total) GOAL")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.inkTertiary)
+                    Spacer()
+                    if ticks.isMet {
+                        Text("GOAL MET")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.severityMinor)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 4)
+                            .overlay(RoundedRectangle(cornerRadius: 4)
+                                .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
+                    }
+                } else {
+                    Text("SET A WEEKLY GOAL")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.accent)
+                    Spacer()
+                    Image(systemName: "plus")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(DS.accent)
+                        .accessibilityHidden(true)
+                }
+            }
+            .padding(.top, 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(goalAccessibilityLabel)
+        .accessibilityHint("Opens the weekly goal setting")
+    }
+
+    private var goalAccessibilityLabel: String {
+        guard let ticks = TrainingLog.goalTicks(
+            sessionCount: thisWeek.sessionCount, goal: weeklyGoal) else {
+            return "Set a weekly session goal"
+        }
+        var label = "Weekly goal: \(ticks.filled) of \(ticks.total) sessions"
+        if ticks.isMet { label += ". Goal met" }
+        return label
     }
 
     private var trainingLogAccessibilityLabel: String {
