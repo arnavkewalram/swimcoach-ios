@@ -3,6 +3,22 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.6.0] — 2026-08-01 — "Proof"
+
+### Added
+- **Skeleton video export**: EXPORT in the Results video header burns the
+  detected skeleton into the session video (frame-accurate, lane-blue limbs
+  with white joint dots) and hands the file to the system share sheet —
+  shareable proof of what the analysis saw. Progress shown inline; export
+  cancels automatically if you leave the screen.
+- Demo results now include a synthetic skeleton track, so the overlay and
+  export are demo-able without a real analysis.
+
+### Fixed
+- Export pipeline uses the canonical `requestMediaDataWhenReady` writer pump —
+  an 8s clip exports in under a second (a readiness-polling loop took ~10
+  minutes; caught by the new end-to-end export test).
+
 ## [1.5.0] — 2026-08-02 — "Refine"
 
 ### Changed

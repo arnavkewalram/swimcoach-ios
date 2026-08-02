@@ -24,6 +24,12 @@ struct ResultsView: View {
 
     @State private var scrollProxy: ScrollViewProxy? = nil
     @State private var reportImage: UIImage? = nil
+
+    enum VideoExportState: Equatable {
+        case idle, exporting(Double), ready(URL), failed
+    }
+    @State private var exportState: VideoExportState = .idle
+    @State private var exportTask: Task<Void, Never>? = nil
     private let videoSectionID = "session-video"
 
     private var canSeekIssues: Bool {
@@ -179,6 +185,7 @@ struct ResultsView: View {
         }
         .onDisappear {
             player?.pause()
+            exportTask?.cancel()
         }
     }
 
@@ -202,6 +209,8 @@ struct ResultsView: View {
                                 .stroke(showSkeleton ? DS.accent.opacity(0.5) : DS.border, lineWidth: 1))
                     }
                     .accessibilityLabel(showSkeleton ? "Hide detected joints overlay" : "Show detected joints overlay")
+
+                    exportControl
                 }
             }
             ZStack {
@@ -235,6 +244,66 @@ struct ResultsView: View {
 
     private var hasSkeletonData: Bool {
         !(result.keypointFrames?.isEmpty ?? true)
+    }
+
+    @ViewBuilder
+    private var exportControl: some View {
+        switch exportState {
+        case .idle, .failed:
+            Button {
+                startExport()
+            } label: {
+                Text(exportState == .failed ? "RETRY EXPORT" : "EXPORT")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.inkSecondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.border, lineWidth: 1))
+            }
+            .accessibilityLabel("Export video with skeleton overlay")
+        case .exporting(let p):
+            Text("\(Int(p * 100))%")
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                .tracking(1.2)
+                .foregroundStyle(DS.accent)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.accent.opacity(0.4), lineWidth: 1))
+                .accessibilityLabel("Exporting video, \(Int(p * 100)) percent")
+        case .ready(let url):
+            ShareLink(item: url) {
+                Text("SHARE VIDEO")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.2)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(DS.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+            }
+            .accessibilityLabel("Share exported video")
+        }
+    }
+
+    private func startExport() {
+        guard let url = result.videoURL, let frames = result.keypointFrames else { return }
+        exportState = .exporting(0)
+        exportTask = Task {
+            do {
+                let out = try await OverlayVideoExporter.export(videoURL: url, frames: frames) { p in
+                    Task { @MainActor in
+                        if case .exporting = exportState { exportState = .exporting(p) }
+                    }
+                }
+                await MainActor.run { exportState = .ready(out) }
+            } catch is CancellationError {
+                await MainActor.run { exportState = .idle }
+            } catch {
+                AppLog.storage.error("Overlay export failed: \(error.localizedDescription)")
+                await MainActor.run { exportState = .failed }
+            }
+        }
     }
 
     // MARK: - Score panel

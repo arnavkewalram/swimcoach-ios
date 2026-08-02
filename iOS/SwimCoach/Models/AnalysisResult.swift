@@ -89,6 +89,7 @@ struct AnalysisResult: Hashable, Codable, Sendable {
         ],
         analyzedAt: Date(),
         videoFileName: "swim_test.mp4",
+        keypointFrames: demoKeypointFrames,
         issueWindows: [
             IssueWindow(start: 0.0, end: 3.0,
                         probs: [0.2, 0.1, 0.3, 0.1, 0.1, 0.1, 0.55, 0.2, 0.35, 0.1]),
@@ -100,6 +101,31 @@ struct AnalysisResult: Hashable, Codable, Sendable {
                         probs: [0.2, 0.1, 0.5, 0.1, 0.1, 0.1, 0.90, 0.2, 0.55, 0.1]),
         ]
     )
+
+    /// Synthetic skeleton path matching the demo cartoon's swimmer band —
+    /// makes the overlay and export demo-able without a real analysis.
+    static let demoKeypointFrames: [KeypointFrame] = (0..<27).map { i in
+        let t = Double(i) * 0.3
+        let x = Float(0.10 + Double(i) * 0.008)
+        let y: Float = 0.50
+        var joints = [Float](repeating: 0, count: 39)
+        // Rough horizontal swimmer: head at +0.10x, feet at -0.10x from center
+        let layout: [(Float, Float)] = [
+            (0.10, 0.00),                     // nose
+            (0.05, -0.015), (0.05, 0.015),    // shoulders
+            (0.02, -0.030), (0.02, 0.030),    // elbows
+            (-0.01, -0.045), (-0.01, 0.045),  // wrists
+            (-0.03, -0.012), (-0.03, 0.012),  // hips
+            (-0.06, -0.015), (-0.06, 0.015),  // knees
+            (-0.10, -0.018), (-0.10, 0.018),  // ankles
+        ]
+        for (j, off) in layout.enumerated() {
+            joints[j * 3]     = x + off.0
+            joints[j * 3 + 1] = y + off.1
+            joints[j * 3 + 2] = 0.9
+        }
+        return KeypointFrame(t: t, joints: joints)
+    }
 
     /// An earlier, weaker session for the compare demo: body_sag worse then,
     /// late_hand_entry has since resolved, low_kick_rate unchanged, and
