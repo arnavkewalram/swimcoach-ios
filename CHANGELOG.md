@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.30.0] — 2026-08-02 — "Fresh"
+
+### Added
+- **Start-here drill targeting**: opening drills from a fault (Focus or
+  a Results issue) now lands on the fixing drill you've practiced least
+  recently — never-practiced first — with a lane-blue START HERE tag.
+  Practice feeds back into what to practice next.
+
 ## [1.29.1] — 2026-08-02
 
 ### Fixed

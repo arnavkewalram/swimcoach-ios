@@ -52,6 +52,24 @@ final class DrillCatalogTests: XCTestCase {
                        DrillPractice.Summary(count: 0, lastDate: nil))
     }
 
+    func testLeastRecentlyPracticedPrefersNeverPracticed() {
+        let events = [DrillPracticeEvent(drillID: "fist-drill", date: Date())]
+        XCTAssertEqual(
+            DrillPractice.leastRecentlyPracticed(of: ["fist-drill", "single-arm"], events: events),
+            "single-arm")
+    }
+
+    func testLeastRecentlyPracticedPicksOldest() {
+        let events = [
+            DrillPracticeEvent(drillID: "fist-drill", date: Date(timeIntervalSinceNow: -100)),
+            DrillPracticeEvent(drillID: "single-arm", date: Date(timeIntervalSinceNow: -50_000)),
+        ]
+        XCTAssertEqual(
+            DrillPractice.leastRecentlyPracticed(of: ["fist-drill", "single-arm"], events: events),
+            "single-arm")
+        XCTAssertNil(DrillPractice.leastRecentlyPracticed(of: [], events: events))
+    }
+
     @MainActor
     func testPracticeEventsRoundTripThroughStore() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
