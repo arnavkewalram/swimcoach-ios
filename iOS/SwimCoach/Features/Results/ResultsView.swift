@@ -31,6 +31,8 @@ struct ResultsView: View {
     @State private var scrollProxy: ScrollViewProxy? = nil
     @State private var reportImage: UIImage? = nil
 
+    @State private var sessionToEdit: SwimSession? = nil
+
     enum VideoExportState: Equatable {
         case idle, exporting(Double), ready(URL), failed
     }
@@ -68,8 +70,46 @@ struct ResultsView: View {
                     // ── Score panel ────────────────────────────────────────
                     scorePanel
                         .padding(.top, 16)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 12)
                         .staggerIn(sectionsVisible, delay: 0)
+
+                    // ── Session label (saved sessions only) ───────────────
+                    if let saved = savedSessions.first {
+                        Button {
+                            sessionToEdit = saved
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "pencil.line")
+                                    .font(.caption2)
+                                    .accessibilityHidden(true)
+                                if saved.name.isEmpty && saved.notes.isEmpty {
+                                    Text("NAME THIS SESSION")
+                                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                        .tracking(1.2)
+                                } else {
+                                    Text(saved.name.isEmpty ? "ADD A NOTE" : saved.name)
+                                        .font(.grotesk(13, .medium))
+                                        .lineLimit(1)
+                                    if !saved.notes.isEmpty {
+                                        Text("· \(saved.notes)")
+                                            .font(.caption.italic())
+                                            .foregroundStyle(DS.inkTertiary)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                Spacer()
+                            }
+                            .foregroundStyle(saved.name.isEmpty && saved.notes.isEmpty
+                                             ? DS.accent : DS.inkSecondary)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(saved.name.isEmpty
+                                            ? "Name this session"
+                                            : "Session name: \(saved.name). Edit name and notes.")
+                        .padding(.bottom, 16)
+                        .staggerIn(sectionsVisible, delay: 0.04)
+                    }
 
                     // ── Quality notes ─────────────────────────────────────
                     if result.sampledFrames > 0 && result.detectionRate < 0.20 {
@@ -193,6 +233,9 @@ struct ResultsView: View {
         .onDisappear {
             player?.pause()
             exportTask?.cancel()
+        }
+        .sheet(item: $sessionToEdit) { session in
+            EditSessionSheet(session: session)
         }
     }
 

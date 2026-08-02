@@ -76,7 +76,7 @@ struct HistoryView: View {
                                         Button {
                                             sessionToRename = session
                                         } label: {
-                                            Label("Rename", systemImage: "pencil")
+                                            Label("Edit name & notes", systemImage: "pencil")
                                         }
                                         Button(role: .destructive) {
                                             if let idx = sessions.firstIndex(where: { $0.id == session.id }) {
@@ -99,7 +99,7 @@ struct HistoryView: View {
             }
         }
         .sheet(item: $sessionToRename) { session in
-            RenameSessionSheet(session: session)
+            EditSessionSheet(session: session)
         }
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
@@ -196,6 +196,12 @@ private struct SessionRow: View {
                 Text("Score \(session.score) · \(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
                     .font(.caption)
                     .foregroundStyle(DS.inkSecondary)
+                if !session.notes.isEmpty {
+                    Text(session.notes)
+                        .font(.caption.italic())
+                        .foregroundStyle(DS.inkTertiary)
+                        .lineLimit(1)
+                }
             }
 
             Spacer()
@@ -363,16 +369,18 @@ private struct IssueFrequencyChart: View {
     }
 }
 
-// MARK: - Rename session sheet
+// MARK: - Edit session sheet (name + notes)
 
-private struct RenameSessionSheet: View {
+struct EditSessionSheet: View {
     let session: SwimSession
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
+    @State private var notes: String
 
     init(session: SwimSession) {
         self.session = session
         _name = State(initialValue: session.name)
+        _notes = State(initialValue: session.notes)
     }
 
     var body: some View {
@@ -380,7 +388,7 @@ private struct RenameSessionSheet: View {
             ZStack {
                 DS.background.ignoresSafeArea()
 
-                VStack(spacing: 20) {
+                VStack(alignment: .leading, spacing: 16) {
                     TextField("Session name", text: $name)
                         .font(.callout)
                         .foregroundStyle(DS.ink)
@@ -391,15 +399,39 @@ private struct RenameSessionSheet: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(DS.borderBold, lineWidth: 1)
                         )
-                        .padding(.horizontal, 20)
-                        .padding(.top, 24)
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("NOTES")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.inkTertiary)
+                        TextField("How did it feel? What did you work on?",
+                                  text: $notes, axis: .vertical)
+                            .font(.callout)
+                            .foregroundStyle(DS.ink)
+                            .lineLimit(3...6)
+                            .padding(12)
+                            .background(DS.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(DS.borderBold, lineWidth: 1)
+                            )
+                    }
 
                     Spacer()
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
             }
-            .navigationTitle("Rename Session")
+            .navigationTitle("Edit Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Edit Session")
+                        .font(.grotesk(17, .medium))
+                        .foregroundStyle(DS.ink)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
@@ -409,6 +441,7 @@ private struct RenameSessionSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         session.name = name.trimmingCharacters(in: .whitespaces)
+                        session.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
                         dismiss()
                     }
                     .foregroundStyle(DS.accent)
@@ -416,7 +449,7 @@ private struct RenameSessionSheet: View {
                 }
             }
         }
-        .presentationDetents([.height(200)])
+        .presentationDetents([.height(340)])
         .presentationBackground(DS.background)
     }
 }

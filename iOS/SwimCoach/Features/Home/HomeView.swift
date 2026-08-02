@@ -250,7 +250,12 @@ struct HomeView: View {
                 analyzedAt: Calendar.current.date(
                     byAdding: .day, value: -item.daysAgo, to: Date()) ?? Date()
             )
-            modelContext.insert(SwimSession(result: result))
+            let session = SwimSession(result: result)
+            if item.daysAgo == 0 {
+                session.name = "Threshold Tuesday"
+                session.notes = "Worked on high-elbow catch; felt strong"
+            }
+            modelContext.insert(session)
         }
     }
 

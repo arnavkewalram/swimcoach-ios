@@ -5,6 +5,9 @@ import SwiftData
 final class SwimSession {
     var id: UUID
     var name: String = ""
+    /// Free-text training note ("worked on catch", "felt heavy").
+    /// Defaulted so existing stores migrate losslessly.
+    var notes: String = ""
     var score: Int
     var grade: String
     var issueCount: Int
