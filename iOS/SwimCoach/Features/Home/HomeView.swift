@@ -12,6 +12,14 @@ struct HomeView: View {
     @State private var docsVideoURL: URL? = nil
     #endif
 
+    private var focusFault: (name: String, occurrences: Int, window: Int)? {
+        // Chronological issue-name lists from stored metadata (no decode)
+        let chronological = sessions.reversed().map(\.issueNames)
+        guard let name = FocusFault.pick(recentIssueNames: chronological) else { return nil }
+        let window = min(FocusFault.window, sessions.count)
+        return (name, FocusFault.occurrences(of: name, in: chronological), window)
+    }
+
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
         if h < 12 { return "Good morning" }
@@ -76,6 +84,16 @@ struct HomeView: View {
                     if sessions.count >= 2 {
                         TrainingLogPanel(sessions: sessions)
                             .padding(.bottom, 24)
+                    }
+
+                    // ── Focus fault (recurring in recent sessions) ────────
+                    if let focus = focusFault {
+                        FocusPanel(faultName: focus.name,
+                                   occurrences: focus.occurrences,
+                                   windowSize: focus.window) {
+                            router.push(.drills(highlightIssue: focus.name))
+                        }
+                        .padding(.bottom, 24)
                     }
 
                     Spacer(minLength: 30)
@@ -332,6 +350,63 @@ struct HomeView: View {
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(DS.border, lineWidth: 1))
     }
     #endif
+}
+
+// MARK: - Focus fault panel
+
+private struct FocusPanel: View {
+    let faultName: String
+    let occurrences: Int
+    let windowSize: Int
+    let onDrills: () -> Void
+
+    private var info: (display: String, severity: TechniqueIssue.Severity)? {
+        FeedbackEngine.displayInfo(for: faultName)
+    }
+
+    private var severityColor: Color {
+        switch info?.severity {
+        case .major: return DS.severityMajor
+        case .moderate: return DS.severityModerate
+        default: return DS.severityMinor
+        }
+    }
+
+    var body: some View {
+        Button(action: onDrills) {
+            VStack(alignment: .leading, spacing: 8) {
+                SectionHeader(title: "Focus")
+                HStack(alignment: .firstTextBaseline) {
+                    Rectangle()
+                        .fill(severityColor)
+                        .frame(width: 3, height: 20)
+                        .offset(y: 2)
+                    Text(info?.display ?? faultName)
+                        .font(.grotesk(20, .bold))
+                        .foregroundStyle(DS.ink)
+                    Spacer()
+                }
+                Text("In \(occurrences) of your last \(windowSize) session\(windowSize == 1 ? "" : "s")")
+                    .font(.footnote)
+                    .foregroundStyle(DS.inkSecondary)
+                HStack(spacing: 5) {
+                    Text("DRILLS FOR THIS")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                        .tracking(1.2)
+                    Image(systemName: "arrow.right")
+                        .font(.caption2.weight(.semibold))
+                        .accessibilityHidden(true)
+                }
+                .foregroundStyle(DS.accent)
+                .padding(.top, 2)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            "Focus: \(info?.display ?? faultName), in \(occurrences) of your last \(windowSize) sessions. Opens drills.")
+    }
 }
 
 // MARK: - Training log (sparkline + this-week line)

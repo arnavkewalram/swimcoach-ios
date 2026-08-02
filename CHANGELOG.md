@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.20.0] — 2026-08-02 — "Focus"
+
+### Added
+- **Focus on Home**: the fault that recurs most across your last five
+  sessions (minimum twice — one-offs are noise; ties break toward the
+  most recent) gets a panel with its severity mark and a one-tap DRILLS
+  FOR THIS link. Sessions now store fault names directly so Home
+  aggregates without decoding result blobs; older sessions contribute as
+  new ones are saved.
+
 ## [1.19.1] — 2026-08-01
 
 ### Fixed

@@ -11,6 +11,9 @@ final class SwimSession {
     var score: Int
     var grade: String
     var issueCount: Int
+    /// Fault names for cheap Home-screen aggregation (no blob decode).
+    /// Defaulted so existing stores migrate; old sessions stay empty.
+    var issueNames: [String] = []
     var strokeCount: Int
     var kickRatePerMin: Double
     var analyzedAt: Date
@@ -22,6 +25,7 @@ final class SwimSession {
         self.score = result.score
         self.grade = result.grade
         self.issueCount = result.issues.count
+        self.issueNames = result.issues.map(\.name)
         self.strokeCount = result.strokeCount
         self.kickRatePerMin = result.kickRatePerMin
         self.analyzedAt = result.analyzedAt

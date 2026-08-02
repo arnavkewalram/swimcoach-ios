@@ -58,6 +58,12 @@ struct FeedbackEngine {
     /// Every issue name the model can emit, in probability order.
     static var issueNames: [String] { catalog.map(\.name) }
 
+    /// Display metadata for a fault name (Focus panel, drills headers).
+    static func displayInfo(for name: String)
+        -> (display: String, severity: TechniqueIssue.Severity)? {
+        catalog.first { $0.name == name }.map { ($0.display, $0.baseSev) }
+    }
+
     static func decode(probabilities: [Float]) -> [TechniqueIssue] {
         probabilities.enumerated().compactMap { i, prob in
             guard i < catalog.count, prob >= threshold else { return nil }
