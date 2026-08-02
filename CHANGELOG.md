@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.23.0] — 2026-08-02 — "Smoke"
+
+### Added
+- **UI smoke tests in CI**: a new XCUITest target launches every major
+  route (Home, demo Results, seeded History, Drills, About, Compare) and
+  asserts its landmark content renders — routing crashes and blank
+  screens are now caught before merge. Runs in the existing test scheme;
+  ~27 s added.
+
 ## [1.22.2] — 2026-08-02
 
 ### Changed
