@@ -41,7 +41,7 @@ struct HomeView: View {
                                 .accessibilityHidden(true)
                         }
                         Text("Technique analysis, on device")
-                            .font(.system(size: 13))
+                            .font(.footnote)
                             .foregroundStyle(DS.inkSecondary)
                     }
                     .padding(.top, 24)
@@ -180,10 +180,10 @@ struct HomeView: View {
     private func devButton(_ title: String, icon: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 11))
+                .font(.caption2)
                 .accessibilityHidden(true)
             Text(title)
-                .font(.system(size: 12, weight: .medium))
+                .font(.caption.weight(.medium))
                 .lineLimit(1)
         }
         .foregroundStyle(DS.inkSecondary)
@@ -207,7 +207,7 @@ private struct FirstRunCard: View {
                 .font(.grotesk(22, .bold))
                 .foregroundStyle(DS.ink)
             Text("Record a side-on video from the pool deck, 3–6 m from the swimmer. You'll get a technique score, detected faults, and drills in under a minute.")
-                .font(.system(size: 14))
+                .font(.footnote)
                 .lineSpacing(3)
                 .foregroundStyle(DS.inkSecondary)
         }
@@ -254,6 +254,8 @@ private struct RecordStrip: View {
                 .font(.statUnit)
                 .tracking(1.2)
                 .foregroundStyle(DS.inkTertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -304,14 +306,14 @@ private struct LastSessionCard: View {
                     }
                     Spacer()
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.subheadline.weight(.medium))
                         .foregroundStyle(DS.inkTertiary)
                         .accessibilityHidden(true)
                 }
                 .padding(.bottom, 10)
 
                 Text("\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
-                    .font(.system(size: 13))
+                    .font(.footnote)
                     .foregroundStyle(DS.inkSecondary)
             }
             .padding(20)

@@ -236,12 +236,12 @@ struct ResultsView: View {
     private func qualityNote(icon: String, color: Color, text: String) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 13))
+                .font(.footnote)
                 .foregroundStyle(color)
                 .padding(.top, 1)
                 .accessibilityHidden(true)
             Text(text)
-                .font(.system(size: 13))
+                .font(.footnote)
                 .lineSpacing(2)
                 .foregroundStyle(DS.inkSecondary)
         }
@@ -283,6 +283,8 @@ struct ResultsView: View {
                 .font(.statUnit)
                 .tracking(1.2)
                 .foregroundStyle(DS.inkTertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -294,13 +296,13 @@ struct ResultsView: View {
         VStack(spacing: 14) {
             HStack(spacing: 6) {
                 Image(systemName: isSaved ? "checkmark" : "exclamationmark.triangle")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(isSaved ? DS.severityMinor : DS.severityModerate)
                     .accessibilityHidden(true)
                 Text(isSaved
                      ? "Session saved"
                      : "Session not saved — a storage error occurred")
-                    .font(.system(size: 13))
+                    .font(.footnote)
                     .foregroundStyle(isSaved ? DS.inkSecondary : DS.severityModerate)
             }
             .frame(maxWidth: .infinity)
@@ -315,14 +317,28 @@ struct ResultsView: View {
     }
 }
 
-// MARK: - Stagger modifier
+// MARK: - Stagger modifier (no-op under Reduce Motion)
+
+private struct StaggerIn: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let visible: Bool
+    let delay: Double
+
+    func body(content: Content) -> some View {
+        if reduceMotion {
+            content
+        } else {
+            content
+                .opacity(visible ? 1 : 0)
+                .offset(y: visible ? 0 : 8)
+                .animation(.easeOut(duration: 0.4).delay(delay), value: visible)
+        }
+    }
+}
 
 private extension View {
     func staggerIn(_ visible: Bool, delay: Double) -> some View {
-        self
-            .opacity(visible ? 1 : 0)
-            .offset(y: visible ? 0 : 8)
-            .animation(.easeOut(duration: 0.4).delay(delay), value: visible)
+        modifier(StaggerIn(visible: visible, delay: delay))
     }
 }
 
@@ -355,7 +371,7 @@ private struct IssueRow: View {
                     Spacer()
                     SeverityBadge(severity: issue.severity.rawValue)
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.caption2.weight(.medium))
                         .foregroundStyle(DS.inkTertiary)
                         .rotationEffect(.degrees(expanded ? 180 : 0))
                         .accessibilityHidden(true)
@@ -374,7 +390,7 @@ private struct IssueRow: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     Text(issue.description)
-                        .font(.system(size: 13))
+                        .font(.footnote)
                         .lineSpacing(3)
                         .foregroundStyle(DS.inkSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -386,7 +402,7 @@ private struct IssueRow: View {
                             .foregroundStyle(DS.accent)
                             .padding(.top, 2)
                         Text(issue.tip)
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.footnote.weight(.medium))
                             .lineSpacing(3)
                             .foregroundStyle(DS.ink)
                             .fixedSize(horizontal: false, vertical: true)
@@ -420,7 +436,7 @@ private struct TipRow: View {
                     .foregroundStyle(DS.accent)
                     .padding(.top, 1)
                 Text(text)
-                    .font(.system(size: 14))
+                    .font(.footnote)
                     .lineSpacing(3)
                     .foregroundStyle(DS.ink)
                     .fixedSize(horizontal: false, vertical: true)

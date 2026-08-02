@@ -5,6 +5,7 @@ struct CameraView: View {
     @StateObject private var camera = CameraManager()
     @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     // Recording indicator pulse
     @State private var recPulse = false
@@ -111,24 +112,25 @@ struct CameraView: View {
 
             if camera.isRecording {
                 HStack(spacing: 8) {
-                    // Pulsing red dot
+                    // Pulsing red dot (static ring under Reduce Motion)
                     ZStack {
                         Circle()
-                            .fill(.red.opacity(recPulse ? 0.35 : 0))
+                            .fill(.red.opacity(reduceMotion ? 0.25 : (recPulse ? 0.35 : 0)))
                             .frame(width: 18, height: 18)
                             .animation(
-                                .easeInOut(duration: 0.7).repeatForever(autoreverses: true),
+                                reduceMotion ? nil :
+                                    .easeInOut(duration: 0.7).repeatForever(autoreverses: true),
                                 value: recPulse
                             )
                         Circle()
                             .fill(.red)
                             .frame(width: 9, height: 9)
                     }
-                    .onAppear { recPulse = true }
+                    .onAppear { if !reduceMotion { recPulse = true } }
                     .onDisappear { recPulse = false }
 
                     Text("REC")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(.red)
 
                     Text(formatDuration(camera.recordingDuration))
@@ -171,7 +173,7 @@ struct CameraView: View {
 
                 // Label
                 Text("Position swimmer here")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(.white.opacity(0.65))
                     .shadow(color: .black.opacity(0.5), radius: 3)
                     .position(x: geo.size.width / 2, y: y + h + 18)
@@ -187,7 +189,7 @@ struct CameraView: View {
     private var tipsCard: some View {
         HStack(spacing: 12) {
             Image(systemName: "lightbulb.fill")
-                .font(.system(size: 14))
+                .font(.footnote)
                 .foregroundStyle(.yellow)
                 .padding(8)
                 .background(Color.yellow.opacity(0.12))

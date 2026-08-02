@@ -133,7 +133,7 @@ struct AnalyzingView: View {
                 .padding(.bottom, 14)
 
             Text(failureMessage)
-                .font(.system(size: 14))
+                .font(.footnote)
                 .lineSpacing(3)
                 .foregroundStyle(DS.inkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -420,7 +420,7 @@ private struct StepRow: View {
                 switch state {
                 case .completed:
                     Image(systemName: "checkmark")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(DS.severityMinor)
                 case .active:
                     Text(String(format: "%02d", index + 1))

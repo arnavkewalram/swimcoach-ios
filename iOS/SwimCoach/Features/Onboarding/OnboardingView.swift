@@ -19,7 +19,7 @@ struct OnboardingView: View {
                     Spacer()
                     if currentPage < 2 {
                         Button("Skip") { hasSeenOnboarding = true }
-                            .font(.system(size: 15, weight: .medium))
+                            .font(.subheadline.weight(.medium))
                             .foregroundStyle(DS.inkSecondary)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 12)
@@ -105,7 +105,7 @@ private struct WelcomePage: View {
                 .padding(.horizontal, 32)
             Spacer().frame(height: 14)
             Text("Film a swim from the pool deck and get detailed biomechanics feedback in seconds — no account, all on device.")
-                .font(.system(size: 15))
+                .font(.subheadline)
                 .lineSpacing(3)
                 .foregroundStyle(DS.inkSecondary)
                 .multilineTextAlignment(.center)
@@ -141,7 +141,7 @@ private struct CameraPage: View {
                 .multilineTextAlignment(.center)
             Spacer().frame(height: 14)
             Text("Stand at the pool edge and film the full lane, with the swimmer's entire body visible from head to feet.")
-                .font(.system(size: 15))
+                .font(.subheadline)
                 .lineSpacing(3)
                 .foregroundStyle(DS.inkSecondary)
                 .multilineTextAlignment(.center)
@@ -154,7 +154,7 @@ private struct CameraPage: View {
                             .font(.grotesk(13, .bold))
                             .foregroundStyle(DS.accent)
                         Text(tip)
-                            .font(.system(size: 15))
+                            .font(.subheadline)
                             .foregroundStyle(DS.ink)
                         Spacer()
                     }
@@ -190,7 +190,7 @@ private struct ResultsPage: View {
                     .font(.grotesk(14, .medium))
                     .foregroundStyle(DS.ink)
                 Text(description)
-                    .font(.system(size: 12))
+                    .font(.caption)
                     .lineSpacing(2)
                     .foregroundStyle(DS.inkSecondary)
             }
