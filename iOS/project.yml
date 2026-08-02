@@ -11,8 +11,8 @@ settings:
   IPHONEOS_DEPLOYMENT_TARGET: "17.0"
   DEVELOPMENT_TEAM: 4VH58A4KM6
   CODE_SIGN_STYLE: Automatic
-  MARKETING_VERSION: 1.13.1
-  CURRENT_PROJECT_VERSION: 16
+  MARKETING_VERSION: 1.14.0
+  CURRENT_PROJECT_VERSION: 17
 
 targets:
   SwimCoach:
@@ -28,6 +28,7 @@ targets:
       - sdk: FoundationModels.framework
         weak: true
     resources:
+      - path: SwimCoach/PrivacyInfo.xcprivacy
       - path: SwimCoach/Resources/swim_test.mp4
       - path: SwimCoach/Resources/Fonts
     info:

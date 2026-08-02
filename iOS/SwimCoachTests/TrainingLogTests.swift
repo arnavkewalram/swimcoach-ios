@@ -72,6 +72,11 @@ final class TrainingLogTests: XCTestCase {
         XCTAssertTrue(TrainingLog.isNewBest(score: 71, priorBest: 70))
     }
 
+    func testPrivacyManifestIsBundled() {
+        // Apple requires PrivacyInfo.xcprivacy in App Store binaries.
+        XCTAssertNotNil(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
+    }
+
     func testFontLicenseIsBundled() {
         // The OFL obliges shipping the license with the fonts; AboutView
         // renders it from the bundle.

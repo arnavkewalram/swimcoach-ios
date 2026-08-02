@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */; };
+		0E9877EFAFE15EBB8E2F77DE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */; };
 		116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */; };
 		1196B0A2E342B9F875B025C3 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */; };
 		13D90FB0157D9328BCD236C2 /* SwimSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06C0AA352DE7728EADB818C /* SwimSessionTests.swift */; };
@@ -63,6 +64,7 @@
 		D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */; };
 		D5FE23FE206209F37B23BD2C /* SpaceGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 65121B38AC1FDF7DE043E733 /* SpaceGrotesk-Bold.ttf */; };
 		D6C634BFF07A295BE4B5C063 /* BiomechanicsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */; };
+		DB05C6679E2D249A3FD1BCBF /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5F95B5EFDE86670DAE8840 /* Haptics.swift */; };
 		DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF341904BDF6F1F4F63756E /* SessionComparison.swift */; };
 		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
@@ -111,6 +113,7 @@
 		730F3A8523C913A0E0248CDD /* CoachingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingService.swift; sourceTree = "<group>"; };
 		73EF644DB5F84FB24F8FDA4B /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
+		8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionComparisonTests.swift; sourceTree = "<group>"; };
 		9739E338795485459CA3A319 /* OverlayVideoExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayVideoExporterTests.swift; sourceTree = "<group>"; };
 		98186D217795042F6E6B7D7A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -131,6 +134,7 @@
 		B9D9E931537A6F52120C9319 /* IssueWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindow.swift; sourceTree = "<group>"; };
 		BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractor.swift; sourceTree = "<group>"; };
 		BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseAnalyzer.swift; sourceTree = "<group>"; };
+		CF5F95B5EFDE86670DAE8840 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		D027762C9F6FC33526494B6F /* DrillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillsView.swift; sourceTree = "<group>"; };
 		D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		D527CB27BAD9FD1888FABA4D /* SwimCoachTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SwimCoachTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -175,6 +179,7 @@
 				730F3A8523C913A0E0248CDD /* CoachingService.swift */,
 				BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */,
 				24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */,
+				CF5F95B5EFDE86670DAE8840 /* Haptics.swift */,
 				983DF83A1982B648EA414060 /* OverlayVideoExporter.swift */,
 				BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */,
 				3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */,
@@ -331,6 +336,7 @@
 				2C46DC385735A4FEE49AF1FB /* Resources */,
 				50E3FF3C10BF299B700EBF8A /* Assets.xcassets */,
 				99AB87293A2C7FE01697E04D /* Info.plist */,
+				8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */,
 				E721FA48603268C362E7F84E /* SwimCoachApp.swift */,
 			);
 			path = SwimCoach;
@@ -472,6 +478,7 @@
 			files = (
 				99FD6C30E05CF624EE90AE1A /* Assets.xcassets in Resources */,
 				2D40371DC278AB39902B6CFF /* OFL.txt in Resources */,
+				0E9877EFAFE15EBB8E2F77DE /* PrivacyInfo.xcprivacy in Resources */,
 				D5FE23FE206209F37B23BD2C /* SpaceGrotesk-Bold.ttf in Resources */,
 				156576D51755F50A71F0E08E /* SpaceGrotesk-Medium.ttf in Resources */,
 				1FC82D44803A100487309E60 /* SpaceGrotesk-Regular.ttf in Resources */,
@@ -523,6 +530,7 @@
 				5AC6297BE8258500F7D893CD /* DrillsView.swift in Sources */,
 				3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */,
 				15A029877A18065E055732B8 /* FeedbackEngine.swift in Sources */,
+				DB05C6679E2D249A3FD1BCBF /* Haptics.swift in Sources */,
 				9AB3F3314B67D293DBB5D3F7 /* HistoryView.swift in Sources */,
 				2815930944855657E8A7EB06 /* HomeView.swift in Sources */,
 				AB95CEAB12265A86D19CD3D7 /* IssueTimelineStrip.swift in Sources */,
@@ -595,7 +603,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -609,7 +617,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.13.1;
+				MARKETING_VERSION = 1.14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -725,7 +733,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -745,7 +753,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.13.1;
+				MARKETING_VERSION = 1.14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
