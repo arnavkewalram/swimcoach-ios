@@ -22,33 +22,32 @@ struct HomeView: View {
         ZStack {
             DS.background.ignoresSafeArea()
 
+            GeometryReader { geo in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
 
                     // ── Masthead ──────────────────────────────────────────
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(greeting.uppercased())
-                            .font(.sectionLabel)
-                            .tracking(2.0)
-                            .foregroundStyle(DS.inkTertiary)
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text("SwimCoach")
-                                .font(.grotesk(34, .bold))
-                                .foregroundStyle(DS.ink)
-                            Image(systemName: "figure.pool.swim")
-                                .font(.system(size: 20, weight: .medium))
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(greeting.uppercased())
+                                .font(.sectionLabel)
+                                .tracking(2.0)
                                 .foregroundStyle(DS.accent)
-                                .accessibilityHidden(true)
+                            Spacer()
+                            Text(Date().formatted(.dateTime.weekday(.wide).day().month()).uppercased())
+                                .font(.sectionLabel)
+                                .tracking(1.2)
+                                .foregroundStyle(DS.inkTertiary)
                         }
-                        Text("Technique analysis, on device")
-                            .font(.footnote)
-                            .foregroundStyle(DS.inkSecondary)
+                        Text("SwimCoach")
+                            .font(.grotesk(40, .bold))
+                            .foregroundStyle(DS.ink)
                     }
-                    .padding(.top, 24)
-                    .padding(.bottom, 24)
+                    .padding(.top, 20)
+                    .padding(.bottom, 18)
 
                     LaneRule()
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 22)
 
                     // ── Last session / first run ──────────────────────────
                     if let last = sessions.first {
@@ -72,34 +71,67 @@ struct HomeView: View {
                             .padding(.bottom, 24)
                     }
 
+                    Spacer(minLength: 30)
+
                     // ── Actions ───────────────────────────────────────────
                     Button {
                         router.push(.camera)
                     } label: {
-                        PrimaryButtonLabel(title: "Analyze a swim", icon: "video.fill")
+                        HStack {
+                            Text("Analyze a swim")
+                                .font(.grotesk(18, .medium))
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .font(.body.weight(.semibold))
+                                .accessibilityHidden(true)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 22)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 60)
+                        .background(DS.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .buttonStyle(ScaleButtonStyle())
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 4)
 
                     if !sessions.isEmpty {
                         Button {
                             router.push(.history)
                         } label: {
-                            SecondaryButtonLabel(title: "History · \(sessions.count)",
-                                                 icon: "clock.arrow.circlepath")
+                            HStack {
+                                Text("History")
+                                    .font(.grotesk(15, .medium))
+                                    .foregroundStyle(DS.ink)
+                                Spacer()
+                                Text("\(sessions.count) SESSIONS")
+                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                    .tracking(1.2)
+                                    .foregroundStyle(DS.inkTertiary)
+                                Image(systemName: "arrow.right")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(DS.inkTertiary)
+                                    .accessibilityHidden(true)
+                            }
+                            .padding(.vertical, 16)
+                            .overlay(alignment: .bottom) { Rectangle().fill(DS.border).frame(height: 1) }
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(ScaleButtonStyle())
+                        .padding(.top, 6)
                     }
 
                     // ── Dev tools (DEBUG builds only) ─────────────────────
                     #if DEBUG
                     devTools
-                        .padding(.top, 28)
+                        .padding(.top, 24)
                     #endif
 
-                    Spacer(minLength: 40)
+                    Spacer(minLength: 24)
                 }
                 .padding(.horizontal, 24)
+                .frame(minHeight: geo.size.height, alignment: .top)
+            }
             }
         }
         .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) { OnboardingView() }
@@ -242,8 +274,7 @@ private struct RecordStrip: View {
             divider
             cell(value: "\(avgScore)", label: "AVERAGE")
         }
-        .padding(.vertical, 14)
-        .glassCard()
+        .padding(.vertical, 4)
     }
 
     private var divider: some View {
@@ -295,40 +326,58 @@ private struct LastSessionCard: View {
                         .tracking(0.8)
                         .foregroundStyle(DS.inkTertiary)
                 }
-                .padding(.bottom, 14)
+                .padding(.bottom, 18)
 
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text("\(session.score)")
-                        .font(.grotesk(52, .bold))
-                        .foregroundStyle(DS.ink)
-                    Text(session.grade)
-                        .font(.grotesk(22, .bold))
-                        .foregroundStyle(gradeColor)
-                    if let d = delta, d != 0 {
-                        Text(d > 0 ? "▲\(d)" : "▼\(-d)")
-                            .font(.grotesk(13, .medium))
-                            .foregroundStyle(d > 0 ? DS.severityMinor : DS.severityModerate)
+                HStack(spacing: 22) {
+                    ZStack {
+                        ScoreArc(score: session.score, color: gradeColor)
+                            .frame(width: 116, height: 116)
+                        VStack(spacing: 0) {
+                            Text("\(session.score)")
+                                .font(.grotesk(38, .bold))
+                                .foregroundStyle(DS.ink)
+                            Text(session.grade)
+                                .font(.grotesk(15, .bold))
+                                .foregroundStyle(gradeColor)
+                        }
                     }
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(DS.inkTertiary)
-                        .accessibilityHidden(true)
-                }
-                .padding(.bottom, 10)
 
-                Text("\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
-                    .font(.footnote)
-                    .foregroundStyle(DS.inkSecondary)
+                    VStack(alignment: .leading, spacing: 10) {
+                        if let d = delta, d != 0 {
+                            HStack(spacing: 5) {
+                                Image(systemName: d > 0 ? "arrow.up.right" : "arrow.down.right")
+                                    .font(.caption2.weight(.semibold))
+                                    .accessibilityHidden(true)
+                                Text(d > 0 ? "UP \(d) PTS" : "DOWN \(-d) PTS")
+                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                    .tracking(1.2)
+                            }
+                            .foregroundStyle(d > 0 ? DS.severityMinor : DS.severityModerate)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("\(session.issueCount) issue\(session.issueCount == 1 ? "" : "s")")
+                                .font(.grotesk(15, .medium))
+                                .foregroundStyle(DS.ink)
+                            Text("\(session.strokeCount) strokes")
+                                .font(.footnote)
+                                .foregroundStyle(DS.inkSecondary)
+                        }
+                        HStack(spacing: 5) {
+                            Text("FULL RESULTS")
+                                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                .tracking(1.2)
+                            Image(systemName: "arrow.right")
+                                .font(.caption2.weight(.semibold))
+                                .accessibilityHidden(true)
+                        }
+                        .foregroundStyle(DS.accent)
+                    }
+                    Spacer(minLength: 0)
+                }
             }
-            .padding(20)
+            .padding(22)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassCard()
-            .overlay(alignment: .leading) {
-                UnevenRoundedRectangle(topLeadingRadius: 12, bottomLeadingRadius: 12)
-                    .fill(gradeColor)
-                    .frame(width: 4)
-            }
+            .glassCard(cornerRadius: 14)
         }
         .buttonStyle(ScaleButtonStyle())
         .accessibilityElement(children: .ignore)

@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.4.0] — 2026-08-02 — "Polish"
+
+### Changed
+- Home recomposed: stronger masthead with date, hero last-session panel with
+  an editorial score gauge, bare record strip (varied surface levels), and
+  bottom-anchored actions — the screen now composes across its full height.
+- Launch screen matches the paper background (no more white flash).
+- Device deployments use Release configuration — no DEV TOOLS in daily use.
+
 ## [1.3.0] — 2026-08-02 — "Share"
 
 ### Added
