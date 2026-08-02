@@ -157,13 +157,14 @@ struct AnalyzingView: View {
     private func runAnalysis() async {
         do {
             // 1 — Pose extraction (0 → 60%)
-            let (observations, fps, sampledFrames) = try await PoseAnalyzer.analyze(videoURL: videoURL) { p in
+            let (timedObservations, fps, sampledFrames) = try await PoseAnalyzer.analyze(videoURL: videoURL) { p in
                 Task { @MainActor in
                     self.progress = p * 0.60
                     self.statusText = "Extracting pose keypoints… \(Int(p * 100))%"
                 }
             }
 
+            let observations = timedObservations.map(\.observation)
             guard !observations.isEmpty else {
                 failWith(
                     "No horizontal swimmer detected. " +
@@ -225,6 +226,7 @@ struct AnalyzingView: View {
             let sortedIssues = issues.sorted { $0.severity > $1.severity }
             let resultID = UUID()
             let videoName = SessionVideoStore.persist(videoURL, for: resultID)
+            let keypointFrames = KeypointFrame.frames(from: timedObservations)
 
             var result = AnalysisResult(
                 id: resultID,
@@ -239,7 +241,8 @@ struct AnalyzingView: View {
                 issues: sortedIssues,
                 tips: sortedIssues.prefix(3).map(\.tip),
                 analyzedAt: Date(),
-                videoFileName: videoName
+                videoFileName: videoName,
+                keypointFrames: keypointFrames
             )
 
             // 6 — AI coaching tips
@@ -253,7 +256,8 @@ struct AnalyzingView: View {
                     sampledFrames: result.sampledFrames,
                     fps: result.fps, issues: result.issues, tips: aiTips,
                     analyzedAt: result.analyzedAt,
-                    videoFileName: result.videoFileName
+                    videoFileName: result.videoFileName,
+                    keypointFrames: result.keypointFrames
                 )
             }
 

@@ -8,6 +8,8 @@ struct ResultsView: View {
     @State private var animatedScore: Double = 0
     @State private var sectionsVisible = false
     @State private var player: AVPlayer? = nil
+    @State private var videoNaturalSize: CGSize = .zero
+    @State private var showSkeleton = true
     // Saved-state read from SwiftData itself — the footer never claims a save
     // that didn't happen.
     @Query private var savedSessions: [SwimSession]
@@ -113,6 +115,13 @@ struct ResultsView: View {
                 let p = AVPlayer(url: url)
                 p.isMuted = true
                 player = p
+                Task {
+                    let asset = AVURLAsset(url: url)
+                    if let track = try? await asset.loadTracks(withMediaType: .video).first,
+                       let size = try? await track.load(.naturalSize) {
+                        videoNaturalSize = CGSize(width: abs(size.width), height: abs(size.height))
+                    }
+                }
             }
         }
         .onDisappear {
@@ -124,10 +133,31 @@ struct ResultsView: View {
 
     private func videoSection(url: URL) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Session video")
-            Group {
+            HStack {
+                SectionHeader(title: "Session video")
+                if hasSkeletonData {
+                    Button {
+                        showSkeleton.toggle()
+                    } label: {
+                        Text(showSkeleton ? "HIDE JOINTS" : "SHOW JOINTS")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                            .foregroundStyle(showSkeleton ? DS.accent : DS.inkTertiary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .overlay(RoundedRectangle(cornerRadius: 5)
+                                .stroke(showSkeleton ? DS.accent.opacity(0.5) : DS.border, lineWidth: 1))
+                    }
+                    .accessibilityLabel(showSkeleton ? "Hide detected joints overlay" : "Show detected joints overlay")
+                }
+            }
+            ZStack {
                 if let player {
                     VideoPlayer(player: player)
+                    if showSkeleton, let frames = result.keypointFrames, !frames.isEmpty {
+                        SkeletonOverlayView(player: player, frames: frames,
+                                            videoSize: videoNaturalSize)
+                    }
                 } else {
                     Color.black
                 }
@@ -137,8 +167,12 @@ struct ResultsView: View {
             .background(Color.black)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.border, lineWidth: 1))
-            .accessibilityLabel("Analyzed swim video. Review your stroke alongside the feedback below.")
+            .accessibilityLabel("Analyzed swim video with detected joint overlay. Review your stroke alongside the feedback below.")
         }
+    }
+
+    private var hasSkeletonData: Bool {
+        !(result.keypointFrames?.isEmpty ?? true)
     }
 
     // MARK: - Score panel
