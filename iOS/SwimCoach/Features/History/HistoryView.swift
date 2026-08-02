@@ -422,7 +422,8 @@ private struct ScoreTrendChart: View {
                         .fill(Color.clear)
                         .contentShape(Rectangle())
                         .onTapGesture { location in
-                            let origin = geo[proxy.plotAreaFrame].origin
+                            guard let plotFrame = proxy.plotFrame else { return }
+                            let origin = geo[plotFrame].origin
                             let x = location.x - origin.x
                             if let idx: Int = proxy.value(atX: x, as: Int.self) {
                                 let clampedIdx = max(0, min(idx - 1, sessions.count - 1))
