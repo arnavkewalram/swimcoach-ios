@@ -100,8 +100,13 @@ struct BiomechanicsEngine {
             }
         }
 
+        // Peak spacing matches ml/features/motion.py: 0.4 s between stroke
+        // peaks, 0.2 s between kicks — fps-aware, not a fixed frame count.
+        let strokeDist = max(1, Int(0.4 * effectiveFPS))
+        let kickDist = max(1, Int(0.2 * effectiveFPS))
+
         // Primary: wrist-based stroke counting (reliable when wrists are detected).
-        let lS = peaks(lWrist), rS = peaks(rWrist)
+        let lS = peaks(lWrist, minDist: strokeDist), rS = peaks(rWrist, minDist: strokeDist)
         var totalStrokes = lS.count + rS.count
 
         // Fallback: shoulder-oscillation stroke counting.
@@ -116,7 +121,10 @@ struct BiomechanicsEngine {
             }
         }
 
-        let nKicks = peaks(lAnkle).count + peaks(rAnkle).count
+        // Union (not sum): synchronized ankle peaks are one kick, matching
+        // the Python pipeline's frame-set semantics.
+        let nKicks = Set(peaks(lAnkle, minDist: kickDist))
+            .union(peaks(rAnkle, minDist: kickDist)).count
         let duration = overrideDuration
             ?? (obs.isEmpty ? 1.0 : Double(obs.count) / max(1, effectiveFPS))
         let kickRate = Double(nKicks) / duration * 60.0
