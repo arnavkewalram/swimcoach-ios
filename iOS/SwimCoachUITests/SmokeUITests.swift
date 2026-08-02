@@ -13,7 +13,7 @@ final class SmokeUITests: XCTestCase {
     private func launch(_ args: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         // UserDefaults launch-argument override skips onboarding
-        app.launchArguments = ["-hasSeenOnboarding", "YES"] + args
+        app.launchArguments = ["-hasSeenOnboarding", "YES", "-suppressWhatsNew"] + args
         app.launch()
         return app
     }

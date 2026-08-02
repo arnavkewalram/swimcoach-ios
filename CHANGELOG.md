@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.26.0] — 2026-08-02 — "News"
+
+### Added
+- **What's New sheet**: after an update, Home shows the release
+  highlights once — updates announce themselves instead of hiding behind
+  data-gated panels. Fresh installs get onboarding instead; automated UI
+  flows suppress it via a launch argument.
+
 ## [1.25.1] — 2026-08-02
 
 ### Fixed
