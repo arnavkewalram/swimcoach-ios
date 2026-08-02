@@ -154,3 +154,24 @@ class TestComputeMotionFeatures:
         result = compute_motion_features(kp, fps=30.0)
         assert result["stroke_count"] > 5
         assert result["kick_rate_per_min"] > 60
+
+
+class TestCrossPlatformSemantics:
+    """stroke_count must be the SUM of both arms' strokes (the watch
+    convention, matching the iOS app) — not the cycle average."""
+
+    def test_stroke_count_is_sum_of_both_arms(self):
+        import numpy as np
+        from features.motion import detect_stroke_cycles
+        from pose.keypoints import N_KEYPOINTS
+
+        fps = 30.0
+        t = np.arange(150) / fps
+        kp = np.full((150, N_KEYPOINTS, 3), 0.5, dtype=np.float32)
+        # Alternating arm oscillation at ~1 Hz each
+        kp[:, 5, 1] = 0.5 + 0.1 * np.sin(2 * np.pi * 1.0 * t)
+        kp[:, 6, 1] = 0.5 + 0.1 * np.sin(2 * np.pi * 1.0 * t + np.pi)
+        result = detect_stroke_cycles(kp, fps)
+        expected = len(result["left_stroke_frames"]) + len(result["right_stroke_frames"])
+        assert result["stroke_count"] == expected
+        assert result["stroke_count"] > 0

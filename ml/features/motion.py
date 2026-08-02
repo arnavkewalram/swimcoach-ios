@@ -88,7 +88,8 @@ def detect_stroke_cycles(
           - 'right_stroke_frames': list of frame indices
           - 'left_stroke_rate_spm': strokes per minute (float)
           - 'right_stroke_rate_spm': strokes per minute (float)
-          - 'stroke_count': total strokes (mean of left + right)
+          - 'stroke_count': total arm strokes (left + right, the watch
+            convention — matches the iOS app)
     """
     lw = _kp_idx("left_wrist")
     rw = _kp_idx("right_wrist")
@@ -106,14 +107,14 @@ def detect_stroke_cycles(
     left_spm = (len(left_peaks) / duration_s) * 60.0 if duration_s > 0 else 0.0
     right_spm = (len(right_peaks) / duration_s) * 60.0 if duration_s > 0 else 0.0
 
-    avg_count = (len(left_peaks) + len(right_peaks)) / 2.0
+    total_count = len(left_peaks) + len(right_peaks)
 
     return {
         "left_stroke_frames": left_peaks.tolist(),
         "right_stroke_frames": right_peaks.tolist(),
         "left_stroke_rate_spm": round(left_spm, 1),
         "right_stroke_rate_spm": round(right_spm, 1),
-        "stroke_count": round(avg_count, 1),
+        "stroke_count": total_count,
     }
 
 

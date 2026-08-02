@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.19.1] — 2026-08-01
+
+### Fixed
+- **Stroke and kick metrics now agree across platforms.** The Python
+  pipeline reported stroke cycles (average of both arms) while the app
+  reported arm strokes (sum) — a ~2× disagreement on the headline number.
+  Both now use the watch convention (sum). iOS peak spacing is fps-aware
+  (0.4 s strokes / 0.2 s kicks, matching Python) instead of a fixed frame
+  count, and synchronized ankle peaks count as one kick on both sides.
+
 ## [1.19.0] — 2026-08-01 — "Steady"
 
 ### Changed
