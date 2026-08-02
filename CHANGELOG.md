@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.22.1] — 2026-08-02
+
+### Changed
+- Onboarding caught up with the product: the welcome page mentions Photos
+  import, the setup tips point at the level line, and the closing page
+  now promises what the app actually delivers — faults on your video,
+  the drill library, trends, goals, and focus.
+
 ## [1.22.0] — 2026-08-02 — "Import"
 
 ### Added
