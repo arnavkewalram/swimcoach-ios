@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.9.0] — 2026-08-01 — "Goal"
+
+### Added
+- **Weekly session goal**: set a target from the training log panel (tap
+  SET A WEEKLY GOAL, or the tick row once set) via an editorial stepper
+  sheet. The panel shows progress ticks, an overflow count when you swim
+  past the goal, and a pine-green GOAL MET chip on completion.
+
 ## [1.8.0] — 2026-08-01 — "Drills"
 
 ### Added

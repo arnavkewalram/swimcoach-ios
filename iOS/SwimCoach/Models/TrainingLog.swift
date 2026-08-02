@@ -45,4 +45,21 @@ enum TrainingLog {
     static func recentScores(from entries: [Entry], limit: Int = 10) -> [Int] {
         Array(entries.sorted { $0.date < $1.date }.suffix(limit).map(\.score))
     }
+
+    struct GoalTicks: Equatable {
+        let filled: Int     // sessions done, capped at the goal
+        let total: Int      // the goal itself
+        let overflow: Int   // sessions beyond the goal
+        var isMet: Bool { filled >= total }
+    }
+
+    /// Tick-row state for a weekly session goal. Nil when no goal is set
+    /// (goal <= 0) — the UI shows the set-goal affordance instead.
+    static func goalTicks(sessionCount: Int, goal: Int) -> GoalTicks? {
+        guard goal > 0 else { return nil }
+        let count = max(0, sessionCount)
+        return GoalTicks(filled: min(count, goal),
+                         total: goal,
+                         overflow: max(0, count - goal))
+    }
 }

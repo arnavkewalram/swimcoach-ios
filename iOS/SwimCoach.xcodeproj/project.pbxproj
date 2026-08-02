@@ -61,6 +61,7 @@
 		DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF341904BDF6F1F4F63756E /* SessionComparison.swift */; };
 		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
+		F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +116,7 @@
 		AC20876C011158E31B687438 /* SkeletonOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonOverlayView.swift; sourceTree = "<group>"; };
 		AD161114DD1D2892C9515515 /* IssueWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindowTests.swift; sourceTree = "<group>"; };
 		B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillCatalogTests.swift; sourceTree = "<group>"; };
+		B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyGoalSheet.swift; sourceTree = "<group>"; };
 		B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
 		B9D9E931537A6F52120C9319 /* IssueWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindow.swift; sourceTree = "<group>"; };
 		BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractor.swift; sourceTree = "<group>"; };
@@ -150,6 +152,7 @@
 			children = (
 				2D8EDC90DCD052513240CF58 /* HomeView.swift */,
 				9A59A49638F1335B4DE0B04D /* Sparkline.swift */,
+				B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -513,6 +516,7 @@
 				7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */,
 				891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */,
 				4769E21B8981C4D77BF4D01B /* TrainingLog.swift in Sources */,
+				F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */,
 				72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -563,7 +567,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -577,7 +581,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -693,7 +697,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -713,7 +717,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.9.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
