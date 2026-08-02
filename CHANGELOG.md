@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.18.1] — 2026-08-01
+
+### Docs
+- Public-facing README (the repo went public with none): product
+  overview with screenshots, monorepo layout, quickstart, release-cycle
+  summary, font license attribution.
+- CLAUDE.md now lists every DEBUG launch argument (the doc had fallen
+  eight arguments behind the code).
+
 ## [1.18.0] — 2026-08-01 — "Shade"
 
 ### Added
