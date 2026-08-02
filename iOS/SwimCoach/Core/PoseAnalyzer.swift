@@ -9,10 +9,17 @@ struct PoseAnalyzer {
 
     static let sampleRate = 3   // process every 3rd frame
 
+    /// A pose observation paired with its source-video presentation time,
+    /// so playback overlays can sync the skeleton to the footage.
+    struct TimedObservation: @unchecked Sendable {
+        let observation: VNHumanBodyPoseObservation
+        let seconds: Double
+    }
+
     static func analyze(
         videoURL: URL,
         onProgress: @escaping @Sendable (Double) -> Void
-    ) async throws -> (observations: [VNHumanBodyPoseObservation], fps: Double, sampledFrames: Int) {
+    ) async throws -> (observations: [TimedObservation], fps: Double, sampledFrames: Int) {
         // Cooperative cancellation: the synchronous frame loop polls this flag
         // each frame, so cancelling the wrapping Task (e.g. the user backs out
         // of AnalyzingView) stops the work within one frame instead of running
@@ -49,7 +56,7 @@ struct PoseAnalyzer {
         videoURL: URL,
         cancelled: CancellationFlag,
         onProgress: @escaping @Sendable (Double) -> Void
-    ) throws -> (observations: [VNHumanBodyPoseObservation], fps: Double, sampledFrames: Int) {
+    ) throws -> (observations: [TimedObservation], fps: Double, sampledFrames: Int) {
 
         let asset  = AVURLAsset(url: videoURL)
         let tracks = asset.tracks(withMediaType: .video)
@@ -76,7 +83,7 @@ struct PoseAnalyzer {
         // Real pose extraction requires a physical device. The simulator path
         // fails gracefully into the "No horizontal swimmer detected" message.
         let request = VNDetectHumanBodyPoseRequest()
-        var observations = [VNHumanBodyPoseObservation]()
+        var observations = [TimedObservation]()
         var frameIndex = 0
         var sampledFrameCount = 0
         var visionErrorCount = 0
@@ -111,7 +118,11 @@ struct PoseAnalyzer {
                         // poolside spectators. When hips aren't detected we assume the shoulder
                         // detection belongs to the swimmer (the only person in a practice video).
                         if isHorizontalSwimmerOrUnknown(best) {
-                            observations.append(best)
+                            let pts = CMSampleBufferGetPresentationTimeStamp(sample)
+                            observations.append(TimedObservation(
+                                observation: best,
+                                seconds: pts.isValid ? CMTimeGetSeconds(pts) : Double(frameIndex) / Double(max(nominalFPS, 1))
+                            ))
                         }
                     }
                 }

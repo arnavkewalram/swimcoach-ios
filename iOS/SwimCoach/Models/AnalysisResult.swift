@@ -17,6 +17,9 @@ struct AnalysisResult: Hashable, Codable, Sendable {
     /// resource name for demo sessions). Optional — sessions saved before
     /// video playback existed have none.
     var videoFileName: String? = nil
+    /// Sampled pose keypoints for skeleton playback overlay. Optional —
+    /// older sessions and demo sessions have none.
+    var keypointFrames: [KeypointFrame]? = nil
 
     var detectionRate: Double {
         sampledFrames > 0 ? Double(frameCount) / Double(sampledFrames) : 1.0
@@ -94,7 +97,7 @@ extension AnalysisResult {
     enum CodingKeys: String, CodingKey {
         case id, score, grade, strokeCount, kickRatePerMin, strokeAsymmetry
         case frameCount, sampledFrames, fps, issues, tips, analyzedAt
-        case videoFileName
+        case videoFileName, keypointFrames
     }
 
     init(from decoder: Decoder) throws {
@@ -112,6 +115,7 @@ extension AnalysisResult {
         tips = try c.decode([String].self, forKey: .tips)
         analyzedAt = try c.decode(Date.self, forKey: .analyzedAt)
         videoFileName = try c.decodeIfPresent(String.self, forKey: .videoFileName)
+        keypointFrames = try c.decodeIfPresent([KeypointFrame].self, forKey: .keypointFrames)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -129,5 +133,6 @@ extension AnalysisResult {
         try c.encode(tips, forKey: .tips)
         try c.encode(analyzedAt, forKey: .analyzedAt)
         try c.encodeIfPresent(videoFileName, forKey: .videoFileName)
+        try c.encodeIfPresent(keypointFrames, forKey: .keypointFrames)
     }
 }
