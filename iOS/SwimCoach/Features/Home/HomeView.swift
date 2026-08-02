@@ -157,6 +157,21 @@ struct HomeView: View {
                         .padding(.top, 24)
                     #endif
 
+                    Button {
+                        router.push(.about)
+                    } label: {
+                        Text("ABOUT SWIMCOACH")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.4)
+                            .foregroundStyle(DS.inkTertiary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 10)
+                    .accessibilityLabel("About SwimCoach")
+
                     Spacer(minLength: 24)
                 }
                 .padding(.horizontal, 24)
@@ -188,6 +203,8 @@ struct HomeView: View {
                                          later: AnalysisResult.demo))
                 } else if args.contains("-openHistory") {
                     router.push(.history)
+                } else if args.contains("-openAbout") {
+                    router.push(.about)
                 } else if let i = args.firstIndex(of: "-openDrills") {
                     let issue = i + 1 < args.count && !args[i + 1].hasPrefix("-")
                         ? args[i + 1] : nil

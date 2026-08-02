@@ -64,6 +64,20 @@ final class TrainingLogTests: XCTestCase {
         XCTAssertEqual(scores, [15, 20, 25, 30, 35, 40, 45, 50, 55, 60])
     }
 
+    func testIsNewBest() {
+        XCTAssertFalse(TrainingLog.isNewBest(score: 90, priorBest: nil),
+                       "first session ever has nothing to beat")
+        XCTAssertFalse(TrainingLog.isNewBest(score: 70, priorBest: 70), "tie is not a new best")
+        XCTAssertFalse(TrainingLog.isNewBest(score: 65, priorBest: 70))
+        XCTAssertTrue(TrainingLog.isNewBest(score: 71, priorBest: 70))
+    }
+
+    func testFontLicenseIsBundled() {
+        // The OFL obliges shipping the license with the fonts; AboutView
+        // renders it from the bundle.
+        XCTAssertNotNil(Bundle.main.url(forResource: "OFL", withExtension: "txt"))
+    }
+
     func testGoalTicksNilWhenNoGoal() {
         XCTAssertNil(TrainingLog.goalTicks(sessionCount: 5, goal: 0))
         XCTAssertNil(TrainingLog.goalTicks(sessionCount: 5, goal: -1))

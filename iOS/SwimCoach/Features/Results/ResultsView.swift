@@ -13,6 +13,7 @@ struct ResultsView: View {
     // Saved-state read from SwiftData itself — the footer never claims a save
     // that didn't happen.
     @Query private var savedSessions: [SwimSession]
+    @Query private var allSessions: [SwimSession]
 
     init(result: AnalysisResult) {
         self.result = result
@@ -21,6 +22,11 @@ struct ResultsView: View {
     }
 
     private var isSaved: Bool { !savedSessions.isEmpty }
+
+    private var isNewBest: Bool {
+        let prior = allSessions.filter { $0.id != result.id }.map(\.score).max()
+        return TrainingLog.isNewBest(score: result.score, priorBest: prior)
+    }
 
     @State private var scrollProxy: ScrollViewProxy? = nil
     @State private var reportImage: UIImage? = nil
@@ -354,13 +360,32 @@ struct ResultsView: View {
             .clipShape(Capsule())
             .padding(.bottom, 12)
 
-            Text(verdict.uppercased())
-                .font(.grotesk(13, .medium))
-                .tracking(1.8)
-                .foregroundStyle(gradeColor)
+            HStack {
+                Text(verdict.uppercased())
+                    .font(.grotesk(13, .medium))
+                    .tracking(1.8)
+                    .foregroundStyle(gradeColor)
+                Spacer()
+                if isNewBest {
+                    HStack(spacing: 5) {
+                        Image(systemName: "arrow.up.to.line")
+                            .font(.system(size: 9, weight: .semibold))
+                            .accessibilityHidden(true)
+                        Text("NEW BEST")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.4)
+                    }
+                    .foregroundStyle(DS.severityMinor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .overlay(RoundedRectangle(cornerRadius: 5)
+                        .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
+                }
+            }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Technique score \(result.score) out of 100, grade \(result.grade). \(verdict).")
+        .accessibilityLabel("Technique score \(result.score) out of 100, grade \(result.grade). \(verdict)." +
+                            (isNewBest ? " New personal best." : ""))
     }
 
     // MARK: - Quality note

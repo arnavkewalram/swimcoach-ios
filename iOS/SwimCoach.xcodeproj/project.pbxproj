@@ -14,6 +14,7 @@
 		156576D51755F50A71F0E08E /* SpaceGrotesk-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3A9CE282550C08C6A515A0E9 /* SpaceGrotesk-Medium.ttf */; };
 		15A029877A18065E055732B8 /* FeedbackEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */; };
 		1761B3D81C1BE2041A855BFB /* SwimSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C6D30A519EEDA7A9575174 /* SwimSession.swift */; };
+		1E33B457C06BD3FCBF26C983 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A49C168A6001543BF9CD78C /* AboutView.swift */; };
 		1FC82D44803A100487309E60 /* SpaceGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BF7185FE87172D94D300296 /* SpaceGrotesk-Regular.ttf */; };
 		2815930944855657E8A7EB06 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8EDC90DCD052513240CF58 /* HomeView.swift */; };
 		2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */; };
@@ -75,6 +76,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0A49C168A6001543BF9CD78C /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		14AC560CE3C7B75914B49079 /* AnalyzingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzingView.swift; sourceTree = "<group>"; };
 		1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngineTests.swift; sourceTree = "<group>"; };
@@ -239,6 +241,14 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		7883FC20168C3697055A17AB /* About */ = {
+			isa = PBXGroup;
+			children = (
+				0A49C168A6001543BF9CD78C /* AboutView.swift */,
+			);
+			path = About;
+			sourceTree = "<group>";
+		};
 		93DC94BA38AC773578EAE7BD /* Camera */ = {
 			isa = PBXGroup;
 			children = (
@@ -277,6 +287,7 @@
 		C87DA6BF23BA100226A2DB28 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				7883FC20168C3697055A17AB /* About */,
 				DDDAB9A82EC9DE971ED49060 /* Analyzing */,
 				93DC94BA38AC773578EAE7BD /* Camera */,
 				CBB70D53DF69456A8EE0BDD4 /* Compare */,
@@ -482,6 +493,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E33B457C06BD3FCBF26C983 /* AboutView.swift in Sources */,
 				576F12DE83ED304722849181 /* AnalysisResult.swift in Sources */,
 				78B84EAA41F09EB2FF2417A3 /* AnalyzingView.swift in Sources */,
 				A83D57DAC1237DD9C5EC6ABC /* AppLog.swift in Sources */,
@@ -567,7 +579,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -581,7 +593,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -697,7 +709,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -717,7 +729,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.10.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
