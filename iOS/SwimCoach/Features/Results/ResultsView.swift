@@ -105,6 +105,13 @@ struct ResultsView: View {
                                         .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                                         .tracking(1.2)
                                 } else {
+                                    if !saved.swimmer.isEmpty {
+                                        Text(saved.swimmer.uppercased())
+                                            .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                                            .tracking(1.0)
+                                            .foregroundStyle(DS.accent)
+                                            .fixedSize()
+                                    }
                                     Text(saved.name.isEmpty ? "ADD A NOTE" : saved.name)
                                         .font(.grotesk(13, .medium))
                                         .lineLimit(1)
