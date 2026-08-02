@@ -59,8 +59,12 @@ cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
 - mediapipe must stay `<0.10.30` (legacy `mp.solutions` API removed after).
 - Vision pose extraction DOES NOT WORK in the iOS simulator (error 9 every
   frame; no workaround). Camera-path testing needs a physical device.
-  Simulator testing uses `-demoResults` / `-analyzeDocs <file>` launch args
-  (DEBUG) and the unit/parity tests.
+  Simulator testing uses DEBUG launch args and the unit/parity tests.
+  Launch args: `-demoResults` (unsaved demo Results), `-demoResultsSaved`
+  (seeds the store, opens a saved session — label/compare/NEW BEST rows),
+  `-demoCompare`, `-demoReport`, `-openHistory`, `-openDrills [issue]`,
+  `-openAbout`, `-seedTrainingLog` (deterministic 3-week fixture; wipes
+  the store), `-analyzeDocs <file>` (file from the app's Documents dir).
 - `iOS/SwimCoach/Resources/swim_test.mp4` is a synthetic cartoon — it
   validates plumbing, not model accuracy.
 - The CLI gate (`ml/analysis/gating.py`) mirrors iOS `PoseAnalyzer` filters;
