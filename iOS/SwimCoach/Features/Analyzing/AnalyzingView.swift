@@ -383,7 +383,8 @@ struct AnalyzingView: View {
             issues: sorted,
             tips: sorted.prefix(3).map(\.tip),
             analyzedAt: Date(),
-            videoFileName: videoURL.lastPathComponent   // bundled demo video
+            videoFileName: videoURL.lastPathComponent,   // bundled demo video
+            durationSeconds: 14
         )
 
         // Step 3 — AI coaching tips
@@ -397,7 +398,8 @@ struct AnalyzingView: View {
                 sampledFrames: result.sampledFrames,
                 fps: result.fps, issues: result.issues, tips: aiTips,
                 analyzedAt: result.analyzedAt,
-                videoFileName: result.videoFileName
+                videoFileName: result.videoFileName,
+                durationSeconds: result.durationSeconds
             )
         }
 
