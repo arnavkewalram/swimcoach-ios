@@ -11,8 +11,8 @@ settings:
   IPHONEOS_DEPLOYMENT_TARGET: "17.0"
   DEVELOPMENT_TEAM: 4VH58A4KM6
   CODE_SIGN_STYLE: Automatic
-  MARKETING_VERSION: 1.22.2
-  CURRENT_PROJECT_VERSION: 31
+  MARKETING_VERSION: 1.23.0
+  CURRENT_PROJECT_VERSION: 32
 
 targets:
   SwimCoach:
@@ -59,6 +59,19 @@ targets:
       TARGETED_DEVICE_FAMILY: "1"
       SWIFT_VERSION: "5"
 
+  SwimCoachUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: SwimCoachUITests
+    dependencies:
+      - target: SwimCoach
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.arnavkewalram.SwimCoachUITests
+      SWIFT_VERSION: "5"
+      GENERATE_INFOPLIST_FILE: YES
+      TEST_TARGET_NAME: SwimCoach
+
   SwimCoachTests:
     type: bundle.unit-test
     platform: iOS
@@ -74,3 +87,19 @@ targets:
       GENERATE_INFOPLIST_FILE: YES
       TEST_HOST: "$(BUILT_PRODUCTS_DIR)/SwimCoach.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SwimCoach"
       BUNDLE_LOADER: "$(TEST_HOST)"
+
+schemes:
+  SwimCoach:
+    build:
+      targets:
+        SwimCoach: all
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - SwimCoachTests
+        - SwimCoachUITests
+    run:
+      config: Debug
+    archive:
+      config: Release
