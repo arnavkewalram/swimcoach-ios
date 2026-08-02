@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.34.0] — 2026-08-02 — "Filtered"
+
+### Changed
+- History's charts follow the swimmer filter: selecting a swimmer scopes
+  the summary strip, consistency, streak, score trend, and common issues
+  to them (grade and search filters still narrow only the list). The
+  swimmer chips moved above the summary strip to reflect their scope.
+
 ## [1.33.0] — 2026-08-02 — "Lanes"
 
 ### Added
