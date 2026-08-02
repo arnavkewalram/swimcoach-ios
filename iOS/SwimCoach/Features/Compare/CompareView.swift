@@ -62,6 +62,9 @@ struct CompareView: View {
 
                     // ── Issues ────────────────────────────────────────────
                     SectionHeader(title: "Issues")
+            Text("Numbers show detection strength (% of model confidence)")
+                .font(.caption)
+                .foregroundStyle(DS.inkTertiary)
                         .padding(.bottom, 10)
                     if deltas.isEmpty {
                         Text("No issues detected in either session.")

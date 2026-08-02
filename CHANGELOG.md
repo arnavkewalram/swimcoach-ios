@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.17.0] — 2026-08-01 — "Versus"
+
+### Added
+- **Compare from Results**: saved sessions with history get a COMPARE TO
+  PREVIOUS SESSION row under the score panel — one tap instead of the
+  two-tap Compare picker in History.
+
+### Changed
+- Compare's Issues section now explains its numbers ("detection
+  strength, % of model confidence").
+- DEBUG `-demoResultsSaved` launch argument seeds and opens a saved
+  session for screenshot automation.
+
 ## [1.16.0] — 2026-08-01 — "Faults"
 
 ### Added

@@ -32,6 +32,14 @@ struct ResultsView: View {
         return scores.count >= 2 ? scores : nil
     }
 
+    /// The chronologically previous saved session, decoded — compare target.
+    private var previousResult: AnalysisResult? {
+        allSessions
+            .filter { $0.id != result.id && $0.analyzedAt < result.analyzedAt }
+            .max(by: { $0.analyzedAt < $1.analyzedAt })?
+            .decoded()
+    }
+
     private var isNewBest: Bool {
         let prior = allSessions.filter { $0.id != result.id }.map(\.score).max()
         return TrainingLog.isNewBest(score: result.score, priorBest: prior)
@@ -117,8 +125,36 @@ struct ResultsView: View {
                         .accessibilityLabel(saved.name.isEmpty
                                             ? "Name this session"
                                             : "Session name: \(saved.name). Edit name and notes.")
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 10)
                         .staggerIn(sectionsVisible, delay: 0.04)
+                    }
+
+                    // ── Compare to previous (saved sessions with history) ──
+                    if isSaved, let previous = previousResult {
+                        Button {
+                            router.push(.compare(earlier: previous, later: result))
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.left.arrow.right")
+                                    .font(.caption2.weight(.semibold))
+                                    .accessibilityHidden(true)
+                                Text("COMPARE TO PREVIOUS SESSION")
+                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                    .tracking(1.2)
+                                Spacer()
+                                Image(systemName: "arrow.right")
+                                    .font(.caption2.weight(.semibold))
+                                    .accessibilityHidden(true)
+                            }
+                            .foregroundStyle(DS.accent)
+                            .padding(.vertical, 10)
+                            .overlay(alignment: .bottom) { Rectangle().fill(DS.border).frame(height: 1) }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Compare this session to the previous one")
+                        .padding(.bottom, 16)
+                        .staggerIn(sectionsVisible, delay: 0.06)
                     }
 
                     // ── Quality notes ─────────────────────────────────────

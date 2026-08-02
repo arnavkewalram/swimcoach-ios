@@ -194,6 +194,16 @@ struct HomeView: View {
                 seedTrainingLog()
             }
             if router.path.isEmpty {
+                if args.contains("-demoResultsSaved") {
+                    seedTrainingLog()
+                    // Fetch fresh — the @Query snapshot predates the seed
+                    if let latest = try? modelContext.fetch(
+                        FetchDescriptor<SwimSession>(
+                            sortBy: [SortDescriptor(\.analyzedAt, order: .reverse)])).first,
+                       let decoded = latest.decoded() {
+                        router.push(.results(decoded))
+                    }
+                }
                 if args.contains("-demoResults") {
                     router.push(.results(AnalysisResult.demo))
                 } else if args.contains("-demoReport") {
