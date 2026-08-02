@@ -9,6 +9,7 @@ struct HomeView: View {
     @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
+    @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
     @State private var showWhatsNew = false
     @State private var showPhotoPicker = false
     @State private var photoItem: PhotosPickerItem? = nil
@@ -26,11 +27,23 @@ struct HomeView: View {
         }
     }
 
+    /// Sessions scoped to the active swimmer ("" = everyone). Falls back
+    /// to everyone when the stored swimmer no longer has sessions.
+    private var scopedSessions: [SwimSession] {
+        guard !activeSwimmer.isEmpty else { return Array(sessions) }
+        let scoped = sessions.filter { $0.swimmer == activeSwimmer }
+        return scoped.isEmpty ? Array(sessions) : scoped
+    }
+
+    private var presentSwimmers: [String] {
+        Array(Set(sessions.map(\.swimmer).filter { !$0.isEmpty })).sorted()
+    }
+
     private var focusFault: (name: String, occurrences: Int, window: Int)? {
         // Chronological issue-name lists from stored metadata (no decode)
-        let chronological = sessions.reversed().map(\.issueNames)
+        let chronological = scopedSessions.reversed().map(\.issueNames)
         guard let name = FocusFault.pick(recentIssueNames: chronological) else { return nil }
-        let window = min(FocusFault.window, sessions.count)
+        let window = min(FocusFault.window, scopedSessions.count)
         return (name, FocusFault.occurrences(of: name, in: chronological), window)
     }
 
@@ -70,13 +83,26 @@ struct HomeView: View {
                     .padding(.bottom, 18)
 
                     LaneRule()
-                        .padding(.bottom, 22)
+                        .padding(.bottom, presentSwimmers.count > 1 ? 12 : 22)
+
+                    // ── Swimmer scope (appears once >1 swimmer exists) ────
+                    if presentSwimmers.count > 1 {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                swimmerScopeChip(label: "Everyone", value: "")
+                                ForEach(presentSwimmers, id: \.self) { swimmer in
+                                    swimmerScopeChip(label: swimmer, value: swimmer)
+                                }
+                            }
+                        }
+                        .padding(.bottom, 20)
+                    }
 
                     // ── Last session / first run ──────────────────────────
-                    if let last = sessions.first {
+                    if let last = scopedSessions.first {
                         LastSessionCard(
                             session: last,
-                            previousSession: sessions.count > 1 ? sessions[1] : nil
+                            previousSession: scopedSessions.count > 1 ? scopedSessions[1] : nil
                         ) {
                             if let result = last.decoded() {
                                 router.push(.results(result))
@@ -89,14 +115,14 @@ struct HomeView: View {
                     }
 
                     // ── Record strip ──────────────────────────────────────
-                    if !sessions.isEmpty {
-                        RecordStrip(sessions: sessions)
+                    if !scopedSessions.isEmpty {
+                        RecordStrip(sessions: scopedSessions)
                             .padding(.bottom, 24)
                     }
 
                     // ── Training log (needs ≥2 sessions to draw a trend) ──
-                    if sessions.count >= 2 {
-                        TrainingLogPanel(sessions: sessions)
+                    if scopedSessions.count >= 2 {
+                        TrainingLogPanel(sessions: scopedSessions)
                             .padding(.bottom, 24)
                     }
 
@@ -312,6 +338,25 @@ struct HomeView: View {
             }
             #endif
         }
+    }
+
+    private func swimmerScopeChip(label: String, value: String) -> some View {
+        let isOn = activeSwimmer == value
+        return Button {
+            activeSwimmer = value
+        } label: {
+            Text(label.uppercased())
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                .tracking(1.0)
+                .foregroundStyle(isOn ? .white : DS.accent)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(isOn ? DS.accent : .clear)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(DS.accent.opacity(isOn ? 0 : 0.5), lineWidth: 1))
+        }
+        .accessibilityLabel("Show \(label)'s training")
+        .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
     // MARK: - Dev tools

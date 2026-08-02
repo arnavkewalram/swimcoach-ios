@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.33.0] — 2026-08-02 — "Lanes"
+
+### Added
+- **Per-swimmer Home**: when more than one swimmer is tagged, a scope
+  row (EVERYONE / each swimmer) under the masthead filters everything on
+  Home — last session, records, training log, weekly goal, and focus —
+  to that swimmer. The choice persists between launches and falls back
+  to Everyone if a swimmer's sessions disappear.
+
 ## [1.32.0] — 2026-08-02 — "Squad"
 
 ### Added

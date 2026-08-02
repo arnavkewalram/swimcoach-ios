@@ -23,6 +23,23 @@ final class SwimSessionTests: XCTestCase {
     }
 
     @MainActor
+    func testSwimmerTagRoundTripsThroughStore() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: SwimSession.self, configurations: config)
+        let context = container.mainContext
+
+        let mine = SwimSession(result: .demo)
+        mine.swimmer = "Maya"
+        context.insert(mine)
+        context.insert(SwimSession(result: .demo))   // untagged
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<SwimSession>())
+        XCTAssertEqual(all.filter { $0.swimmer == "Maya" }.count, 1)
+        XCTAssertEqual(all.filter { $0.swimmer.isEmpty }.count, 1)
+    }
+
+    @MainActor
     func testNotesDefaultsEmptyForNewSessions() throws {
         let session = SwimSession(result: .demo)
         XCTAssertEqual(session.notes, "")
