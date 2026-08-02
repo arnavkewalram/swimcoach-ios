@@ -5,6 +5,10 @@ import SwiftUI
 /// coach or teammate. Render via `ReportCardView.render(result:)`.
 struct ReportCardView: View {
     let result: AnalysisResult
+    /// Chronological recent scores ending with this session — draws the
+    /// PROGRESS sparkline when there are at least two points.
+    var trendScores: [Int]? = nil
+    var newBest: Bool = false
 
     static let size = CGSize(width: 540, height: 675)   // rendered @2x → 1080×1350
 
@@ -40,6 +44,17 @@ struct ReportCardView: View {
                 Text(result.grade)
                     .font(.grotesk(30, .bold))
                     .foregroundStyle(DS.gradeColor(result.grade))
+                if newBest {
+                    Text("NEW BEST")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                        .tracking(1.4)
+                        .foregroundStyle(DS.severityMinor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .overlay(RoundedRectangle(cornerRadius: 5)
+                            .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
+                        .offset(y: -6)
+                }
             }
             .padding(.bottom, 16)
 
@@ -50,6 +65,25 @@ struct ReportCardView: View {
                 metric(String(format: "%.0f%%", result.strokeAsymmetry * 100), "ASYMMETRY")
             }
             .padding(.bottom, 22)
+
+            // Progress sparkline (needs >= 2 points)
+            if let trend = trendScores, trend.count >= 2 {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("PROGRESS")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 11))
+                        .tracking(1.8)
+                        .foregroundStyle(DS.inkTertiary)
+                    Spacer()
+                    Text("LAST \(trend.count) SESSIONS")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.inkTertiary)
+                }
+                .padding(.bottom, 6)
+                Sparkline(values: trend)
+                    .frame(height: 36)
+                    .padding(.bottom, 18)
+            }
 
             laneRule
                 .padding(.bottom, 14)
@@ -134,8 +168,11 @@ struct ReportCardView: View {
 
     /// Render the report card to a shareable image (2x scale → 1080×1350).
     @MainActor
-    static func render(result: AnalysisResult) -> UIImage? {
-        let renderer = ImageRenderer(content: ReportCardView(result: result))
+    static func render(result: AnalysisResult,
+                       trendScores: [Int]? = nil,
+                       newBest: Bool = false) -> UIImage? {
+        let renderer = ImageRenderer(content: ReportCardView(
+            result: result, trendScores: trendScores, newBest: newBest))
         renderer.scale = 2
         return renderer.uiImage
     }

@@ -23,6 +23,15 @@ struct ResultsView: View {
 
     private var isSaved: Bool { !savedSessions.isEmpty }
 
+    /// Chronological recent scores for the report sparkline, ending with
+    /// this session (appended manually when it isn't in the store yet).
+    private var reportTrendScores: [Int]? {
+        var scores = TrainingLog.recentScores(
+            from: allSessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) })
+        if savedSessions.isEmpty { scores = Array((scores + [result.score]).suffix(10)) }
+        return scores.count >= 2 ? scores : nil
+    }
+
     private var isNewBest: Bool {
         let prior = allSessions.filter { $0.id != result.id }.map(\.score).max()
         return TrainingLog.isNewBest(score: result.score, priorBest: prior)
@@ -215,7 +224,8 @@ struct ResultsView: View {
             withAnimation(.easeOut(duration: 1.0)) { animatedScore = Double(result.score) }
             sectionsVisible = true
             if reportImage == nil {
-                reportImage = ReportCardView.render(result: result)
+                reportImage = ReportCardView.render(
+                    result: result, trendScores: reportTrendScores, newBest: isNewBest)
             }
             if player == nil, let url = result.videoURL {
                 let p = AVPlayer(url: url)
