@@ -3,6 +3,18 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.8.0] — 2026-08-01 — "Drills"
+
+### Added
+- **Drill library**: ten authored freestyle drills (goal, numbered steps,
+  suggested dose) grouped by focus area — Arms & catch, Body line, Kick &
+  timing — as editorial index cards. Every fault the model can detect maps
+  to at least one drill (test-enforced).
+- Entry points: a Drill library row on Home, and a DRILLS link inside each
+  expanded issue on Results that opens the library scrolled to the drills
+  fixing that issue, outlined in lane blue.
+- DEBUG `-openDrills [issue]` launch argument for screenshot automation.
+
 ## [1.7.0] — 2026-08-01 — "Trend"
 
 ### Added
