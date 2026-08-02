@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.27.0] — 2026-08-02 — "Streak"
+
+### Added
+- **Weekly streak**: consecutive training weeks shown as a pine-green
+  chip on the History consistency strip (from two weeks up). A quiet
+  current week doesn't break a run that was alive last week — the streak
+  holds until a week actually ends empty.
+
 ## [1.26.0] — 2026-08-02 — "News"
 
 ### Added
