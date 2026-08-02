@@ -300,11 +300,11 @@ struct ResultsView: View {
             // the label break mid-word.
             ViewThatFits(in: .horizontal) {
                 HStack {
-                    SectionHeader(title: "Session video")
+                    SectionHeader(title: videoSectionTitle)
                     videoControls
                 }
                 VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(title: "Session video")
+                    SectionHeader(title: videoSectionTitle)
                     HStack { videoControls }
                 }
             }
@@ -339,6 +339,10 @@ struct ResultsView: View {
 
     private var hasSkeletonData: Bool {
         !(result.keypointFrames?.isEmpty ?? true)
+    }
+
+    private var videoSectionTitle: String {
+        result.durationText.map { "Video · \($0)" } ?? "Session video"
     }
 
     @ViewBuilder

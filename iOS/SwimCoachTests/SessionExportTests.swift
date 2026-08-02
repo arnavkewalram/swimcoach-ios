@@ -82,6 +82,15 @@ final class SessionExportTests: XCTestCase {
         XCTAssertNil(bare.practice)
     }
 
+    func testDurationTextFormatsMinutesSeconds() {
+        XCTAssertEqual(AnalysisResult.demo.durationText, "1:00")   // 60 s fixture
+        var base = AnalysisResult.demo
+        base.durationSeconds = 95.4
+        XCTAssertEqual(base.durationText, "1:35")
+        base.durationSeconds = nil
+        XCTAssertNil(base.durationText)
+    }
+
     func testEmptyStoreStillEncodes() throws {
         let data = try SessionExport.archiveData(from: [])
         XCTAssertFalse(data.isEmpty)

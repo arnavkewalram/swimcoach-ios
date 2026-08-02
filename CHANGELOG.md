@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.31.0] — 2026-08-02 — "Clock"
+
+### Added
+- The analyzed clip's length now shows in the Results video header
+  ("VIDEO · 1:00"); legacy sessions without a stored duration keep the
+  plain header.
+
 ## [1.30.0] — 2026-08-02 — "Fresh"
 
 ### Added
