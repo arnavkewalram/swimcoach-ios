@@ -5,6 +5,7 @@ struct AnalyzingView: View {
     let videoURL: URL
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
 
     @State private var progress: Double = 0
     @State private var statusText = "Extracting pose keypoints…"
@@ -290,7 +291,9 @@ struct AnalyzingView: View {
             // so a failed save is shown honestly instead of a false checkmark)
             guard !Task.isCancelled else { return }
             await MainActor.run {
-                modelContext.insert(SwimSession(result: result))
+                let session = SwimSession(result: result)
+                session.swimmer = activeSwimmer
+                modelContext.insert(session)
                 do {
                     try modelContext.save()
                 } catch {
@@ -405,7 +408,9 @@ struct AnalyzingView: View {
 
         guard !Task.isCancelled else { return }
         await MainActor.run {
-            modelContext.insert(SwimSession(result: result))
+            let session = SwimSession(result: result)
+                session.swimmer = activeSwimmer
+                modelContext.insert(session)
             do {
                 try modelContext.save()
             } catch {

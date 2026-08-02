@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.35.0] — 2026-08-02 — "Inherit"
+
+### Added
+- New analyses are tagged with the active swimmer automatically — the
+  Home scope picker now also decides who new sessions belong to (still
+  editable per session). Results shows the swimmer beside the session
+  name.
+
 ## [1.34.0] — 2026-08-02 — "Filtered"
 
 ### Changed
