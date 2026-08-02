@@ -15,14 +15,22 @@ enum SessionExport {
         let issues: [String]
     }
 
+    struct ExportedPractice: Codable, Equatable {
+        let date: Date
+        let drill: String
+    }
+
     struct Archive: Codable, Equatable {
         let app: String
         let exportedAt: Date
         let sessions: [ExportedSession]
+        var practice: [ExportedPractice]? = nil
     }
 
     /// Chronological (oldest first) JSON archive of the training log.
-    static func archiveData(from sessions: [SwimSession], now: Date = Date()) throws -> Data {
+    static func archiveData(from sessions: [SwimSession],
+                            practice: [DrillPracticeEvent] = [],
+                            now: Date = Date()) throws -> Data {
         let exported = sessions
             .sorted { $0.analyzedAt < $1.analyzedAt }
             .map { s in
@@ -36,7 +44,11 @@ enum SessionExport {
                     kickRatePerMin: s.kickRatePerMin,
                     issues: s.issueNames)
             }
-        let archive = Archive(app: "SwimCoach", exportedAt: now, sessions: exported)
+        let exportedPractice = practice
+            .sorted { $0.date < $1.date }
+            .map { ExportedPractice(date: $0.date, drill: $0.drillID) }
+        let archive = Archive(app: "SwimCoach", exportedAt: now, sessions: exported,
+                              practice: exportedPractice.isEmpty ? nil : exportedPractice)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601

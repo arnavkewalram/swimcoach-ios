@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.29.1] — 2026-08-02
+
+### Fixed
+- Erase All Sessions now also clears drill-practice history, and the
+  training-log export includes it (a chronological `practice` list) —
+  YOUR DATA covers everything the app stores again.
+
 ## [1.29.0] — 2026-08-02 — "Polish"
 
 ### Changed
