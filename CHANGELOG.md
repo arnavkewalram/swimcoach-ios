@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.22.0] — 2026-08-02 — "Import"
+
+### Added
+- **Import from Photos**: an Import a video button under the record CTA
+  opens the photo library (videos only) and runs the picked clip through
+  the full analysis — most real swim footage is filmed by someone else
+  and arrives in Photos, and until now the app was record-only.
+- **Cancel during analysis**: a quiet CANCEL in the analyzing screen's
+  corner aborts the pipeline cleanly and returns Home.
+
 ## [1.21.0] — 2026-08-02 — "Archive"
 
 ### Added

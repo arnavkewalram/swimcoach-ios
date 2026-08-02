@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 import UniformTypeIdentifiers
 
 struct HomeView: View {
@@ -7,6 +8,9 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    @State private var showPhotoPicker = false
+    @State private var photoItem: PhotosPickerItem? = nil
+    @State private var isImporting = false
     #if DEBUG
     @State private var showFilePicker = false
     @State private var docsVideoURL: URL? = nil
@@ -118,6 +122,18 @@ struct HomeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .buttonStyle(ScaleButtonStyle())
+                    .padding(.bottom, 8)
+
+                    Button {
+                        showPhotoPicker = true
+                    } label: {
+                        SecondaryButtonLabel(
+                            title: isImporting ? "Importing…" : "Import a video",
+                            icon: "photo.on.rectangle")
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .disabled(isImporting)
+                    .accessibilityLabel("Import a swim video from your photo library")
                     .padding(.bottom, 4)
 
                     if !sessions.isEmpty {
@@ -195,6 +211,21 @@ struct HomeView: View {
                 .padding(.horizontal, 24)
                 .frame(minHeight: geo.size.height, alignment: .top)
             }
+            }
+        }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $photoItem, matching: .videos)
+        .onChange(of: photoItem) { _, item in
+            guard let item else { return }
+            isImporting = true
+            Task {
+                defer { isImporting = false; photoItem = nil }
+                do {
+                    if let video = try await item.loadTransferable(type: ImportedVideo.self) {
+                        router.push(.analyzing(video.url))
+                    }
+                } catch {
+                    AppLog.storage.error("Photo import failed: \(error.localizedDescription)")
+                }
             }
         }
         .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) { OnboardingView() }
@@ -350,6 +381,25 @@ struct HomeView: View {
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(DS.border, lineWidth: 1))
     }
     #endif
+}
+
+// MARK: - Photo-library video import
+
+/// Copies the picked video into tmp so the analysis pipeline gets a
+/// stable file URL that outlives the picker's security scope.
+struct ImportedVideo: Transferable {
+    let url: URL
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { video in
+            SentTransferredFile(video.url)
+        } importing: { received in
+            let dest = FileManager.default.temporaryDirectory
+                .appendingPathComponent("import-\(UUID().uuidString).mov")
+            try FileManager.default.copyItem(at: received.file, to: dest)
+            return ImportedVideo(url: dest)
+        }
+    }
 }
 
 // MARK: - Focus fault panel
