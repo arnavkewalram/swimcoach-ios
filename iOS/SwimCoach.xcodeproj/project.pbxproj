@@ -35,6 +35,7 @@
 		99FD6C30E05CF624EE90AE1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50E3FF3C10BF299B700EBF8A /* Assets.xcassets */; };
 		9AB3F3314B67D293DBB5D3F7 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */; };
 		A58B3D216C76EE2B7B9460C1 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7CDB20F3A4841EE3E9036C /* CameraManager.swift */; };
+		A83D57DAC1237DD9C5EC6ABC /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1962A1582111C7A9B84F96A3 /* AppLog.swift */; };
 		AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */; };
 		C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */; };
 		D457186B47170F1CE985F528 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7BECFC0E9326C22CD9437B /* CameraView.swift */; };
@@ -58,6 +59,7 @@
 		0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		14AC560CE3C7B75914B49079 /* AnalyzingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzingView.swift; sourceTree = "<group>"; };
 		1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngineTests.swift; sourceTree = "<group>"; };
+		1962A1582111C7A9B84F96A3 /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
 		1BF7185FE87172D94D300296 /* SpaceGrotesk-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Regular.ttf"; sourceTree = "<group>"; };
 		1D7CDB20F3A4841EE3E9036C /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 		250B5A246B05DC00B6BD27FA /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				1962A1582111C7A9B84F96A3 /* AppLog.swift */,
 				999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */,
 				730F3A8523C913A0E0248CDD /* CoachingService.swift */,
 				BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */,
@@ -402,6 +405,7 @@
 			files = (
 				576F12DE83ED304722849181 /* AnalysisResult.swift in Sources */,
 				78B84EAA41F09EB2FF2417A3 /* AnalyzingView.swift in Sources */,
+				A83D57DAC1237DD9C5EC6ABC /* AppLog.swift in Sources */,
 				310CB56C4250CC47283D5AD5 /* AppRouter.swift in Sources */,
 				D6C634BFF07A295BE4B5C063 /* BiomechanicsEngine.swift in Sources */,
 				A58B3D216C76EE2B7B9460C1 /* CameraManager.swift in Sources */,

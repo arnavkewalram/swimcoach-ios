@@ -19,15 +19,15 @@ from analysis.issues import TechniqueIssue
 # Default confidence threshold for flagging an issue
 DEFAULT_THRESHOLD = 0.45
 
-# The model is trained on 90-frame windows at 30 fps (3 s). Inference must
-# preserve that timebase: resample to 30 fps, slide 90-frame windows, and
-# average probabilities. Resampling a whole clip to 90 frames would
-# time-compress it and distort frequency-sensitive labels (kick rate).
-MODEL_FPS = 30.0
-WINDOW_LEN = 90
-WINDOW_STRIDE = 45
+# Windowing lives in ml/windowing.py (torch-free, CI-testable).
+from .windowing import (  # noqa: E402  (re-exported for compatibility)
+    MODEL_FPS, WINDOW_LEN, WINDOW_STRIDE,
+    prediction_windows as _prediction_windows,
+    resample_frames as _resample_frames,
+)
 
-# Weights path (auto-trained on first run if missing)
+# Weights path. Missing weights raise by default; auto-training is opt-in
+# via SWIM_TCN_AUTOTRAIN=1 (a server must never train inside a request).
 _WEIGHTS_PATH = Path(__file__).parent / "swim_tcn.pt"
 
 # Severity mapping by label
@@ -66,26 +66,20 @@ def _get_model(weights_path: str = None, device: str = "cpu") -> SwimTCN:
     path = weights_path or str(_WEIGHTS_PATH)
     if path not in _model_cache:
         if not os.path.exists(path):
-            print(f"[SwimTCN] No weights at {path} — training now...")
-            from .train import train
-            train(weights_path=path)
+            if os.environ.get("SWIM_TCN_AUTOTRAIN") == "1":
+                print(f"[SwimTCN] No weights at {path} — training now...")
+                from .train import train
+                train(weights_path=path)
+            else:
+                raise FileNotFoundError(
+                    f"SwimTCN weights not found at {path}. Train with "
+                    "'python -m ml.train' or set SWIM_TCN_AUTOTRAIN=1."
+                )
         model = SwimTCN()
         model.load_state_dict(torch.load(path, map_location=device))
         model.eval()
         _model_cache[path] = model
     return _model_cache[path]
-
-
-def _resample_frames(keypoints: np.ndarray, target_len: int) -> np.ndarray:
-    """Linear-resample (T, 13, 3) along time to (target_len, 13, 3)."""
-    T = keypoints.shape[0]
-    if T == target_len:
-        return keypoints
-    src_idx = np.linspace(0, T - 1, target_len)
-    idx_lo = np.floor(src_idx).astype(int)
-    idx_hi = np.minimum(idx_lo + 1, T - 1)
-    frac = (src_idx - idx_lo)[:, None, None]
-    return keypoints[idx_lo] * (1 - frac) + keypoints[idx_hi] * frac
 
 
 def _keypoints_to_tcn_input(
@@ -106,30 +100,6 @@ def _keypoints_to_tcn_input(
     # Reshape (target_len, 13, 3) → (39, target_len) for TCN
     x = kp.transpose(1, 2, 0).reshape(IN_CHANNELS, target_len)
     return torch.tensor(x[None], dtype=torch.float32)  # (1, 39, T)
-
-
-def _prediction_windows(keypoints: np.ndarray, fps: float) -> list[np.ndarray]:
-    """
-    Split a clip into model-timebase windows.
-
-    Resamples the sequence to MODEL_FPS, then slides WINDOW_LEN-frame windows
-    with WINDOW_STRIDE (always including a final window flush with the clip
-    end). Clips shorter than one window are returned whole —
-    _keypoints_to_tcn_input stretches them, a bounded distortion for sub-3s
-    clips.
-    """
-    if fps > 0 and abs(fps - MODEL_FPS) > 1e-6:
-        t30 = max(1, int(round(len(keypoints) * MODEL_FPS / fps)))
-        kp = _resample_frames(keypoints, t30)
-    else:
-        kp = keypoints
-
-    if len(kp) <= WINDOW_LEN:
-        return [kp]
-    starts = list(range(0, len(kp) - WINDOW_LEN + 1, WINDOW_STRIDE))
-    if starts[-1] != len(kp) - WINDOW_LEN:
-        starts.append(len(kp) - WINDOW_LEN)
-    return [kp[s:s + WINDOW_LEN] for s in starts]
 
 
 def detect_issues_ml(
@@ -169,6 +139,10 @@ def detect_issues_ml(
             # forward() returns raw logits (see SwimTCN docstring) — sigmoid
             # matches the CoreML export (SwimTCNWithSigmoid) used on iOS.
             window_probs.append(torch.sigmoid(model(x))[0].numpy())
+    if not window_probs:
+        # Clip carries too little real time in the model timebase (e.g. a
+        # dozen frames tagged 240fps) — nothing analyzable.
+        return []
     probs = np.mean(window_probs, axis=0)  # (N_LABELS,)
 
     issues = []

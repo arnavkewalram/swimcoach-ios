@@ -39,7 +39,9 @@ targets:
         NSMicrophoneUsageDescription: "SwimCoach records audio alongside video."
         NSPhotoLibraryUsageDescription: "SwimCoach can analyze swimming videos from your photo library."
         UILaunchScreen: {}
-        UIFileSharingEnabled: true
+        # Never expose Documents (users' swim videos live there) via Finder /
+        # Files. Dev video staging uses `devicectl device copy` instead.
+        UIFileSharingEnabled: false
         LSSupportsOpeningDocumentsInPlace: false
         UISupportedInterfaceOrientations~iphone:
           - UIInterfaceOrientationPortrait

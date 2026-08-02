@@ -69,23 +69,34 @@ final class CameraManager: NSObject, ObservableObject, AVCaptureFileOutputRecord
     // MARK: - Recording
 
     func startRecording() {
-        guard !movieOutput.isRecording else { return }
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("mov")
-        movieOutput.startRecording(to: url, recordingDelegate: self)
+        // All AVCaptureMovieFileOutput calls go through sessionQueue — mixing
+        // main-thread mutation with queued configuration races the session.
+        sessionQueue.async { [weak self] in
+            guard let self, !self.movieOutput.isRecording else { return }
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("mov")
+            self.movieOutput.startRecording(to: url, recordingDelegate: self)
 
-        DispatchQueue.main.async {
-            self.isRecording = true
-            self.recordingDuration = 0
-            self.durationTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-                DispatchQueue.main.async { self.recordingDuration += 0.5 }
+            DispatchQueue.main.async {
+                self.isRecording = true
+                self.recordingDuration = 0
+                // [weak self] so an abandoned timer can never keep the whole
+                // capture stack alive.
+                self.durationTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+                    DispatchQueue.main.async { self?.recordingDuration += 0.5 }
+                }
             }
         }
     }
 
     func stopRecording() {
-        movieOutput.stopRecording()
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            if self.movieOutput.isRecording {
+                self.movieOutput.stopRecording()
+            }
+        }
         DispatchQueue.main.async {
             self.isRecording = false
             self.durationTimer?.invalidate()
@@ -94,6 +105,9 @@ final class CameraManager: NSObject, ObservableObject, AVCaptureFileOutputRecord
     }
 
     func stop() {
+        // Finalize any in-flight recording before tearing the session down —
+        // CameraView calls this from onDisappear, including mid-recording.
+        stopRecording()
         sessionQueue.async { self.session.stopRunning() }
     }
 
