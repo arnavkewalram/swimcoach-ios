@@ -235,6 +235,11 @@ struct HomeView: View {
         ]
         for item in plan {
             let base = AnalysisResult.demo
+            // Low Kick Rate fades out in recent sessions (improving trend);
+            // the other faults persist.
+            let issues = item.daysAgo <= 6
+                ? base.issues.filter { $0.name != "low_kick_rate" }
+                : base.issues
             let result = AnalysisResult(
                 id: UUID(),
                 score: item.score,
@@ -245,7 +250,7 @@ struct HomeView: View {
                 frameCount: base.frameCount,
                 sampledFrames: base.sampledFrames,
                 fps: base.fps,
-                issues: base.issues,
+                issues: issues,
                 tips: base.tips,
                 analyzedAt: Calendar.current.date(
                     byAdding: .day, value: -item.daysAgo, to: Date()) ?? Date()

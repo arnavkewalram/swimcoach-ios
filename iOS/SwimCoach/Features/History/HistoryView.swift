@@ -377,23 +377,38 @@ private struct IssueFrequencyChart: View {
     private struct IssueFreqItem {
         let name: String
         let count: Int
+        let trend: IssueTrend
         var shortName: String {
             name.count > 18 ? String(name.prefix(17)) + "…" : name
         }
     }
 
     private var topIssues: [IssueFreqItem] {
-        var tally: [String: Int] = [:]
-        for session in sessions {
-            guard let result = session.decoded() else { continue }
-            for issue in result.issues {
-                tally[issue.displayName, default: 0] += 1
+        // One decode pass: chronological presence flags per fault
+        let decoded = sessions.reversed().compactMap { $0.decoded() }   // oldest first
+        var presence: [String: [Bool]] = [:]
+        for result in decoded {
+            let names = Set(result.issues.map(\.displayName))
+            let priorCount = presence.values.first?.count ?? 0
+            for name in Set(presence.keys).union(names) {
+                presence[name, default: [Bool](repeating: false, count: priorCount)]
+                    .append(names.contains(name))
             }
         }
-        return tally
-            .sorted { $0.value > $1.value }
+        // Backfill: faults first seen mid-history need leading falses
+        let total = decoded.count
+        for (name, flags) in presence where flags.count < total {
+            presence[name] = [Bool](repeating: false, count: total - flags.count) + flags
+        }
+        return presence
+            .map { (name: $0.key, flags: $0.value) }
+            .map { IssueFreqItem(name: $0.name,
+                                 count: $0.flags.filter { $0 }.count,
+                                 trend: IssueTrend.trend(occurrences: $0.flags)) }
+            .filter { $0.count > 0 }
+            .sorted { $0.count > $1.count }
             .prefix(5)
-            .map { IssueFreqItem(name: $0.key, count: $0.value) }
+            .map { $0 }
     }
 
     var body: some View {
@@ -401,6 +416,11 @@ private struct IssueFrequencyChart: View {
         if !issues.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(title: "Common issues")
+                if sessions.count >= IssueTrend.minSessions {
+                    Text("Arrows compare your recent sessions to earlier ones")
+                        .font(.caption)
+                        .foregroundStyle(DS.inkTertiary)
+                }
 
                 Chart(issues, id: \.name) { item in
                     BarMark(
@@ -410,9 +430,20 @@ private struct IssueFrequencyChart: View {
                     .foregroundStyle(DS.accent.opacity(0.85))
                     .cornerRadius(3)
                     .annotation(position: .trailing) {
-                        Text("\(item.count)")
-                            .font(.grotesk(11, .bold))
-                            .foregroundStyle(DS.inkSecondary)
+                        HStack(spacing: 4) {
+                            Text("\(item.count)")
+                                .font(.grotesk(11, .bold))
+                                .foregroundStyle(DS.inkSecondary)
+                            if item.trend != .flat {
+                                Image(systemName: item.trend == .improving
+                                      ? "arrow.down.right" : "arrow.up.right")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .foregroundStyle(item.trend == .improving
+                                                     ? DS.severityMinor : DS.severityMajor)
+                                    .accessibilityLabel(item.trend == .improving
+                                                        ? "improving" : "worsening")
+                            }
+                        }
                     }
                 }
                 .chartXAxis(.hidden)
