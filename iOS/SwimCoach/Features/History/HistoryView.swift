@@ -233,10 +233,14 @@ private struct ScoreTrendChart: View {
     let sessions: [SwimSession]
     let onSelect: (SwimSession) -> Void
 
+    private var averageScore: Int {
+        sessions.isEmpty ? 0 : sessions.map(\.score).reduce(0, +) / sessions.count
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Score trend")
-            Text("Tap a point to open that session")
+            Text("Tap a point to open that session · dashed line = average \(averageScore)")
                 .font(.caption)
                 .foregroundStyle(DS.inkTertiary)
 
@@ -256,20 +260,18 @@ private struct ScoreTrendChart: View {
                     .symbolSize(46)
                 }
 
-                let avg = sessions.map(\.score).reduce(0, +) / sessions.count
-                RuleMark(y: .value("Average", avg))
+                RuleMark(y: .value("Average", averageScore))
                     .foregroundStyle(DS.inkTertiary)
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .annotation(position: .topLeading, alignment: .leading) {
-                        Text("AVG \(avg)")
-                            .font(.statUnit)
-                            .tracking(0.8)
-                            .foregroundStyle(DS.inkTertiary)
-                    }
             }
             .chartYScale(domain: 0...100)
+            // Pin the domain to real session indices — .automatic invents
+            // negative "sessions" when the plot gets narrow (large type).
+            .chartXScale(domain: 0.5...(Double(sessions.count) + 0.5))
             .chartXAxis {
-                AxisMarks(values: .automatic) { _ in
+                AxisMarks(values: Array(stride(
+                    from: 1, through: sessions.count,
+                    by: max(1, sessions.count / 5)))) { _ in
                     AxisGridLine().foregroundStyle(DS.border.opacity(0.6))
                     AxisTick().foregroundStyle(Color.clear)
                     AxisValueLabel()

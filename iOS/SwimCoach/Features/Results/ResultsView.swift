@@ -253,24 +253,17 @@ struct ResultsView: View {
 
     private func videoSection(url: URL) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                SectionHeader(title: "Session video")
-                if hasSkeletonData {
-                    Button {
-                        showSkeleton.toggle()
-                    } label: {
-                        Text(showSkeleton ? "HIDE JOINTS" : "SHOW JOINTS")
-                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                            .tracking(1.2)
-                            .foregroundStyle(showSkeleton ? DS.accent : DS.inkTertiary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 5)
-                            .overlay(RoundedRectangle(cornerRadius: 5)
-                                .stroke(showSkeleton ? DS.accent.opacity(0.5) : DS.border, lineWidth: 1))
-                    }
-                    .accessibilityLabel(showSkeleton ? "Hide detected joints overlay" : "Show detected joints overlay")
-
-                    exportControl
+            // At accessibility type sizes the header row can't fit beside
+            // the controls — fall to a vertical stack instead of letting
+            // the label break mid-word.
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    SectionHeader(title: "Session video")
+                    videoControls
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: "Session video")
+                    HStack { videoControls }
                 }
             }
             ZStack {
@@ -304,6 +297,27 @@ struct ResultsView: View {
 
     private var hasSkeletonData: Bool {
         !(result.keypointFrames?.isEmpty ?? true)
+    }
+
+    @ViewBuilder
+    private var videoControls: some View {
+        if hasSkeletonData {
+            Button {
+                showSkeleton.toggle()
+            } label: {
+                Text(showSkeleton ? "HIDE JOINTS" : "SHOW JOINTS")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.2)
+                    .foregroundStyle(showSkeleton ? DS.accent : DS.inkTertiary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .overlay(RoundedRectangle(cornerRadius: 5)
+                        .stroke(showSkeleton ? DS.accent.opacity(0.5) : DS.border, lineWidth: 1))
+            }
+            .accessibilityLabel(showSkeleton ? "Hide detected joints overlay" : "Show detected joints overlay")
+
+            exportControl
+        }
     }
 
     @ViewBuilder
