@@ -8,6 +8,8 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
+    @State private var showWhatsNew = false
     @State private var showPhotoPicker = false
     @State private var photoItem: PhotosPickerItem? = nil
     @State private var isImporting = false
@@ -15,6 +17,14 @@ struct HomeView: View {
     @State private var showFilePicker = false
     @State private var docsVideoURL: URL? = nil
     #endif
+
+    /// Sheets presented synchronously in onAppear can silently no-op on
+    /// first render — defer past the initial layout pass.
+    private func presentWhatsNewSoon() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            showWhatsNew = true
+        }
+    }
 
     private var focusFault: (name: String, occurrences: Int, window: Int)? {
         // Chronological issue-name lists from stored metadata (no decode)
@@ -229,8 +239,31 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) { OnboardingView() }
+        .sheet(isPresented: $showWhatsNew) {
+            WhatsNewSheet {
+                lastSeenWhatsNewVersion = WhatsNew.currentVersion
+                showWhatsNew = false
+            }
+            .presentationDetents([.large, .medium])
+        }
         .navigationBarHidden(true)
         .onAppear {
+            // What's-new: fresh installs just adopt the current version
+            // (onboarding covers them); upgrades get the sheet once.
+            // -suppressWhatsNew keeps automated UI flows deterministic.
+            if ProcessInfo.processInfo.arguments.contains("-suppressWhatsNew") {
+                lastSeenWhatsNewVersion = WhatsNew.currentVersion
+            } else if !hasSeenOnboarding || lastSeenWhatsNewVersion.isEmpty {
+                if hasSeenOnboarding == false { lastSeenWhatsNewVersion = WhatsNew.currentVersion }
+                else if lastSeenWhatsNewVersion.isEmpty {
+                    // Pre-feature installs have seen onboarding but never
+                    // stored a version — they're upgraders: show it.
+                    presentWhatsNewSoon()
+                }
+            } else if WhatsNew.shouldShow(current: WhatsNew.currentVersion,
+                                          lastSeen: lastSeenWhatsNewVersion) {
+                presentWhatsNewSoon()
+            }
             #if DEBUG
             if let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first,
                let found = try? FileManager.default.contentsOfDirectory(at: docsDir, includingPropertiesForKeys: nil)

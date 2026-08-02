@@ -23,6 +23,7 @@
 		1FC82D44803A100487309E60 /* SpaceGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BF7185FE87172D94D300296 /* SpaceGrotesk-Regular.ttf */; };
 		2703249E05512D971EF62E81 /* SmokeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5253D1FE2BD2528D422DC30 /* SmokeUITests.swift */; };
 		2815930944855657E8A7EB06 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8EDC90DCD052513240CF58 /* HomeView.swift */; };
+		2B4A833E943ADA09095C2271 /* WhatsNewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE0D76E0735856376DBDFDF /* WhatsNewSheet.swift */; };
 		2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */; };
 		2D3FB6852995E34951EDB73E /* VideoTransformTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5C39CD071B8B9A74F6A45B /* VideoTransformTests.swift */; };
 		2D40371DC278AB39902B6CFF /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73EF644DB5F84FB24F8FDA4B /* OFL.txt */; };
@@ -68,6 +69,7 @@
 		B03EF14770A341DB035E8D42 /* IssueWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D9E931537A6F52120C9319 /* IssueWindow.swift */; };
 		B21693A6CF7528E594204809 /* VideoTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E1CC5D111B6A5AAB5640BE /* VideoTransform.swift */; };
 		B273B39A76FC83B7EDA6EA92 /* FocusFaultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D016218CB2E6A0CE353E62 /* FocusFaultTests.swift */; };
+		C02B70A87116FDBF215902FB /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 667FF8EEE7913666DD9CA4FD /* WhatsNew.swift */; };
 		C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */; };
 		CBA6A54F8729E3AA33031F4E /* SessionExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F51D64597390CD17D508EC3 /* SessionExport.swift */; };
 		CBCE9E2F7EDC6AEA156B6890 /* OverlayVideoExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9739E338795485459CA3A319 /* OverlayVideoExporterTests.swift */; };
@@ -107,6 +109,7 @@
 		058CDD9AB205E722F6E0442B /* LevelMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelMonitor.swift; sourceTree = "<group>"; };
 		0A49C168A6001543BF9CD78C /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		0CE0D76E0735856376DBDFDF /* WhatsNewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewSheet.swift; sourceTree = "<group>"; };
 		0F22E293B4BD707148F41A19 /* IssueTrendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueTrendTests.swift; sourceTree = "<group>"; };
 		14AC560CE3C7B75914B49079 /* AnalyzingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzingView.swift; sourceTree = "<group>"; };
 		1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngineTests.swift; sourceTree = "<group>"; };
@@ -133,6 +136,7 @@
 		5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */ = {isa = PBXFileReference; path = swim_test.mp4; sourceTree = "<group>"; };
 		5B7BECFC0E9326C22CD9437B /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		65121B38AC1FDF7DE043E733 /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
+		667FF8EEE7913666DD9CA4FD /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
 		6868AD80A9E69F4E03AFBC3D /* SessionExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExportTests.swift; sourceTree = "<group>"; };
 		6CF341904BDF6F1F4F63756E /* SessionComparison.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionComparison.swift; sourceTree = "<group>"; };
 		6E5C39CD071B8B9A74F6A45B /* VideoTransformTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTransformTests.swift; sourceTree = "<group>"; };
@@ -207,6 +211,7 @@
 				9A59A49638F1335B4DE0B04D /* Sparkline.swift */,
 				581473BB2D471E034BCE8FC8 /* TrainingLogPanel.swift */,
 				B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */,
+				0CE0D76E0735856376DBDFDF /* WhatsNewSheet.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -347,6 +352,7 @@
 				52C6D30A519EEDA7A9575174 /* SwimSession.swift */,
 				228631A15A23306938ED17ED /* TechniqueIssue.swift */,
 				2D334215248B1046E54DC5BF /* TrainingLog.swift */,
+				667FF8EEE7913666DD9CA4FD /* WhatsNew.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -661,6 +667,8 @@
 				D793450460E9BCA2A098D248 /* TrainingLogPanel.swift in Sources */,
 				B21693A6CF7528E594204809 /* VideoTransform.swift in Sources */,
 				F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */,
+				C02B70A87116FDBF215902FB /* WhatsNew.swift in Sources */,
+				2B4A833E943ADA09095C2271 /* WhatsNewSheet.swift in Sources */,
 				72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -716,7 +724,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 36;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -730,7 +738,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.25.1;
+				MARKETING_VERSION = 1.26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -882,7 +890,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 35;
+				CURRENT_PROJECT_VERSION = 36;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -902,7 +910,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.25.1;
+				MARKETING_VERSION = 1.26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

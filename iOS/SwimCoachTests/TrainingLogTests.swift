@@ -92,6 +92,20 @@ final class TrainingLogTests: XCTestCase {
         XCTAssertTrue(TrainingLog.isNewBest(score: 71, priorBest: 70))
     }
 
+    func testWhatsNewShowLogic() {
+        XCTAssertFalse(WhatsNew.shouldShow(current: "1.26.0", lastSeen: ""),
+                       "fresh installs get onboarding, not release notes")
+        XCTAssertFalse(WhatsNew.shouldShow(current: "1.26.0", lastSeen: "1.26.0"))
+        XCTAssertTrue(WhatsNew.shouldShow(current: "1.26.0", lastSeen: "1.25.1"))
+    }
+
+    func testWhatsNewHighlightsWellFormed() {
+        XCTAssertFalse(WhatsNew.highlights.isEmpty)
+        XCTAssertTrue(WhatsNew.highlights.allSatisfy { !$0.title.isEmpty && !$0.detail.isEmpty })
+        XCTAssertEqual(WhatsNew.highlights.map(\.id).count,
+                       Set(WhatsNew.highlights.map(\.id)).count, "titles must be unique ids")
+    }
+
     func testPrivacyManifestIsBundled() {
         // Apple requires PrivacyInfo.xcprivacy in App Store binaries.
         XCTAssertNotNil(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
