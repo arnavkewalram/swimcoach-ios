@@ -15,6 +15,15 @@ struct DrillsView: View {
         return Set(DrillCatalog.drills(fixing: issue).map(\.id))
     }
 
+    /// Of the fixing drills, the one most due for practice — the scroll
+    /// target and START HERE card.
+    private var startHereID: String? {
+        guard let issue = highlightIssue else { return nil }
+        return DrillPractice.leastRecentlyPracticed(
+            of: DrillCatalog.drills(fixing: issue).map(\.id),
+            events: practiceEvents)
+    }
+
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
@@ -37,6 +46,7 @@ struct DrillsView: View {
                                     number: cardNumber(of: drill),
                                     drill: drill,
                                     isHighlighted: highlightedIDs.contains(drill.id),
+                                    isStartHere: drill.id == startHereID,
                                     practice: DrillPractice.summary(
                                         for: drill.id, events: practiceEvents),
                                     onMarkDone: {
@@ -52,8 +62,9 @@ struct DrillsView: View {
                     .padding(.bottom, 32)
                 }
                 .onAppear {
-                    if let first = DrillCatalog.all.first(where: { highlightedIDs.contains($0.id) }) {
-                        withAnimation { proxy.scrollTo(first.id, anchor: .top) }
+                    if let target = startHereID
+                        ?? DrillCatalog.all.first(where: { highlightedIDs.contains($0.id) })?.id {
+                        withAnimation { proxy.scrollTo(target, anchor: .top) }
                     }
                 }
             }
@@ -82,6 +93,7 @@ private struct DrillCard: View {
     let number: String
     let drill: Drill
     let isHighlighted: Bool
+    var isStartHere: Bool = false
     let practice: DrillPractice.Summary
     let onMarkDone: () -> Void
 
@@ -94,6 +106,17 @@ private struct DrillCard: View {
                 Text(drill.name)
                     .font(.grotesk(17, .bold))
                     .foregroundStyle(DS.ink)
+                if isStartHere {
+                    Text("START HERE")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 8))
+                        .tracking(1.2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(DS.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .fixedSize()
+                }
                 Spacer()
                 Text(drill.dose.uppercased())
                     .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
