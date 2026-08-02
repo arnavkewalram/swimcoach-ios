@@ -33,6 +33,13 @@ struct AnalysisResult: Hashable, Codable, Sendable {
         return Double(strokeCount) / d * 60.0
     }
 
+    /// "M:SS" clip length for display, nil for legacy sessions.
+    var durationText: String? {
+        guard let d = durationSeconds, d > 0 else { return nil }
+        let total = Int(d.rounded())
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
     var detectionRate: Double {
         sampledFrames > 0 ? Double(frameCount) / Double(sampledFrames) : 1.0
     }
