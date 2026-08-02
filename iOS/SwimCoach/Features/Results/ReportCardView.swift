@@ -61,6 +61,9 @@ struct ReportCardView: View {
             // Metrics line
             HStack(spacing: 22) {
                 metric("\(result.strokeCount)", "STROKES")
+                if let spm = result.strokeRatePerMin {
+                    metric(String(format: "%.0f", spm), "STROKES/MIN")
+                }
                 metric(String(format: "%.0f", result.kickRatePerMin), "KICKS/MIN")
                 metric(String(format: "%.0f%%", result.strokeAsymmetry * 100), "ASYMMETRY")
             }

@@ -264,7 +264,8 @@ struct AnalyzingView: View {
                 analyzedAt: Date(),
                 videoFileName: videoName,
                 keypointFrames: keypointFrames,
-                issueWindows: windows
+                issueWindows: windows,
+                durationSeconds: metrics.durationSeconds
             )
 
             // 6 — AI coaching tips
@@ -280,7 +281,8 @@ struct AnalyzingView: View {
                     analyzedAt: result.analyzedAt,
                     videoFileName: result.videoFileName,
                     keypointFrames: result.keypointFrames,
-                    issueWindows: result.issueWindows
+                    issueWindows: result.issueWindows,
+                    durationSeconds: result.durationSeconds
                 )
             }
 

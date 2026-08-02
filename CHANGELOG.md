@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.25.0] — 2026-08-02 — "Tempo"
+
+### Added
+- **Stroke rate (strokes/min)** on Results and the report card — the
+  tempo number coaches actually use. Clip duration is now stored with
+  each session; older sessions without it simply don't show the cell.
+
 ## [1.24.0] — 2026-08-02 — "Consistent"
 
 ### Added
