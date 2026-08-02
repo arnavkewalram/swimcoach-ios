@@ -21,3 +21,7 @@ ENV PYTHONPATH=/app/ml
 EXPOSE 8080
 
 CMD ["python", "main.py"]
+
+# Fail the image build if model weights are missing — a server must
+# never boot weightless (startup would fail) or train inside a request.
+RUN test -f ml/ml/swim_tcn.pt || (echo "ERROR: ml/ml/swim_tcn.pt missing from build context" && exit 1)

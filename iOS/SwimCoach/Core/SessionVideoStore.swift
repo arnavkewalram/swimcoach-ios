@@ -31,7 +31,7 @@ enum SessionVideoStore {
             try FileManager.default.copyItem(at: sourceURL, to: dest)
             return name
         } catch {
-            print("[SessionVideoStore] Could not persist video: \(error.localizedDescription)")
+            AppLog.storage.error("Could not persist video: \(error.localizedDescription)")
             return nil
         }
     }

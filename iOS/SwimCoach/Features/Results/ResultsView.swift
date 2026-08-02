@@ -8,6 +8,17 @@ struct ResultsView: View {
     @State private var animatedScore: Double = 0
     @State private var sectionsVisible = false
     @State private var player: AVPlayer? = nil
+    // Saved-state read from SwiftData itself — the footer never claims a save
+    // that didn't happen.
+    @Query private var savedSessions: [SwimSession]
+
+    init(result: AnalysisResult) {
+        self.result = result
+        let id = result.id
+        _savedSessions = Query(filter: #Predicate<SwimSession> { $0.id == id })
+    }
+
+    private var isSaved: Bool { !savedSessions.isEmpty }
 
     var body: some View {
         ZStack {
@@ -248,13 +259,15 @@ struct ResultsView: View {
     private var footer: some View {
         VStack(spacing: 14) {
             HStack(spacing: 6) {
-                Image(systemName: "checkmark")
+                Image(systemName: isSaved ? "checkmark" : "exclamationmark.triangle")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(DS.severityMinor)
+                    .foregroundStyle(isSaved ? DS.severityMinor : DS.severityModerate)
                     .accessibilityHidden(true)
-                Text("Session saved")
+                Text(isSaved
+                     ? "Session saved"
+                     : "Session not saved — a storage error occurred")
                     .font(.system(size: 13))
-                    .foregroundStyle(DS.inkSecondary)
+                    .foregroundStyle(isSaved ? DS.inkSecondary : DS.severityModerate)
             }
             .frame(maxWidth: .infinity)
 

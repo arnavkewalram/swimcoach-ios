@@ -13,3 +13,7 @@ output/
 dist/
 build/
 .DS_Store
+
+# The trained checkpoint IS tracked — the committed CoreML model must be
+# reproducible from it (see coreml_convert.py)
+!ml/swim_tcn.pt

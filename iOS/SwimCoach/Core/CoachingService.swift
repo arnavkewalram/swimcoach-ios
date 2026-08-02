@@ -45,8 +45,19 @@ struct CoachingService {
             let session = LanguageModelSession(
                 instructions: "You are a concise expert swim coach. Respond only with the requested tips."
             )
-            let response = try await session.respond(to: prompt)
-            let tips = response.content
+            // 15s timeout — an on-device model stall must not hang the
+            // analysis pipeline at 98% forever.
+            let response = try await withThrowingTaskGroup(of: String.self) { group in
+                group.addTask { try await session.respond(to: prompt).content }
+                group.addTask {
+                    try await Task.sleep(nanoseconds: 15_000_000_000)
+                    throw CancellationError()
+                }
+                guard let first = try await group.next() else { throw CancellationError() }
+                group.cancelAll()
+                return first
+            }
+            let tips = response
                 .components(separatedBy: "\n")
                 .map { line -> String in
                     var s = line.trimmingCharacters(in: .whitespacesAndNewlines)

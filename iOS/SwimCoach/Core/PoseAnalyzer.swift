@@ -13,21 +13,41 @@ struct PoseAnalyzer {
         videoURL: URL,
         onProgress: @escaping @Sendable (Double) -> Void
     ) async throws -> (observations: [VNHumanBodyPoseObservation], fps: Double, sampledFrames: Int) {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    let result = try analyzeSynchronously(videoURL: videoURL, onProgress: onProgress)
-                    continuation.resume(returning: result)
-                } catch {
-                    continuation.resume(throwing: error)
+        // Cooperative cancellation: the synchronous frame loop polls this flag
+        // each frame, so cancelling the wrapping Task (e.g. the user backs out
+        // of AnalyzingView) stops the work within one frame instead of running
+        // the whole video to completion.
+        let cancelled = CancellationFlag()
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        let result = try analyzeSynchronously(
+                            videoURL: videoURL, cancelled: cancelled, onProgress: onProgress)
+                        continuation.resume(returning: result)
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
                 }
             }
+        } onCancel: {
+            cancelled.set()
         }
+    }
+
+    /// Thread-safe cancellation flag shared between the async wrapper and the
+    /// synchronous GCD frame loop.
+    final class CancellationFlag: @unchecked Sendable {
+        private let lock = NSLock()
+        private var value = false
+        func set() { lock.lock(); value = true; lock.unlock() }
+        var isSet: Bool { lock.lock(); defer { lock.unlock() }; return value }
     }
 
     // Synchronous inner implementation — must be called off the main thread.
     private static func analyzeSynchronously(
         videoURL: URL,
+        cancelled: CancellationFlag,
         onProgress: @escaping @Sendable (Double) -> Void
     ) throws -> (observations: [VNHumanBodyPoseObservation], fps: Double, sampledFrames: Int) {
 
@@ -62,10 +82,15 @@ struct PoseAnalyzer {
         var visionErrorCount = 0
 
         while let sample = output.copyNextSampleBuffer() {
+            if cancelled.isSet {
+                reader.cancelReading()
+                throw CancellationError()
+            }
             frameIndex += 1
-            onProgress(min(Double(frameIndex) / Double(totalFrames), 1.0))
-
+            // Report progress only on sampled frames — reporting every raw
+            // frame spawned thousands of main-actor tasks on long clips.
             guard frameIndex % sampleRate == 0 else { continue }
+            onProgress(min(Double(frameIndex) / Double(totalFrames), 1.0))
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sample) else { continue }
             sampledFrameCount += 1
 
@@ -93,15 +118,15 @@ struct PoseAnalyzer {
             } catch {
                 visionErrorCount += 1
                 if visionErrorCount == 1 {
-                    print("[PoseAnalyzer] Vision error on frame \(frameIndex): \(error)")
+                    AppLog.analysis.warning("Vision error on frame \(frameIndex): \(String(describing: error))")
                 }
             }
         }
 
         if visionErrorCount > 0 {
-            print("[PoseAnalyzer] Total Vision errors: \(visionErrorCount)/\(sampledFrameCount) sampled frames")
+            AppLog.analysis.warning("Total Vision errors: \(visionErrorCount)/\(sampledFrameCount) sampled frames")
         }
-        print("[PoseAnalyzer] Sampled \(sampledFrameCount) frames, \(observations.count) observations with visible hips")
+        AppLog.analysis.info("Sampled \(sampledFrameCount) frames, \(observations.count) swimmer observations")
 
         return (observations, Double(nominalFPS), sampledFrameCount)
     }

@@ -27,20 +27,20 @@ final class SwimTCNRunner {
             modelURL = compiled
         } else if let raw = Bundle.main.url(forResource: "swim_tcn", withExtension: "mlpackage") {
             do { modelURL = try MLModel.compileModel(at: raw) } catch {
-                print("[SwimTCN] Failed to compile model: \(error.localizedDescription)")
+                AppLog.model.error("Failed to compile model: \(error.localizedDescription)")
                 return
             }
         } else {
-            print("[SwimTCN] swim_tcn model not in bundle — rule-based fallback active")
+            AppLog.model.fault("swim_tcn model not in bundle — analysis will fail")
             return
         }
         do {
             let cfg = MLModelConfiguration()
             cfg.computeUnits = .cpuAndNeuralEngine
             _model = try MLModel(contentsOf: modelURL, configuration: cfg)
-            print("[SwimTCN] Model loaded — ML analysis enabled")
+            AppLog.model.info("Model loaded — ML analysis enabled")
         } catch {
-            print("[SwimTCN] Failed to load model: \(error.localizedDescription)")
+            AppLog.model.error("Failed to load model: \(error.localizedDescription)")
         }
     }
 

@@ -34,7 +34,9 @@ struct AnalyzingView: View {
         }
         .navigationBarHidden(true)
         .task {
-            if videoURL.lastPathComponent == "swim_test.mp4" {
+            // Bundle-identity check, not filename match — a user file that
+            // happens to be named swim_test.mp4 must get real analysis.
+            if videoURL == Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
                 await runDemoAnalysis()
             } else {
                 await runAnalysis()
@@ -255,12 +257,19 @@ struct AnalyzingView: View {
                 )
             }
 
-            // 7 — Auto-save session
+            // 7 — Auto-save session (Results reads saved-state from SwiftData,
+            // so a failed save is shown honestly instead of a false checkmark)
+            guard !Task.isCancelled else { return }
             await MainActor.run {
                 modelContext.insert(SwimSession(result: result))
-                try? modelContext.save()
+                do {
+                    try modelContext.save()
+                } catch {
+                    AppLog.analysis.error("Session save failed: \(error.localizedDescription)")
+                }
             }
 
+            guard !Task.isCancelled else { return }
             await MainActor.run {
                 progress = 1.0
                 // replaceTop: Back from Results must not land on this screen —
@@ -268,6 +277,8 @@ struct AnalyzingView: View {
                 router.replaceTop(with: .results(result))
             }
 
+        } catch is CancellationError {
+            return  // user left the screen — no failure UI, no side effects
         } catch {
             failWith(error.localizedDescription)
         }
@@ -360,11 +371,17 @@ struct AnalyzingView: View {
             )
         }
 
+        guard !Task.isCancelled else { return }
         await MainActor.run {
             modelContext.insert(SwimSession(result: result))
-            try? modelContext.save()
+            do {
+                try modelContext.save()
+            } catch {
+                AppLog.analysis.error("Demo session save failed: \(error.localizedDescription)")
+            }
         }
 
+        guard !Task.isCancelled else { return }
         await MainActor.run {
             progress = 1.0
             router.replaceTop(with: .results(result))
