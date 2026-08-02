@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.24.0] — 2026-08-02 — "Consistent"
+
+### Added
+- **Consistency strip in History**: sessions per week over the trailing
+  twelve weeks as a mini bar row — empty weeks stay as hairline stubs, so
+  gaps in the routine are as visible as the training blocks.
+
 ## [1.23.0] — 2026-08-02 — "Smoke"
 
 ### Added

@@ -53,6 +53,20 @@ enum TrainingLog {
         return score > prior
     }
 
+    /// Sessions per calendar week for the trailing `weeks` weeks,
+    /// chronological — last element is the week containing `now`.
+    static func weeklyCounts(for entries: [Entry], weeks: Int = 12,
+                             now: Date = Date(),
+                             calendar: Calendar = .current) -> [Int] {
+        guard weeks > 0 else { return [] }
+        return (0..<weeks).reversed().map { back in
+            guard let ref = calendar.date(byAdding: .weekOfYear, value: -back, to: now) else {
+                return 0
+            }
+            return summary(for: entries, weekContaining: ref, calendar: calendar).sessionCount
+        }
+    }
+
     struct GoalTicks: Equatable {
         let filled: Int     // sessions done, capped at the goal
         let total: Int      // the goal itself
