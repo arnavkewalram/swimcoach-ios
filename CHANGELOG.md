@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.25.1] — 2026-08-02
+
+### Fixed
+- Demo-analyzed sessions now carry a clip duration, so they show the
+  stroke-rate cell like real analyses.
+- Erase All Sessions sweeps the video store immediately instead of
+  leaving a corrupt-blob leak for the next-launch prune.
+
 ## [1.25.0] — 2026-08-02 — "Tempo"
 
 ### Added

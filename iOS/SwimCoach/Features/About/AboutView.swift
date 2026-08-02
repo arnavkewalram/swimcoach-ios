@@ -178,6 +178,9 @@ struct AboutView: View {
             SessionVideoStore.delete(fileName: session.decoded()?.videoFileName)
             modelContext.delete(session)
         }
+        // Belt and braces: a session whose blob fails to decode above would
+        // leak its video until the next-launch prune — sweep now instead.
+        SessionVideoStore.pruneOrphans(referencedFileNames: [])
         exportURL = nil
     }
 }
