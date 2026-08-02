@@ -6,6 +6,7 @@ import SwiftData
 struct AboutView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
+    @Query private var practiceEvents: [DrillPracticeEvent]
     @State private var showLicense = false
     @State private var exportURL: URL? = nil
     @State private var confirmErase = false
@@ -163,7 +164,7 @@ struct AboutView: View {
 
     private func prepareExport() {
         do {
-            let data = try SessionExport.archiveData(from: sessions)
+            let data = try SessionExport.archiveData(from: sessions, practice: practiceEvents)
             let url = FileManager.default.temporaryDirectory
                 .appendingPathComponent("swimcoach-training-log.json")
             try data.write(to: url, options: .atomic)
@@ -181,6 +182,7 @@ struct AboutView: View {
         // Belt and braces: a session whose blob fails to decode above would
         // leak its video until the next-launch prune — sweep now instead.
         SessionVideoStore.pruneOrphans(referencedFileNames: [])
+        for event in practiceEvents { modelContext.delete(event) }
         exportURL = nil
     }
 }

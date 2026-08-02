@@ -64,6 +64,24 @@ final class SessionExportTests: XCTestCase {
         XCTAssertEqual(roundTrip.durationSeconds, 60)
     }
 
+    func testPracticeLogIncludedChronologically() throws {
+        let old = Date(timeIntervalSinceNow: -86400)
+        let events = [
+            DrillPracticeEvent(drillID: "fist-drill", date: Date()),
+            DrillPracticeEvent(drillID: "catch-up", date: old),
+        ]
+        let data = try SessionExport.archiveData(from: [], practice: events)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let archive = try decoder.decode(SessionExport.Archive.self, from: data)
+        XCTAssertEqual(archive.practice?.map(\.drill), ["catch-up", "fist-drill"])
+
+        // No practice → key omitted (older archives stay decodable)
+        let bare = try decoder.decode(SessionExport.Archive.self,
+                                      from: SessionExport.archiveData(from: []))
+        XCTAssertNil(bare.practice)
+    }
+
     func testEmptyStoreStillEncodes() throws {
         let data = try SessionExport.archiveData(from: [])
         XCTAssertFalse(data.isEmpty)
