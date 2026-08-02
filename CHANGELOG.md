@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.13.1] — 2026-08-01
+
+### Fixed
+- Accessibility-size audit (largest supported Dynamic Type): the Results
+  SESSION VIDEO header no longer breaks mid-word — it stacks above its
+  controls when the row can't fit; the History score trend no longer
+  invents negative session numbers (x-axis pinned to real indices) and
+  the average now reads in the caption instead of colliding with axis
+  labels in-plot.
+
 ## [1.13.0] — 2026-08-01 — "Card"
 
 ### Changed
