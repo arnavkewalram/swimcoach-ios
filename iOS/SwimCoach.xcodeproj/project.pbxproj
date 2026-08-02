@@ -40,7 +40,9 @@
 		587186C09D23A6475D1168D5 /* KeypointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB41DA1B0CADFE8AF96B3B07 /* KeypointFrame.swift */; };
 		596F90194883FCE42C428A75 /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAC6C76DBE9C4FCC419F4B7 /* CompareView.swift */; };
 		5AC6297BE8258500F7D893CD /* DrillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D027762C9F6FC33526494B6F /* DrillsView.swift */; };
+		5F86F0DA01048214F3837B6A /* HomeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */; };
 		65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */; };
+		672EC66C3ADDBBAC9CE60AD8 /* ImportedVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869DD420BA54EE808DAA8590 /* ImportedVideo.swift */; };
 		6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */; };
 		7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */; };
 		72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */; };
@@ -73,12 +75,14 @@
 		D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */; };
 		D5FE23FE206209F37B23BD2C /* SpaceGrotesk-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 65121B38AC1FDF7DE043E733 /* SpaceGrotesk-Bold.ttf */; };
 		D6C634BFF07A295BE4B5C063 /* BiomechanicsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */; };
+		D793450460E9BCA2A098D248 /* TrainingLogPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581473BB2D471E034BCE8FC8 /* TrainingLogPanel.swift */; };
 		DB05C6679E2D249A3FD1BCBF /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5F95B5EFDE86670DAE8840 /* Haptics.swift */; };
 		DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF341904BDF6F1F4F63756E /* SessionComparison.swift */; };
 		E81536F228A32D51B4F9E3C1 /* IssueTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7994303E7AA3F1A682B4A9E /* IssueTrend.swift */; };
 		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
 		F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */; };
+		FC8EAEA27AFEDD75D67BAFF4 /* IssueRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F58D5D4BC3109B966FB868 /* IssueRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,6 +121,7 @@
 		52C6D30A519EEDA7A9575174 /* SwimSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimSession.swift; sourceTree = "<group>"; };
 		5321399BE9F3645B9111A95C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		55B42BDC1F60A78BB7C517EB /* LevelMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelMathTests.swift; sourceTree = "<group>"; };
+		581473BB2D471E034BCE8FC8 /* TrainingLogPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogPanel.swift; sourceTree = "<group>"; };
 		5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */ = {isa = PBXFileReference; path = swim_test.mp4; sourceTree = "<group>"; };
 		5B7BECFC0E9326C22CD9437B /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		65121B38AC1FDF7DE043E733 /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
@@ -128,6 +133,7 @@
 		730F3A8523C913A0E0248CDD /* CoachingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingService.swift; sourceTree = "<group>"; };
 		73EF644DB5F84FB24F8FDA4B /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		7B732C3B50E0D87F181B63E4 /* SessionFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionFilterTests.swift; sourceTree = "<group>"; };
+		869DD420BA54EE808DAA8590 /* ImportedVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedVideo.swift; sourceTree = "<group>"; };
 		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
 		8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionComparisonTests.swift; sourceTree = "<group>"; };
@@ -139,8 +145,10 @@
 		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9A59A49638F1335B4DE0B04D /* Sparkline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkline.swift; sourceTree = "<group>"; };
 		9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngineTests.swift; sourceTree = "<group>"; };
+		A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCards.swift; sourceTree = "<group>"; };
 		A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogTests.swift; sourceTree = "<group>"; };
 		A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportCardTests.swift; sourceTree = "<group>"; };
+		A3F58D5D4BC3109B966FB868 /* IssueRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueRow.swift; sourceTree = "<group>"; };
 		A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractorTests.swift; sourceTree = "<group>"; };
 		AC20876C011158E31B687438 /* SkeletonOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonOverlayView.swift; sourceTree = "<group>"; };
 		AD161114DD1D2892C9515515 /* IssueWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindowTests.swift; sourceTree = "<group>"; };
@@ -184,8 +192,10 @@
 		030CC4B701E8B3B721AF2672 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */,
 				2D8EDC90DCD052513240CF58 /* HomeView.swift */,
 				9A59A49638F1335B4DE0B04D /* Sparkline.swift */,
+				581473BB2D471E034BCE8FC8 /* TrainingLogPanel.swift */,
 				B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */,
 			);
 			path = Home;
@@ -200,6 +210,7 @@
 				BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */,
 				24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */,
 				CF5F95B5EFDE86670DAE8840 /* Haptics.swift */,
+				869DD420BA54EE808DAA8590 /* ImportedVideo.swift */,
 				983DF83A1982B648EA414060 /* OverlayVideoExporter.swift */,
 				BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */,
 				3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */,
@@ -222,6 +233,7 @@
 		376F99D216F528CB58C092EE /* Results */ = {
 			isa = PBXGroup;
 			children = (
+				A3F58D5D4BC3109B966FB868 /* IssueRow.swift */,
 				EA0310224F538D191BF5071C /* IssueTimelineStrip.swift */,
 				1DA260E8E7098342EEBFE586 /* ReportCardView.swift */,
 				B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */,
@@ -568,7 +580,10 @@
 				88505CD0796817BAA863672C /* FocusFault.swift in Sources */,
 				DB05C6679E2D249A3FD1BCBF /* Haptics.swift in Sources */,
 				9AB3F3314B67D293DBB5D3F7 /* HistoryView.swift in Sources */,
+				5F86F0DA01048214F3837B6A /* HomeCards.swift in Sources */,
 				2815930944855657E8A7EB06 /* HomeView.swift in Sources */,
+				672EC66C3ADDBBAC9CE60AD8 /* ImportedVideo.swift in Sources */,
+				FC8EAEA27AFEDD75D67BAFF4 /* IssueRow.swift in Sources */,
 				AB95CEAB12265A86D19CD3D7 /* IssueTimelineStrip.swift in Sources */,
 				E81536F228A32D51B4F9E3C1 /* IssueTrend.swift in Sources */,
 				B03EF14770A341DB035E8D42 /* IssueWindow.swift in Sources */,
@@ -591,6 +606,7 @@
 				7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */,
 				891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */,
 				4769E21B8981C4D77BF4D01B /* TrainingLog.swift in Sources */,
+				D793450460E9BCA2A098D248 /* TrainingLogPanel.swift in Sources */,
 				B21693A6CF7528E594204809 /* VideoTransform.swift in Sources */,
 				F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */,
 				72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */,
@@ -643,7 +659,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -657,7 +673,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.22.1;
+				MARKETING_VERSION = 1.22.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -773,7 +789,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -793,7 +809,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.22.1;
+				MARKETING_VERSION = 1.22.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
