@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.15.1] — 2026-08-01
+
+### Fixed
+- **Python pipeline now applies video rotation metadata.** OpenCV detects
+  a phone recording's rotation tag but the pip-wheel ffmpeg backend does
+  not apply it by default — MediaPipe was fed sideways frames for
+  portrait-shot videos (CLI and Cloud Run backend alike). All readers now
+  go through `open_video_capture`, which sets
+  `CAP_PROP_ORIENTATION_AUTO` explicitly; verified against a committed
+  rotation-tagged fixture. Companion to the iOS-side v1.14.1 fix.
+
 ## [1.15.0] — 2026-08-01 — "Find"
 
 ### Added

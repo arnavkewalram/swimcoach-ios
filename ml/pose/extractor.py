@@ -11,6 +11,20 @@ from typing import Optional
 from pose.keypoints import KEYPOINT_INDICES, KEYPOINT_NAMES, N_KEYPOINTS
 
 
+def open_video_capture(video_path: str) -> "cv2.VideoCapture":
+    """Open a video with rotation metadata applied.
+
+    Phone recordings store sensor-native frames plus a rotation tag.
+    OpenCV's ffmpeg backend detects the tag but (in the pip wheels we
+    ship with) does NOT apply it by default — MediaPipe would see
+    sideways frames. CAP_PROP_ORIENTATION_AUTO makes it explicit and
+    backend-independent. Mirrors the iOS fix in VideoTransform.swift.
+    """
+    cap = cv2.VideoCapture(video_path)
+    cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1)
+    return cap
+
+
 def extract_keypoints_from_video(
     video_path: str,
     frame_sample_rate: int = 1,
@@ -35,7 +49,7 @@ def extract_keypoints_from_video(
     """
     mp_pose = mp.solutions.pose
 
-    cap = cv2.VideoCapture(video_path)
+    cap = open_video_capture(video_path)
     if not cap.isOpened():
         raise ValueError(f"Cannot open video: {video_path}")
 

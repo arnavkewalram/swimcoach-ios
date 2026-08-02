@@ -141,7 +141,8 @@ def extract_pose_sequence(video_path: str) -> Optional[np.ndarray]:
     )
     landmarker = PoseLandmarker.create_from_options(opts)
 
-    cap = cv2.VideoCapture(video_path)
+    from pose.extractor import open_video_capture
+    cap = open_video_capture(video_path)
     if not cap.isOpened():
         return None
 
