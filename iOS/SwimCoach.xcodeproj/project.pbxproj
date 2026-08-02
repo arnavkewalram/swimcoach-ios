@@ -19,6 +19,7 @@
 		1E33B457C06BD3FCBF26C983 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A49C168A6001543BF9CD78C /* AboutView.swift */; };
 		1E434E4BF11307292CFCF251 /* ReportCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */; };
 		1F6B827E4FD8ECD28321D4FA /* LevelMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058CDD9AB205E722F6E0442B /* LevelMonitor.swift */; };
+		1F9FB56A83609471F8D87697 /* SessionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA67BB92F29577B965B6D2E4 /* SessionFilter.swift */; };
 		1FC82D44803A100487309E60 /* SpaceGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BF7185FE87172D94D300296 /* SpaceGrotesk-Regular.ttf */; };
 		2815930944855657E8A7EB06 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8EDC90DCD052513240CF58 /* HomeView.swift */; };
 		2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */; };
@@ -44,6 +45,7 @@
 		72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */; };
 		76DA86DFB3778BE9E0ED8025 /* DrillCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */; };
 		78B84EAA41F09EB2FF2417A3 /* AnalyzingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AC560CE3C7B75914B49079 /* AnalyzingView.swift */; };
+		859AD7AE16F22FD47E69B08B /* SessionFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B732C3B50E0D87F181B63E4 /* SessionFilterTests.swift */; };
 		882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E721FA48603268C362E7F84E /* SwimCoachApp.swift */; };
 		891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228631A15A23306938ED17ED /* TechniqueIssue.swift */; };
 		944F046C848F3370BA9966DA /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5321399BE9F3645B9111A95C /* RootView.swift */; };
@@ -116,6 +118,7 @@
 		70E1CC5D111B6A5AAB5640BE /* VideoTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTransform.swift; sourceTree = "<group>"; };
 		730F3A8523C913A0E0248CDD /* CoachingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingService.swift; sourceTree = "<group>"; };
 		73EF644DB5F84FB24F8FDA4B /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		7B732C3B50E0D87F181B63E4 /* SessionFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionFilterTests.swift; sourceTree = "<group>"; };
 		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
 		8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionComparisonTests.swift; sourceTree = "<group>"; };
@@ -138,6 +141,7 @@
 		B9D9E931537A6F52120C9319 /* IssueWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindow.swift; sourceTree = "<group>"; };
 		BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractor.swift; sourceTree = "<group>"; };
 		BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseAnalyzer.swift; sourceTree = "<group>"; };
+		CA67BB92F29577B965B6D2E4 /* SessionFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionFilter.swift; sourceTree = "<group>"; };
 		CF5F95B5EFDE86670DAE8840 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		D027762C9F6FC33526494B6F /* DrillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillsView.swift; sourceTree = "<group>"; };
 		D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
@@ -247,6 +251,7 @@
 				F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */,
 				A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */,
 				8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */,
+				7B732C3B50E0D87F181B63E4 /* SessionFilterTests.swift */,
 				B06C0AA352DE7728EADB818C /* SwimSessionTests.swift */,
 				40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */,
 				A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */,
@@ -289,6 +294,7 @@
 				B9D9E931537A6F52120C9319 /* IssueWindow.swift */,
 				EB41DA1B0CADFE8AF96B3B07 /* KeypointFrame.swift */,
 				6CF341904BDF6F1F4F63756E /* SessionComparison.swift */,
+				CA67BB92F29577B965B6D2E4 /* SessionFilter.swift */,
 				52C6D30A519EEDA7A9575174 /* SwimSession.swift */,
 				228631A15A23306938ED17ED /* TechniqueIssue.swift */,
 				2D334215248B1046E54DC5BF /* TrainingLog.swift */,
@@ -511,6 +517,7 @@
 				D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */,
 				1E434E4BF11307292CFCF251 /* ReportCardTests.swift in Sources */,
 				48AB4C100E6842402B6589CF /* SessionComparisonTests.swift in Sources */,
+				859AD7AE16F22FD47E69B08B /* SessionFilterTests.swift in Sources */,
 				13D90FB0157D9328BCD236C2 /* SwimSessionTests.swift in Sources */,
 				116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */,
 				A3B1E9443D343FF9B5564F05 /* TrainingLogTests.swift in Sources */,
@@ -551,6 +558,7 @@
 				1196B0A2E342B9F875B025C3 /* ResultsView.swift in Sources */,
 				944F046C848F3370BA9966DA /* RootView.swift in Sources */,
 				DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */,
+				1F9FB56A83609471F8D87697 /* SessionFilter.swift in Sources */,
 				2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */,
 				EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */,
 				96333E9BF629DC3E167FC3C7 /* Sparkline.swift in Sources */,
@@ -611,7 +619,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -625,7 +633,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.14.1;
+				MARKETING_VERSION = 1.15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -741,7 +749,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -761,7 +769,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.14.1;
+				MARKETING_VERSION = 1.15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

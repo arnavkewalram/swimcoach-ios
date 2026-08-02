@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.15.0] — 2026-08-01 — "Find"
+
+### Added
+- **History search & filters**: pull down to search sessions by name,
+  note, or date; grade chips under SESSIONS narrow the list (empty
+  selection = all). Charts keep describing the full history.
+
 ## [1.14.1] — 2026-08-01
 
 ### Fixed

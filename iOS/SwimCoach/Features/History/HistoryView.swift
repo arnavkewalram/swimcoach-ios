@@ -9,6 +9,8 @@ struct HistoryView: View {
     @State private var sessionToRename: SwimSession? = nil
     @State private var compareSelection: [SwimSession] = []
     @State private var selectingForCompare = false
+    @State private var searchQuery = ""
+    @State private var gradeFilter: Set<String> = []
 
     private var bestScore: Int { sessions.map(\.score).max() ?? 0 }
     private var avgScore: Int {
@@ -19,6 +21,23 @@ struct HistoryView: View {
     // Chronological order for the chart
     private var chronologicalSessions: [SwimSession] {
         sessions.reversed()
+    }
+
+    private var filteredSessions: [SwimSession] {
+        sessions.filter { session in
+            SessionFilter.matches(grades: gradeFilter, grade: session.grade)
+            && SessionFilter.matches(
+                query: searchQuery,
+                name: session.name,
+                notes: session.notes,
+                dateText: session.analyzedAt.formatted(date: .abbreviated, time: .shortened))
+        }
+    }
+
+    private var presentGrades: [String] {
+        let order = ["A", "B", "C", "D", "F"]
+        let present = Set(sessions.map(\.grade))
+        return order.filter { present.contains($0) }
     }
 
     var body: some View {
@@ -53,14 +72,26 @@ struct HistoryView: View {
                             SectionHeader(title: "Sessions")
                                 .padding(.top, 8)
 
+                            if presentGrades.count > 1 {
+                                gradeChips
+                            }
+
                             if selectingForCompare {
                                 Text("Pick two sessions to compare")
                                     .font(.footnote)
                                     .foregroundStyle(DS.accent)
                             }
 
+                            if filteredSessions.isEmpty {
+                                Text("No sessions match")
+                                    .font(.footnote)
+                                    .foregroundStyle(DS.inkTertiary)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 24)
+                            }
+
                             LazyVStack(spacing: 8) {
-                                ForEach(sessions) { session in
+                                ForEach(filteredSessions) { session in
                                     Button {
                                         if selectingForCompare {
                                             toggleCompare(session)
@@ -98,6 +129,8 @@ struct HistoryView: View {
                 }
             }
         }
+        .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .automatic),
+                    prompt: "Name, notes, or date")
         .sheet(item: $sessionToRename) { session in
             EditSessionSheet(session: session)
         }
@@ -138,6 +171,33 @@ struct HistoryView: View {
         selectingForCompare = false
         compareSelection = []
         router.push(.compare(earlier: earlier, later: later))
+    }
+
+    private var gradeChips: some View {
+        HStack(spacing: 8) {
+            ForEach(presentGrades, id: \.self) { grade in
+                let isOn = gradeFilter.contains(grade)
+                Button {
+                    if isOn { gradeFilter.remove(grade) } else { gradeFilter.insert(grade) }
+                } label: {
+                    Text(grade)
+                        .font(.grotesk(13, .bold))
+                        .foregroundStyle(isOn ? .white : DS.gradeColor(grade))
+                        .frame(width: 34, height: 30)
+                        .background(isOn ? DS.gradeColor(grade) : .clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 7))
+                        .overlay(RoundedRectangle(cornerRadius: 7)
+                            .stroke(DS.gradeColor(grade).opacity(isOn ? 0 : 0.5), lineWidth: 1))
+                }
+                .accessibilityLabel("\(isOn ? "Remove" : "Add") grade \(grade) filter")
+            }
+            if !gradeFilter.isEmpty {
+                Button("Clear") { gradeFilter = [] }
+                    .font(.footnote)
+                    .foregroundStyle(DS.accent)
+            }
+            Spacer()
+        }
     }
 
     private var summaryStrip: some View {
