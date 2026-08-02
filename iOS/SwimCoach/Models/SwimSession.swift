@@ -8,6 +8,9 @@ final class SwimSession {
     /// Free-text training note ("worked on catch", "felt heavy").
     /// Defaulted so existing stores migrate losslessly.
     var notes: String = ""
+    /// Who swam — lets one phone track multiple swimmers. Defaulted for
+    /// lossless migration; empty means untagged.
+    var swimmer: String = ""
     var score: Int
     var grade: String
     var issueCount: Int
