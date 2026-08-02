@@ -189,7 +189,7 @@ struct AnalyzingView: View {
             // 2 — Feature extraction: 3-second windows in the model's timebase
             let effectiveFPS = fps / Double(PoseAnalyzer.sampleRate)
             guard let tensors = FeatureExtractor.extractWindows(
-                from: observations, effectiveFPS: effectiveFPS
+                from: timedObservations, effectiveFPS: effectiveFPS
             ) else {
                 failWith(
                     "Could not prepare the detected poses for analysis. " +

@@ -29,21 +29,72 @@ struct FeatureExtractor {
 
     // MARK: - Public API
 
+    /// Build model windows from timestamped observations on a UNIFORM time
+    /// grid, zero-filling detection gaps — matching the Python pipeline,
+    /// which keeps every processed frame (zeros when detection fails).
+    /// Windowing the raw observation array instead would silently compress
+    /// time whenever frames were rejected (turns, splashes), skewing the
+    /// frequency-sensitive kick-rate labels.
     static func extractWindows(
-        from observations: [VNHumanBodyPoseObservation],
+        from timed: [PoseAnalyzer.TimedObservation],
         effectiveFPS: Double
     ) -> [MLMultiArray]? {
-        guard observations.count >= minObservations else { return nil }
+        guard timed.count >= minObservations else { return nil }
 
         let W = nJoints * nCoords
-        let raw = rawBuffer(from: observations)
+        let times = timed.map(\.seconds)
+        let slots = slotAssignments(times: times, fps: max(1.0, effectiveFPS))
+
+        // Uniform-grid buffer: observation joints in their slot, zeros in gaps
+        var raw = [Float](repeating: 0, count: slots.count * W)
+        for (slot, obsIndex) in slots.enumerated() {
+            guard let obsIndex else { continue }
+            fill(&raw, atFrame: slot, from: timed[obsIndex].observation)
+        }
+
         let winLen = windowLength(for: effectiveFPS)
-        let tensors = windowRanges(frameCount: observations.count, windowLen: winLen)
+        let tensors = windowRanges(frameCount: slots.count, windowLen: winLen)
             .compactMap { r -> MLMultiArray? in
                 tensor(from: Array(raw[(r.lowerBound * W)..<(r.upperBound * W)]),
                        frameCount: r.count)
             }
         return tensors.isEmpty ? nil : tensors
+    }
+
+    /// Map a uniform grid at `fps` spanning the observation times to the
+    /// nearest observation per slot (nil = gap). Pure and unit-tested.
+    static func slotAssignments(times: [Double], fps: Double) -> [Int?] {
+        guard let first = times.first, let last = times.last, fps > 0 else { return [] }
+        let step = 1.0 / fps
+        let slotCount = max(times.count, Int(((last - first) / step).rounded()) + 1)
+        var result = [Int?](repeating: nil, count: slotCount)
+        var obsIndex = 0
+        for slot in 0..<slotCount {
+            let t = first + Double(slot) * step
+            // Advance to the observation closest to t (times are sorted)
+            while obsIndex + 1 < times.count,
+                  abs(times[obsIndex + 1] - t) <= abs(times[obsIndex] - t) {
+                obsIndex += 1
+            }
+            if abs(times[obsIndex] - t) <= step * 0.75 {
+                result[slot] = obsIndex
+            }
+        }
+        return result
+    }
+
+    private static func fill(_ raw: inout [Float], atFrame frame: Int,
+                             from obs: VNHumanBodyPoseObservation) {
+        let W = nJoints * nCoords
+        for (j, joint) in joints.enumerated() {
+            let base = frame * W + j * nCoords
+            if let pt = try? obs.recognizedPoint(joint), pt.confidence > 0.1 {
+                raw[base]     = Float(pt.location.x)
+                // Vision y-up → MediaPipe y-down training convention.
+                raw[base + 1] = Float(1 - pt.location.y)
+                raw[base + 2] = Float(pt.confidence)
+            }
+        }
     }
 
     // 3 s worth of observations at the pipeline's effective frame rate.
@@ -65,25 +116,6 @@ struct FeatureExtractor {
     }
 
     // MARK: - Internals
-
-    // Flat (T × 39) buffer: [t*W + j*3 + c]
-    private static func rawBuffer(from observations: [VNHumanBodyPoseObservation]) -> [Float] {
-        let W = nJoints * nCoords
-        var raw = [Float](repeating: 0, count: observations.count * W)
-        for (t, obs) in observations.enumerated() {
-            for (j, joint) in joints.enumerated() {
-                let base = t * W + j * nCoords
-                if let pt = try? obs.recognizedPoint(joint), pt.confidence > 0.1 {
-                    raw[base]     = Float(pt.location.x)
-                    // Vision uses a bottom-left origin (y up); the model was trained on
-                    // MediaPipe keypoints with a top-left origin (y down). Flip to match.
-                    raw[base + 1] = Float(1 - pt.location.y)
-                    raw[base + 2] = Float(pt.confidence)
-                }
-            }
-        }
-        return raw
-    }
 
     // Pack one window (frameCount × 39 flat) into a (1, 39, targetLen) tensor.
     // Layout: tensor[channel * targetLen + t] where channel = j*3 + c.
