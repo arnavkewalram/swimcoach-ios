@@ -50,6 +50,11 @@ struct FeedbackEngine {
          "Settle into a 6-beat kick for aerobic efforts, 2-beat for distance."),
     ]
 
+    /// Index of a label in catalog/probability order (for issue timelines).
+    static func labelIndex(of name: String) -> Int? {
+        catalog.firstIndex { $0.name == name }
+    }
+
     static func decode(probabilities: [Float]) -> [TechniqueIssue] {
         probabilities.enumerated().compactMap { i, prob in
             guard i < catalog.count, prob >= threshold else { return nil }

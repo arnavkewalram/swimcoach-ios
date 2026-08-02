@@ -9,6 +9,7 @@
 - [ ] If `ml/ml/datagen.py` or `ml/ml/model.py` changed: retrained, reconverted
       (`coreml_convert.py`), and regenerated `RealFootageFixtures.swift`
 - [ ] If `iOS/project.yml` changed: ran `xcodegen generate` and committed the pbxproj
+- [ ] CHANGELOG.md has an entry for this change under the target version
 
 ## Model impact
 

@@ -35,15 +35,25 @@ struct FeatureExtractor {
     /// Windowing the raw observation array instead would silently compress
     /// time whenever frames were rejected (turns, splashes), skewing the
     /// frequency-sensitive kick-rate labels.
+    /// One model window: the input tensor plus the source-time span it
+    /// covers, so results can point back into the video ("see it").
+    struct Window {
+        let tensor: MLMultiArray
+        let start: Double
+        let end: Double
+    }
+
     static func extractWindows(
         from timed: [PoseAnalyzer.TimedObservation],
         effectiveFPS: Double
-    ) -> [MLMultiArray]? {
+    ) -> [Window]? {
         guard timed.count >= minObservations else { return nil }
 
         let W = nJoints * nCoords
         let times = timed.map(\.seconds)
-        let slots = slotAssignments(times: times, fps: max(1.0, effectiveFPS))
+        let fps = max(1.0, effectiveFPS)
+        let slots = slotAssignments(times: times, fps: fps)
+        let t0 = times.first ?? 0
 
         // Uniform-grid buffer: observation joints in their slot, zeros in gaps
         var raw = [Float](repeating: 0, count: slots.count * W)
@@ -53,12 +63,15 @@ struct FeatureExtractor {
         }
 
         let winLen = windowLength(for: effectiveFPS)
-        let tensors = windowRanges(frameCount: slots.count, windowLen: winLen)
-            .compactMap { r -> MLMultiArray? in
-                tensor(from: Array(raw[(r.lowerBound * W)..<(r.upperBound * W)]),
-                       frameCount: r.count)
+        let windows = windowRanges(frameCount: slots.count, windowLen: winLen)
+            .compactMap { r -> Window? in
+                guard let t = tensor(from: Array(raw[(r.lowerBound * W)..<(r.upperBound * W)]),
+                                     frameCount: r.count) else { return nil }
+                return Window(tensor: t,
+                              start: t0 + Double(r.lowerBound) / fps,
+                              end: t0 + Double(r.upperBound) / fps)
             }
-        return tensors.isEmpty ? nil : tensors
+        return windows.isEmpty ? nil : windows
     }
 
     /// Map a uniform grid at `fps` spanning the observation times to the
