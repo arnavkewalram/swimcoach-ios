@@ -3,6 +3,12 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.27.1] — 2026-08-02
+
+### Fixed
+- Zero-warning build: the score trend chart's tap mapping moved off the
+  deprecated `plotAreaFrame` API.
+
 ## [1.27.0] — 2026-08-02 — "Streak"
 
 ### Added
