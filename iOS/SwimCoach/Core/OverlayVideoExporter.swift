@@ -18,12 +18,17 @@ enum OverlayVideoExporter {
         }
     }
 
-    /// Map one keypoint frame into pixel space (y-flip from Vision's
-    /// bottom-left origin to the buffer's top-left rows). Pure — unit-tested.
-    static func pixelPoints(for frame: KeypointFrame, size: CGSize) -> [CGPoint?] {
-        (0..<KeypointFrame.jointCount).map { j in
+    /// Map one keypoint frame into RAW-frame pixel space. Keypoints are
+    /// Vision-normalized in display (oriented) space; the exporter draws
+    /// on untransformed frames, so each point goes back through the
+    /// track transform. Pure — unit-tested.
+    static func pixelPoints(for frame: KeypointFrame, naturalSize: CGSize,
+                            transform: CGAffineTransform = .identity) -> [CGPoint?] {
+        (0..<KeypointFrame.jointCount).map { j -> CGPoint? in
             guard let p = frame.point(j) else { return nil }
-            return CGPoint(x: p.x * size.width, y: (1 - p.y) * size.height)
+            return VideoTransform.rawPixelPoint(
+                visionDisplayPoint: CGPoint(x: p.x, y: p.y),
+                natural: naturalSize, transform: transform)
         }
     }
 
@@ -37,6 +42,7 @@ enum OverlayVideoExporter {
             throw ExportError.noVideoTrack
         }
         let naturalSize = try await track.load(.naturalSize)
+        let preferredTransform = try await track.load(.preferredTransform)
         let duration = try await asset.load(.duration).seconds
         let size = CGSize(width: abs(naturalSize.width), height: abs(naturalSize.height))
 
@@ -56,6 +62,9 @@ enum OverlayVideoExporter {
             AVVideoHeightKey: size.height,
         ])
         writerInput.expectsMediaDataInRealTime = false
+        // Output frames stay raw; carrying the source transform keeps the
+        // exported file playing in the same orientation as the original.
+        writerInput.transform = preferredTransform
         let adaptor = AVAssetWriterInputPixelBufferAdaptor(
             assetWriterInput: writerInput,
             sourcePixelBufferAttributes: [
@@ -117,7 +126,8 @@ enum OverlayVideoExporter {
                             // flip so our top-left math draws upright.
                             ctx.translateBy(x: 0, y: CGFloat(CVPixelBufferGetHeight(pixelBuffer)))
                             ctx.scaleBy(x: 1, y: -1)
-                            draw(frame: frame, in: ctx, size: size, color: accent)
+                            draw(frame: frame, in: ctx, naturalSize: size,
+                                 transform: preferredTransform, color: accent)
                         }
                         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
@@ -145,9 +155,10 @@ enum OverlayVideoExporter {
     }
 
     private static func draw(frame: KeypointFrame, in ctx: CGContext,
-                             size: CGSize, color: UIColor) {
-        let points = pixelPoints(for: frame, size: size)
-        let lineWidth = max(2, size.width / 320)
+                             naturalSize: CGSize, transform: CGAffineTransform,
+                             color: UIColor) {
+        let points = pixelPoints(for: frame, naturalSize: naturalSize, transform: transform)
+        let lineWidth = max(2, min(naturalSize.width, naturalSize.height) / 240)
 
         ctx.setStrokeColor(color.cgColor)
         ctx.setLineWidth(lineWidth)
@@ -159,7 +170,7 @@ enum OverlayVideoExporter {
             ctx.strokePath()
         }
 
-        let r = max(3, size.width / 240)
+        let r = max(3, min(naturalSize.width, naturalSize.height) / 180)
         for case let p? in points {
             let dot = CGRect(x: p.x - r, y: p.y - r, width: r * 2, height: r * 2)
             ctx.setFillColor(UIColor.white.cgColor)

@@ -66,6 +66,11 @@ struct PoseAnalyzer {
         let duration    = CMTimeGetSeconds(asset.duration)
         let totalFrames = max(1, Int(duration * Double(nominalFPS)))
 
+        // Camera files store sensor-native frames + a rotation transform;
+        // Vision must be told the orientation or it analyzes sideways
+        // content (and returns sideways coordinates).
+        let frameOrientation = VideoTransform.orientation(for: videoTrack.preferredTransform)
+
         let reader = try AVAssetReader(asset: asset)
         let settings: [String: Any] = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
@@ -101,7 +106,9 @@ struct PoseAnalyzer {
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sample) else { continue }
             sampledFrameCount += 1
 
-            let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+            let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer,
+                                                orientation: frameOrientation,
+                                                options: [:])
             do {
                 try handler.perform([request])
                 if let results = request.results, !results.isEmpty {

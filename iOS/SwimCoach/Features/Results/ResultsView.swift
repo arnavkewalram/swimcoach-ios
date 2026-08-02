@@ -239,8 +239,9 @@ struct ResultsView: View {
                 Task {
                     let asset = AVURLAsset(url: url)
                     if let track = try? await asset.loadTracks(withMediaType: .video).first,
-                       let size = try? await track.load(.naturalSize) {
-                        videoNaturalSize = CGSize(width: abs(size.width), height: abs(size.height))
+                       let size = try? await track.load(.naturalSize),
+                       let transform = try? await track.load(.preferredTransform) {
+                        videoNaturalSize = VideoTransform.displaySize(natural: size, transform: transform)
                     }
                 }
             }

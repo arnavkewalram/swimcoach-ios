@@ -3,6 +3,20 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.14.1] — 2026-08-01
+
+### Fixed
+- **Video rotation metadata is now honored end-to-end.** iPhone camera
+  recordings store sensor-native frames plus a rotation transform; the
+  pipeline ignored it, so on camera footage Vision analyzed sideways
+  frames (degrading detection), the skeleton overlay mismapped, and
+  exported videos played rotated. Vision now receives the frame
+  orientation, the overlay maps against the true display size, and the
+  exporter tags output with the source transform while drawing keypoints
+  through the inverse mapping (new `VideoTransform` helper, unit-tested
+  for all four orientations). Identity-transform sources — every existing
+  test fixture — behave exactly as before.
+
 ## [1.14.0] — 2026-08-01 — "Ready"
 
 ### Added
