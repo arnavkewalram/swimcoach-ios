@@ -246,6 +246,11 @@ private struct ConsistencyStrip: View {
             for: sessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) })
     }
 
+    private var streak: Int {
+        TrainingLog.weeklyStreak(
+            for: sessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) })
+    }
+
     var body: some View {
         let counts = counts
         let peak = max(counts.max() ?? 1, 1)
@@ -255,6 +260,16 @@ private struct ConsistencyStrip: View {
                     .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                     .tracking(1.4)
                     .foregroundStyle(DS.inkTertiary)
+                if streak >= 2 {
+                    Text("\(streak)-WEEK STREAK")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.severityMinor)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .overlay(RoundedRectangle(cornerRadius: 4)
+                            .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
+                }
                 Spacer()
                 Text("SESSIONS / WEEK · LAST 12")
                     .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
@@ -279,7 +294,9 @@ private struct ConsistencyStrip: View {
 
     private var consistencyAccessibilityLabel: String {
         let active = counts.filter { $0 > 0 }.count
-        return "Consistency: sessions in \(active) of the last 12 weeks."
+        var label = "Consistency: sessions in \(active) of the last 12 weeks."
+        if streak >= 2 { label += " \(streak) week streak." }
+        return label
     }
 }
 

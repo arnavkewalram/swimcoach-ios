@@ -84,6 +84,34 @@ final class TrainingLogTests: XCTestCase {
                                                 now: date(2026, 7, 29), calendar: cal), [])
     }
 
+    func testWeeklyStreakCountsConsecutiveWeeks() {
+        let now = date(2026, 7, 29)
+        let entries = [
+            TrainingLog.Entry(date: date(2026, 7, 28), score: 70),   // this week
+            TrainingLog.Entry(date: date(2026, 7, 21), score: 68),   // -1 week
+            TrainingLog.Entry(date: date(2026, 7, 14), score: 66),   // -2 weeks
+            TrainingLog.Entry(date: date(2026, 6, 30), score: 60),   // -4 weeks (gap at -3)
+        ]
+        XCTAssertEqual(TrainingLog.weeklyStreak(for: entries, now: now, calendar: cal), 3)
+    }
+
+    func testWeeklyStreakGraceForQuietCurrentWeek() {
+        let now = date(2026, 7, 29)
+        let entries = [
+            TrainingLog.Entry(date: date(2026, 7, 21), score: 68),   // -1 week
+            TrainingLog.Entry(date: date(2026, 7, 14), score: 66),   // -2 weeks
+        ]
+        // Nothing yet this week — the run ending last week still stands
+        XCTAssertEqual(TrainingLog.weeklyStreak(for: entries, now: now, calendar: cal), 2)
+    }
+
+    func testWeeklyStreakZeroAfterFullGap() {
+        let now = date(2026, 7, 29)
+        let entries = [TrainingLog.Entry(date: date(2026, 7, 7), score: 66)]  // -3 weeks
+        XCTAssertEqual(TrainingLog.weeklyStreak(for: entries, now: now, calendar: cal), 0)
+        XCTAssertEqual(TrainingLog.weeklyStreak(for: [], now: now, calendar: cal), 0)
+    }
+
     func testIsNewBest() {
         XCTAssertFalse(TrainingLog.isNewBest(score: 90, priorBest: nil),
                        "first session ever has nothing to beat")

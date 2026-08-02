@@ -67,6 +67,25 @@ enum TrainingLog {
         }
     }
 
+    /// Consecutive training weeks. Counts back from the current week; a
+    /// quiet current week doesn't break a run that was alive last week —
+    /// the streak is "held" until the week actually ends empty.
+    static func weeklyStreak(for entries: [Entry], now: Date = Date(),
+                             calendar: Calendar = .current,
+                             maxWeeks: Int = 260) -> Int {
+        let thisWeek = summary(for: entries, weekContaining: now, calendar: calendar).sessionCount
+        var streak = thisWeek > 0 ? 1 : 0
+        var back = 1
+        while back < maxWeeks {
+            guard let ref = calendar.date(byAdding: .weekOfYear, value: -back, to: now),
+                  summary(for: entries, weekContaining: ref, calendar: calendar).sessionCount > 0
+            else { break }
+            streak += 1
+            back += 1
+        }
+        return streak
+    }
+
     struct GoalTicks: Equatable {
         let filled: Int     // sessions done, capped at the goal
         let total: Int      // the goal itself
