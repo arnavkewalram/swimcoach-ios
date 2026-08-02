@@ -9,7 +9,7 @@ final class OverlayVideoExporterTests: XCTestCase {
         var joints = [Float](repeating: 0, count: 39)
         joints[0] = 0.25; joints[1] = 0.75; joints[2] = 0.9
         let frame = KeypointFrame(t: 0, joints: joints)
-        let points = OverlayVideoExporter.pixelPoints(for: frame, size: CGSize(width: 1000, height: 500))
+        let points = OverlayVideoExporter.pixelPoints(for: frame, naturalSize: CGSize(width: 1000, height: 500))
         XCTAssertEqual(points.count, 13)
         XCTAssertEqual(points[0]?.x ?? -1, 250, accuracy: 0.001)
         XCTAssertEqual(points[0]?.y ?? -1, 125, accuracy: 0.001)   // (1 - 0.75) * 500
@@ -20,7 +20,7 @@ final class OverlayVideoExporterTests: XCTestCase {
         joints[0] = 0.5; joints[1] = 0.5; joints[2] = 0.05   // below minConfidence
         joints[3] = 0.5; joints[4] = 0.5; joints[5] = 0.9
         let frame = KeypointFrame(t: 0, joints: joints)
-        let points = OverlayVideoExporter.pixelPoints(for: frame, size: CGSize(width: 100, height: 100))
+        let points = OverlayVideoExporter.pixelPoints(for: frame, naturalSize: CGSize(width: 100, height: 100))
         XCTAssertNil(points[0])
         XCTAssertNotNil(points[1])
     }
