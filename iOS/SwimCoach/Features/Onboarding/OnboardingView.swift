@@ -104,7 +104,7 @@ private struct WelcomePage: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Spacer().frame(height: 14)
-            Text("Film a swim from the pool deck and get detailed biomechanics feedback in seconds — no account, all on device.")
+            Text("Film a swim from the pool deck — or import one from Photos — and get detailed biomechanics feedback in seconds. No account, all on device.")
                 .font(.subheadline)
                 .lineSpacing(3)
                 .foregroundStyle(DS.inkSecondary)
@@ -120,7 +120,7 @@ private struct CameraPage: View {
     let onNext: () -> Void
 
     private let tips = [
-        "Stable phone, waist height",
+        "Stable phone — watch the level line",
         "3–6 metres from the swimmer",
         "Bright lighting preferred"
     ]
@@ -213,10 +213,10 @@ private struct ResultsPage: View {
             VStack(spacing: 10) {
                 ResultCard(index: "01", title: "Technique score",
                            description: "A 0–100 biomechanics score with a letter grade")
-                ResultCard(index: "02", title: "Issues detected",
-                           description: "Named stroke faults, each with a severity rating")
-                ResultCard(index: "03", title: "Drill tips",
-                           description: "Specific exercises to fix each fault")
+                ResultCard(index: "02", title: "Faults, on your video",
+                           description: "Named stroke faults with severity — and a skeleton overlay showing exactly when they happened")
+                ResultCard(index: "03", title: "Drills & progress",
+                           description: "A drill library mapped to every fault, plus trends, weekly goals, and a focus to work on")
             }
             .padding(.horizontal, 40)
             Spacer()
