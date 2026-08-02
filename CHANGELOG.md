@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.10.0] — 2026-08-01 — "Best"
+
+### Added
+- **New Best**: when a session beats every previously saved score, the
+  Results score panel shows a pine-green NEW BEST chip (and VoiceOver says
+  so). Ties and first-ever sessions don't count — there was nothing to beat.
+- **About screen** (footer of Home): what the app is, the on-device privacy
+  stance, live version/build from the bundle, and the Space Grotesk SIL OFL
+  license text — which the license obliges us to ship (test-enforced).
+
 ## [1.9.0] — 2026-08-01 — "Goal"
 
 ### Added

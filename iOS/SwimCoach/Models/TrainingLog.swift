@@ -46,6 +46,13 @@ enum TrainingLog {
         Array(entries.sorted { $0.date < $1.date }.suffix(limit).map(\.score))
     }
 
+    /// True when a score beats every prior session. Nil prior best (first
+    /// session ever) is not a "new best" — there was nothing to beat.
+    static func isNewBest(score: Int, priorBest: Int?) -> Bool {
+        guard let prior = priorBest else { return false }
+        return score > prior
+    }
+
     struct GoalTicks: Equatable {
         let filled: Int     // sessions done, capped at the goal
         let total: Int      // the goal itself
