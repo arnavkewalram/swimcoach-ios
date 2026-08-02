@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.19.0] — 2026-08-01 — "Steady"
+
+### Changed
+- **Model retrained with camera-roll augmentation**: synthetic training
+  now includes ±6° global roll jitter so a slightly tilted phone can't
+  masquerade as body sag — faults must show their temporal signature.
+  Synthetic F1 holds at 1.000 on all ten labels; sanity checks (no
+  saturation, injection detection, healthy-sequence rejection) all pass.
+  CoreML export and real-footage parity fixtures regenerated.
+
 ## [1.18.1] — 2026-08-01
 
 ### Docs

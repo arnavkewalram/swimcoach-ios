@@ -119,6 +119,15 @@ def _apply_view_jitter(kp: np.ndarray, rng: np.random.Generator) -> np.ndarray:
     kp = kp.copy()
     if rng.random() < 0.5:
         kp[:, :, 0] = 1.0 - kp[:, :, 0]
+    # Small camera roll (±6°): hand-held phones are rarely perfectly level,
+    # and a static global tilt must not read as body sag — the faults live
+    # in the temporal signature, not a fixed y-offset. Label-preserving.
+    angle = rng.uniform(-0.105, 0.105)
+    c, s = float(np.cos(angle)), float(np.sin(angle))
+    x = kp[:, :, 0] - 0.5
+    y = kp[:, :, 1] - 0.5
+    kp[:, :, 0] = x * c - y * s + 0.5
+    kp[:, :, 1] = x * s + y * c + 0.5
     scale = rng.uniform(0.8, 1.2)
     shift = rng.uniform(-0.08, 0.08, size=2).astype(np.float32)
     kp[:, :, :2] = np.clip((kp[:, :, :2] - 0.5) * scale + 0.5 + shift, 0.0, 1.0)
