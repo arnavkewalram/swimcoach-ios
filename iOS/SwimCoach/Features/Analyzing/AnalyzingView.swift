@@ -198,11 +198,14 @@ struct AnalyzingView: View {
                 return
             }
 
-            // 3 — SwimTCN inference (the ML model is the only detection path),
-            // probabilities averaged across windows
+            // 3 — SwimTCN inference (the ML model is the only detection path).
+            // Keep per-window probabilities (issue timeline / "see it") and
+            // average them for the overall verdict.
+            var windows = [IssueWindow]()
             var probSum = [Float](repeating: 0, count: SwimTCNRunner.expectedLabelCount)
-            for tensor in tensors {
-                let p = try SwimTCNRunner.shared.predict(tensor: tensor)
+            for w in tensors {
+                let p = try SwimTCNRunner.shared.predict(tensor: w.tensor)
+                windows.append(IssueWindow(start: w.start, end: w.end, probs: p))
                 for i in probSum.indices { probSum[i] += p[i] }
             }
             let probs = probSum.map { $0 / Float(tensors.count) }
@@ -213,7 +216,7 @@ struct AnalyzingView: View {
 
             // 4 — Motion metrics
             let metrics = BiomechanicsEngine().metrics(
-                from: observations, fps: fps, sampleRate: PoseAnalyzer.sampleRate,
+                from: timedObservations, fps: fps, sampleRate: PoseAnalyzer.sampleRate,
                 sampledFrames: sampledFrames
             )
 
@@ -242,7 +245,8 @@ struct AnalyzingView: View {
                 tips: sortedIssues.prefix(3).map(\.tip),
                 analyzedAt: Date(),
                 videoFileName: videoName,
-                keypointFrames: keypointFrames
+                keypointFrames: keypointFrames,
+                issueWindows: windows
             )
 
             // 6 — AI coaching tips
@@ -257,7 +261,8 @@ struct AnalyzingView: View {
                     fps: result.fps, issues: result.issues, tips: aiTips,
                     analyzedAt: result.analyzedAt,
                     videoFileName: result.videoFileName,
-                    keypointFrames: result.keypointFrames
+                    keypointFrames: result.keypointFrames,
+                    issueWindows: result.issueWindows
                 )
             }
 

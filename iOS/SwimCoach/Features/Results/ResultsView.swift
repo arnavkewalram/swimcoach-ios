@@ -22,10 +22,33 @@ struct ResultsView: View {
 
     private var isSaved: Bool { !savedSessions.isEmpty }
 
+    @State private var scrollProxy: ScrollViewProxy? = nil
+    private let videoSectionID = "session-video"
+
+    private var canSeekIssues: Bool {
+        result.videoURL != nil && !(result.issueWindows?.isEmpty ?? true)
+    }
+
+    /// Jump the video to where this issue's window probability peaked.
+    private func seekToPeak(of issue: TechniqueIssue) {
+        guard let windows = result.issueWindows,
+              let index = FeedbackEngine.labelIndex(of: issue.name),
+              let peak = windows.peakWindow(labelIndex: index) else { return }
+        seek(to: peak.start)
+    }
+
+    private func seek(to seconds: Double) {
+        withAnimation { scrollProxy?.scrollTo(videoSectionID, anchor: .top) }
+        player?.seek(to: CMTime(seconds: seconds, preferredTimescale: 600),
+                     toleranceBefore: .zero, toleranceAfter: .zero)
+        player?.play()
+    }
+
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
 
+            ScrollViewReader { scrollProxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
 
@@ -74,7 +97,9 @@ struct ResultsView: View {
                             .staggerIn(sectionsVisible, delay: 0.18)
                         VStack(spacing: 8) {
                             ForEach(result.issues, id: \.name) { issue in
-                                IssueRow(issue: issue)
+                                IssueRow(issue: issue,
+                                         canSeek: canSeekIssues,
+                                         onSeeIt: { seekToPeak(of: issue) })
                             }
                         }
                         .padding(.bottom, 28)
@@ -103,6 +128,8 @@ struct ResultsView: View {
                         .staggerIn(sectionsVisible, delay: 0.30)
                 }
                 .padding(.horizontal, 24)
+            }
+            .onAppear { self.scrollProxy = scrollProxy }
             }
         }
         .navigationTitle("Results")
@@ -168,7 +195,16 @@ struct ResultsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.border, lineWidth: 1))
             .accessibilityLabel("Analyzed swim video with detected joint overlay. Review your stroke alongside the feedback below.")
+
+            if let windows = result.issueWindows, !windows.isEmpty, !result.issues.isEmpty {
+                IssueTimelineStrip(
+                    windows: windows,
+                    issues: result.issues,
+                    onSelect: { time in seek(to: time) }
+                )
+            }
         }
+        .id(videoSectionID)
     }
 
     private var hasSkeletonData: Bool {
@@ -346,6 +382,8 @@ private extension View {
 
 private struct IssueRow: View {
     let issue: TechniqueIssue
+    var canSeek: Bool = false
+    var onSeeIt: () -> Void = {}
     @State private var expanded = false
 
     private var severityColor: Color {
@@ -406,6 +444,25 @@ private struct IssueRow: View {
                             .lineSpacing(3)
                             .foregroundStyle(DS.ink)
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if canSeek {
+                        Button(action: onSeeIt) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "play.circle")
+                                    .font(.footnote)
+                                    .accessibilityHidden(true)
+                                Text("SEE IT IN YOUR VIDEO")
+                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                    .tracking(1.2)
+                            }
+                            .foregroundStyle(DS.accent)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 8)
+                            .overlay(RoundedRectangle(cornerRadius: 6)
+                                .stroke(DS.accent.opacity(0.45), lineWidth: 1))
+                        }
+                        .accessibilityLabel("Play the video where \(issue.displayName) was strongest")
                     }
                 }
                 .padding(16)

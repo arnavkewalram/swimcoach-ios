@@ -20,6 +20,9 @@ struct AnalysisResult: Hashable, Codable, Sendable {
     /// Sampled pose keypoints for skeleton playback overlay. Optional —
     /// older sessions and demo sessions have none.
     var keypointFrames: [KeypointFrame]? = nil
+    /// Per-window model probabilities with time spans (issue timeline /
+    /// "see it" seeking). Optional — older sessions have none.
+    var issueWindows: [IssueWindow]? = nil
 
     var detectionRate: Double {
         sampledFrames > 0 ? Double(frameCount) / Double(sampledFrames) : 1.0
@@ -85,7 +88,17 @@ struct AnalysisResult: Hashable, Codable, Sendable {
             "Add a 2-beat kick (one per arm stroke) to keep your hips rotating.",
         ],
         analyzedAt: Date(),
-        videoFileName: "swim_test.mp4"
+        videoFileName: "swim_test.mp4",
+        issueWindows: [
+            IssueWindow(start: 0.0, end: 3.0,
+                        probs: [0.2, 0.1, 0.3, 0.1, 0.1, 0.1, 0.55, 0.2, 0.35, 0.1]),
+            IssueWindow(start: 1.5, end: 4.5,
+                        probs: [0.2, 0.1, 0.6, 0.1, 0.1, 0.1, 0.85, 0.2, 0.50, 0.1]),
+            IssueWindow(start: 3.0, end: 6.0,
+                        probs: [0.2, 0.1, 0.7, 0.1, 0.1, 0.1, 0.95, 0.2, 0.60, 0.1]),
+            IssueWindow(start: 4.5, end: 7.5,
+                        probs: [0.2, 0.1, 0.5, 0.1, 0.1, 0.1, 0.90, 0.2, 0.55, 0.1]),
+        ]
     )
     #endif
 }
@@ -97,7 +110,7 @@ extension AnalysisResult {
     enum CodingKeys: String, CodingKey {
         case id, score, grade, strokeCount, kickRatePerMin, strokeAsymmetry
         case frameCount, sampledFrames, fps, issues, tips, analyzedAt
-        case videoFileName, keypointFrames
+        case videoFileName, keypointFrames, issueWindows
     }
 
     init(from decoder: Decoder) throws {
@@ -116,6 +129,7 @@ extension AnalysisResult {
         analyzedAt = try c.decode(Date.self, forKey: .analyzedAt)
         videoFileName = try c.decodeIfPresent(String.self, forKey: .videoFileName)
         keypointFrames = try c.decodeIfPresent([KeypointFrame].self, forKey: .keypointFrames)
+        issueWindows = try c.decodeIfPresent([IssueWindow].self, forKey: .issueWindows)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -134,5 +148,6 @@ extension AnalysisResult {
         try c.encode(analyzedAt, forKey: .analyzedAt)
         try c.encodeIfPresent(videoFileName, forKey: .videoFileName)
         try c.encodeIfPresent(keypointFrames, forKey: .keypointFrames)
+        try c.encodeIfPresent(issueWindows, forKey: .issueWindows)
     }
 }

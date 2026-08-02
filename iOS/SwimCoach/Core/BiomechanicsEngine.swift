@@ -17,13 +17,24 @@ struct BiomechanicsEngine {
     // MARK: - Metrics (always called)
 
     func metrics(
-        from observations: [VNHumanBodyPoseObservation],
+        from timed: [PoseAnalyzer.TimedObservation],
         fps: Double,
         sampleRate: Int,
         sampledFrames: Int = 0
     ) -> Metrics {
         let effectiveFPS = fps / Double(max(1, sampleRate))
-        let motion = computeMotion(observations, effectiveFPS: effectiveFPS, sampledFrames: sampledFrames)
+        // Real elapsed time from timestamps — observation-count-based duration
+        // understates elapsed time whenever detection drops frames, which
+        // inflated kick rate on clean footage and zeroed it on sparse footage.
+        let realDuration: Double
+        if let first = timed.first?.seconds, let last = timed.last?.seconds, last > first {
+            realDuration = (last - first) + 1.0 / max(1.0, effectiveFPS)
+        } else {
+            realDuration = Double(max(sampledFrames, timed.count)) / max(1.0, effectiveFPS)
+        }
+        let motion = computeMotion(timed.map(\.observation),
+                                   effectiveFPS: effectiveFPS,
+                                   overrideDuration: realDuration)
         return Metrics(
             strokeCount: motion.totalStrokes,
             kickRatePerMin: motion.kickRate,
@@ -74,7 +85,7 @@ struct BiomechanicsEngine {
 
     private func computeMotion(_ obs: [VNHumanBodyPoseObservation],
                                 effectiveFPS: Double,
-                                sampledFrames: Int = 0) -> MotionData {
+                                overrideDuration: Double? = nil) -> MotionData {
         var lWrist = [Float](), rWrist = [Float]()
         var lAnkle = [Float](), rAnkle = [Float]()
         var shoulderDiff = [Float]()  // leftShoulder.y − rightShoulder.y
@@ -106,10 +117,8 @@ struct BiomechanicsEngine {
         }
 
         let nKicks = peaks(lAnkle).count + peaks(rAnkle).count
-        // Use actual sampled frame count for duration so kick rate is correct even when
-        // Vision only detected poses in a fraction of frames (sparse detection scenario).
-        let frameCount = sampledFrames > 0 ? sampledFrames : obs.count
-        let duration = frameCount == 0 ? 1.0 : Double(frameCount) / max(1, effectiveFPS)
+        let duration = overrideDuration
+            ?? (obs.isEmpty ? 1.0 : Double(obs.count) / max(1, effectiveFPS))
         let kickRate = Double(nKicks) / duration * 60.0
         let diff = abs(lS.count - rS.count)
         let total = max(1, lS.count + rS.count)

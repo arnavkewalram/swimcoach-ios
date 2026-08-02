@@ -73,3 +73,18 @@ cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
 Never commit to `main` directly — branch, open a PR, and let CI
 (python-tests + ios-tests) go green before merging. Model-weight changes
 belong in their own PR with training metrics in the description.
+
+## Release cycle (applies to every feature)
+
+Features ship as releases, not loose merges:
+1. Feature branch → PR (must include a CHANGELOG.md entry under the target
+   version) → CI green → squash-merge.
+2. When a version's scope is complete: bump MARKETING_VERSION /
+   CURRENT_PROJECT_VERSION in `iOS/project.yml` (+ `xcodegen generate`),
+   finalize the CHANGELOG section with the date.
+3. Tag `vX.Y.Z` on the release commit and create a GitHub release whose
+   notes are that CHANGELOG section.
+4. Deploy = install the tagged build on the device/simulator and verify the
+   headline feature works before calling it shipped.
+Semver: features bump minor, fixes bump patch, model-contract or data-format
+breaks bump major.
