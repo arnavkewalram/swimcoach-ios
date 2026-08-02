@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.16.0] — 2026-08-01 — "Faults"
+
+### Added
+- **Issue trends in History**: each fault in Common Issues now carries a
+  direction arrow once six or more sessions exist — pine green heading
+  down when a fault fades from recent sessions, brick red heading up when
+  it's emerging. Rates compare the recent half of your sessions to the
+  earlier half with a 25% movement threshold, so noise stays unmarked.
+
 ## [1.15.1] — 2026-08-01
 
 ### Fixed
