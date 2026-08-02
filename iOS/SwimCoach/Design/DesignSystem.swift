@@ -21,8 +21,6 @@ enum DS {
     // Lane blue — the one accent. Used for actions and live data, never decoration.
     static let accent     = Color(red: 0.043, green: 0.322, blue: 0.863) // #0B52DC
     static let accentDim  = accent.opacity(0.55)
-    // Kept for API compatibility; maps to ink in the editorial system.
-    static let accentBlue = ink
 
     // Severity — print register, not alarm register
     static let severityMajor    = Color(red: 0.788, green: 0.263, blue: 0.212) // brick red
@@ -152,29 +150,6 @@ extension View {
     func glassCard(cornerRadius: CGFloat = 12, borderColor: Color = DS.border) -> some View {
         modifier(GlassCard(cornerRadius: cornerRadius, borderColor: borderColor))
     }
-}
-
-// MARK: - Separator (name kept for API compatibility — now a hairline)
-
-struct GradientSeparator: View {
-    var body: some View {
-        Rectangle().fill(DS.border).frame(height: 1)
-    }
-}
-
-// MARK: - Retired atmosphere layers (stubs keep untouched screens compiling
-// while each is restyled; the editorial system has no ambient decoration)
-
-struct AmbientGlow: View {
-    var body: some View { EmptyView() }
-}
-
-struct AnimatedWaves: View {
-    var body: some View { EmptyView() }
-}
-
-struct ConfettiView: View {
-    var body: some View { EmptyView() }
 }
 
 // MARK: - Score arc (flat editorial gauge — thin stroke, no glow)

@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.22.2] — 2026-08-02
+
+### Changed
+- Code health: HomeView (757 → 384 lines) and ResultsView (764 → 612)
+  split into focused files (TrainingLogPanel, HomeCards, IssueRow,
+  ImportedVideo); five dead design-system symbols removed (retired
+  atmosphere stubs, gradient separator, unused accent alias). Verified
+  pixel-identical by screenshot diff; no behavior change.
+
 ## [1.22.1] — 2026-08-02
 
 ### Changed
