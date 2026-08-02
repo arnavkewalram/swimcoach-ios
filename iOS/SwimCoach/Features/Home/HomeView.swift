@@ -348,6 +348,7 @@ struct HomeView: View {
                     byAdding: .day, value: -item.daysAgo, to: Date()) ?? Date()
             )
             let session = SwimSession(result: result)
+            session.swimmer = item.daysAgo % 2 == 0 ? "Arnav" : "Maya"
             if item.daysAgo == 0 {
                 session.name = "Threshold Tuesday"
                 session.notes = "Worked on high-elbow catch; felt strong"

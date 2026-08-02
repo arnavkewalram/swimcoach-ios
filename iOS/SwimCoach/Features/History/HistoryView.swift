@@ -11,6 +11,7 @@ struct HistoryView: View {
     @State private var selectingForCompare = false
     @State private var searchQuery = ""
     @State private var gradeFilter: Set<String> = []
+    @State private var swimmerFilter: Set<String> = []
 
     private var bestScore: Int { sessions.map(\.score).max() ?? 0 }
     private var avgScore: Int {
@@ -26,12 +27,18 @@ struct HistoryView: View {
     private var filteredSessions: [SwimSession] {
         sessions.filter { session in
             SessionFilter.matches(grades: gradeFilter, grade: session.grade)
+            && SessionFilter.matches(swimmers: swimmerFilter, swimmer: session.swimmer)
             && SessionFilter.matches(
                 query: searchQuery,
                 name: session.name,
                 notes: session.notes,
-                dateText: session.analyzedAt.formatted(date: .abbreviated, time: .shortened))
+                dateText: session.analyzedAt.formatted(date: .abbreviated, time: .shortened),
+                swimmer: session.swimmer)
         }
+    }
+
+    private var presentSwimmers: [String] {
+        Array(Set(sessions.map(\.swimmer).filter { !$0.isEmpty })).sorted()
     }
 
     private var presentGrades: [String] {
@@ -75,6 +82,10 @@ struct HistoryView: View {
 
                             SectionHeader(title: "Sessions")
                                 .padding(.top, 8)
+
+                            if presentSwimmers.count > 1 {
+                                swimmerChips
+                            }
 
                             if presentGrades.count > 1 {
                                 gradeChips
@@ -175,6 +186,37 @@ struct HistoryView: View {
         selectingForCompare = false
         compareSelection = []
         router.push(.compare(earlier: earlier, later: later))
+    }
+
+    private var swimmerChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(presentSwimmers, id: \.self) { swimmer in
+                    let isOn = swimmerFilter.contains(swimmer)
+                    Button {
+                        if isOn { swimmerFilter.remove(swimmer) }
+                        else { swimmerFilter.insert(swimmer) }
+                    } label: {
+                        Text(swimmer.uppercased())
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.0)
+                            .foregroundStyle(isOn ? .white : DS.accent)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(isOn ? DS.accent : .clear)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(
+                                DS.accent.opacity(isOn ? 0 : 0.5), lineWidth: 1))
+                    }
+                    .accessibilityLabel("\(isOn ? "Remove" : "Add") \(swimmer) filter")
+                }
+                if !swimmerFilter.isEmpty {
+                    Button("Clear") { swimmerFilter = [] }
+                        .font(.footnote)
+                        .foregroundStyle(DS.accent)
+                }
+            }
+        }
     }
 
     private var gradeChips: some View {
@@ -324,11 +366,21 @@ private struct SessionRow: View {
                 Text("Score \(session.score) · \(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
                     .font(.caption)
                     .foregroundStyle(DS.inkSecondary)
-                if !session.notes.isEmpty {
-                    Text(session.notes)
-                        .font(.caption.italic())
-                        .foregroundStyle(DS.inkTertiary)
-                        .lineLimit(1)
+                if !session.swimmer.isEmpty || !session.notes.isEmpty {
+                    HStack(spacing: 6) {
+                        if !session.swimmer.isEmpty {
+                            Text(session.swimmer.uppercased())
+                                .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                                .tracking(1.0)
+                                .foregroundStyle(DS.accent)
+                        }
+                        if !session.notes.isEmpty {
+                            Text(session.notes)
+                                .font(.caption.italic())
+                                .foregroundStyle(DS.inkTertiary)
+                                .lineLimit(1)
+                        }
+                    }
                 }
             }
 
@@ -538,11 +590,13 @@ struct EditSessionSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name: String
     @State private var notes: String
+    @State private var swimmer: String
 
     init(session: SwimSession) {
         self.session = session
         _name = State(initialValue: session.name)
         _notes = State(initialValue: session.notes)
+        _swimmer = State(initialValue: session.swimmer)
     }
 
     var body: some View {
@@ -561,6 +615,23 @@ struct EditSessionSheet: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .stroke(DS.borderBold, lineWidth: 1)
                         )
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("SWIMMER")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.inkTertiary)
+                        TextField("Who swam? (optional)", text: $swimmer)
+                            .font(.callout)
+                            .foregroundStyle(DS.ink)
+                            .padding(12)
+                            .background(DS.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(DS.borderBold, lineWidth: 1)
+                            )
+                    }
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text("NOTES")
@@ -604,6 +675,7 @@ struct EditSessionSheet: View {
                     Button("Save") {
                         session.name = name.trimmingCharacters(in: .whitespaces)
                         session.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                        session.swimmer = swimmer.trimmingCharacters(in: .whitespaces)
                         dismiss()
                     }
                     .foregroundStyle(DS.accent)
@@ -611,7 +683,7 @@ struct EditSessionSheet: View {
                 }
             }
         }
-        .presentationDetents([.height(340)])
+        .presentationDetents([.height(430)])
         .presentationBackground(DS.background)
     }
 }

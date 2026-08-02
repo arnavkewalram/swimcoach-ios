@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.32.0] — 2026-08-02 — "Squad"
+
+### Added
+- **Swimmer tags**: sessions can name who swam (Edit Session sheet).
+  History shows the tag on each row, gains swimmer filter capsules when
+  more than one swimmer exists, and search covers swimmer names — one
+  phone can now track a whole lane. Existing sessions stay untagged and
+  migrate losslessly.
+
 ## [1.31.0] — 2026-08-02 — "Clock"
 
 ### Added

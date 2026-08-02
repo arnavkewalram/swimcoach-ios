@@ -22,6 +22,25 @@ final class SessionFilterTests: XCTestCase {
             query: "butterfly", name: "Threshold Tuesday", notes: "catch work", dateText: "Aug 1"))
     }
 
+    func testSwimmerFilterSemantics() {
+        XCTAssertTrue(SessionFilter.matches(swimmers: [], swimmer: ""))
+        XCTAssertTrue(SessionFilter.matches(swimmers: [], swimmer: "Maya"))
+        XCTAssertTrue(SessionFilter.matches(swimmers: ["Maya"], swimmer: "Maya"))
+        XCTAssertFalse(SessionFilter.matches(swimmers: ["Maya"], swimmer: "Arnav"))
+        XCTAssertFalse(SessionFilter.matches(swimmers: ["Maya"], swimmer: ""),
+                       "a selection hides untagged sessions")
+    }
+
+    func testSearchIncludesSwimmer() {
+        XCTAssertTrue(SessionFilter.matches(
+            query: "maya", name: "", notes: "", dateText: "", swimmer: "Maya"))
+        XCTAssertFalse(SessionFilter.matches(
+            query: "maya", name: "", notes: "", dateText: "", swimmer: "Arnav"))
+        XCTAssertTrue(SessionFilter.matches(
+            query: "", name: "", notes: "", dateText: "", swimmer: "Arnav"),
+            "empty query still matches everything")
+    }
+
     func testGradeFilterEmptyMeansAll() {
         XCTAssertTrue(SessionFilter.matches(grades: [], grade: "C"))
         XCTAssertTrue(SessionFilter.matches(grades: ["C", "D"], grade: "C"))
