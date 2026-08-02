@@ -1,4 +1,5 @@
 import XCTest
+import SwiftData
 @testable import SwimCoach
 
 final class DrillCatalogTests: XCTestCase {
@@ -34,6 +35,32 @@ final class DrillCatalogTests: XCTestCase {
                 XCTAssertTrue(valid.contains(fix), "\(drill.id) targets unknown issue \(fix)")
             }
         }
+    }
+
+    func testPracticeSummaryCountsAndLatestDate() {
+        let old = Date(timeIntervalSinceNow: -86400)
+        let newer = Date()
+        let events = [
+            DrillPracticeEvent(drillID: "fist-drill", date: old),
+            DrillPracticeEvent(drillID: "fist-drill", date: newer),
+            DrillPracticeEvent(drillID: "catch-up", date: old),
+        ]
+        let summary = DrillPractice.summary(for: "fist-drill", events: events)
+        XCTAssertEqual(summary.count, 2)
+        XCTAssertEqual(summary.lastDate, newer)
+        XCTAssertEqual(DrillPractice.summary(for: "superman-glide", events: events),
+                       DrillPractice.Summary(count: 0, lastDate: nil))
+    }
+
+    @MainActor
+    func testPracticeEventsRoundTripThroughStore() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: DrillPracticeEvent.self, configurations: config)
+        let context = container.mainContext
+        context.insert(DrillPracticeEvent(drillID: "two-beat-timing"))
+        try context.save()
+        let fetched = try context.fetch(FetchDescriptor<DrillPracticeEvent>())
+        XCTAssertEqual(fetched.first?.drillID, "two-beat-timing")
     }
 
     func testFixingFilterReturnsOnlyMatchingDrills() {

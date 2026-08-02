@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */; };
+		0DF63EA8693F3E7FFA9CA9F9 /* DrillPracticeEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */; };
 		0E9877EFAFE15EBB8E2F77DE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */; };
 		116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */; };
 		1196B0A2E342B9F875B025C3 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */; };
@@ -157,6 +158,7 @@
 		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9A59A49638F1335B4DE0B04D /* Sparkline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkline.swift; sourceTree = "<group>"; };
 		9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngineTests.swift; sourceTree = "<group>"; };
+		A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillPracticeEvent.swift; sourceTree = "<group>"; };
 		A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCards.swift; sourceTree = "<group>"; };
 		A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogTests.swift; sourceTree = "<group>"; };
 		A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportCardTests.swift; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 			children = (
 				E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */,
 				6F1C5CC95E42646636CE665F /* DrillCatalog.swift */,
+				A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */,
 				440FD098C083BE63E4C44154 /* FocusFault.swift */,
 				D7994303E7AA3F1A682B4A9E /* IssueTrend.swift */,
 				B9D9E931537A6F52120C9319 /* IssueWindow.swift */,
@@ -632,6 +635,7 @@
 				596F90194883FCE42C428A75 /* CompareView.swift in Sources */,
 				6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */,
 				4529CE69E4735D29DD9A364E /* DrillCatalog.swift in Sources */,
+				0DF63EA8693F3E7FFA9CA9F9 /* DrillPracticeEvent.swift in Sources */,
 				5AC6297BE8258500F7D893CD /* DrillsView.swift in Sources */,
 				3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */,
 				15A029877A18065E055732B8 /* FeedbackEngine.swift in Sources */,
@@ -724,7 +728,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -738,7 +742,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.27.1;
+				MARKETING_VERSION = 1.28.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -890,7 +894,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -910,7 +914,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.27.1;
+				MARKETING_VERSION = 1.28.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

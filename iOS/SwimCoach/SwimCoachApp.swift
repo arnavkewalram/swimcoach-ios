@@ -6,7 +6,7 @@ struct SwimCoachApp: App {
     let container: ModelContainer
 
     init() {
-        container = try! ModelContainer(for: SwimSession.self)
+        container = try! ModelContainer(for: SwimSession.self, DrillPracticeEvent.self)
         // Storage hygiene: drop session videos whose session no longer exists.
         let context = ModelContext(container)
         if let sessions = try? context.fetch(FetchDescriptor<SwimSession>()) {
