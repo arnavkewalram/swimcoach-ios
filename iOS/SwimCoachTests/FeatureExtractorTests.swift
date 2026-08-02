@@ -26,7 +26,32 @@ final class FeatureExtractorTests: XCTestCase {
     // MARK: - Nil guard on empty input
 
     func testReturnsNilForEmptyInput() {
-        XCTAssertNil(FeatureExtractor.extractWindows(from: [], effectiveFPS: 10))
+        XCTAssertNil(FeatureExtractor.extractWindows(
+            from: [PoseAnalyzer.TimedObservation](), effectiveFPS: 10))
+    }
+
+    // MARK: - Slot assignment (uniform time grid with gap zero-fill)
+
+    func testUniformTimesMapOneToOne() {
+        let times = (0..<30).map { Double($0) / 10.0 }   // 10 fps, no gaps
+        let slots = FeatureExtractor.slotAssignments(times: times, fps: 10)
+        XCTAssertEqual(slots.count, 30)
+        XCTAssertEqual(slots.compactMap { $0 }, Array(0..<30))
+    }
+
+    func testDetectionGapProducesNilSlots() {
+        // 1s of detections, 2s gap, 1s of detections at 10 fps
+        let before: [Double] = (0..<10).map { Double($0) / 10.0 }
+        let after: [Double] = (0..<10).map { 3.0 + Double($0) / 10.0 }
+        let times: [Double] = before + after
+        let slots = FeatureExtractor.slotAssignments(times: times, fps: 10)
+        XCTAssertEqual(slots.count, 40)                 // spans 4s of real time
+        let gapSlots = slots[12..<28]
+        XCTAssertTrue(gapSlots.allSatisfy { $0 == nil }, "gap must zero-fill, not compress")
+    }
+
+    func testEmptyTimesEmptySlots() {
+        XCTAssertTrue(FeatureExtractor.slotAssignments(times: [], fps: 10).isEmpty)
     }
 
     // MARK: - Window length (3 s in the pipeline's effective frame rate)

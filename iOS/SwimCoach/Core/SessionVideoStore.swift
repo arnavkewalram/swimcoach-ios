@@ -55,4 +55,15 @@ enum SessionVideoStore {
         let stored = directory.appendingPathComponent(fileName)
         try? FileManager.default.removeItem(at: stored)
     }
+
+    /// Delete stored videos no session references any more — keeps the
+    /// session store from growing unbounded if deletions ever miss a file.
+    static func pruneOrphans(referencedFileNames: Set<String>) {
+        guard let files = try? FileManager.default.contentsOfDirectory(
+            at: directory, includingPropertiesForKeys: nil) else { return }
+        for file in files where !referencedFileNames.contains(file.lastPathComponent) {
+            try? FileManager.default.removeItem(at: file)
+            AppLog.storage.info("Pruned orphan session video: \(file.lastPathComponent)")
+        }
+    }
 }
