@@ -23,6 +23,7 @@ struct ResultsView: View {
     private var isSaved: Bool { !savedSessions.isEmpty }
 
     @State private var scrollProxy: ScrollViewProxy? = nil
+    @State private var reportImage: UIImage? = nil
     private let videoSectionID = "session-video"
 
     private var canSeekIssues: Bool {
@@ -135,9 +136,27 @@ struct ResultsView: View {
         .navigationTitle("Results")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(DS.background, for: .navigationBar)
+        .toolbar {
+            if let reportImage {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(
+                        item: Image(uiImage: reportImage),
+                        preview: SharePreview("SwimCoach report — \(result.score)/100",
+                                              image: Image(uiImage: reportImage))
+                    ) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundStyle(DS.accent)
+                    }
+                    .accessibilityLabel("Share report card")
+                }
+            }
+        }
         .onAppear {
             withAnimation(.easeOut(duration: 1.0)) { animatedScore = Double(result.score) }
             sectionsVisible = true
+            if reportImage == nil {
+                reportImage = ReportCardView.render(result: result)
+            }
             if player == nil, let url = result.videoURL {
                 let p = AVPlayer(url: url)
                 p.isMuted = true
