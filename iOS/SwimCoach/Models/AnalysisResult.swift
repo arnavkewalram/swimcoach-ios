@@ -13,9 +13,18 @@ struct AnalysisResult: Hashable, Codable, Sendable {
     let issues: [TechniqueIssue]
     let tips: [String]
     let analyzedAt: Date
+    /// File name of the analyzed video in SessionVideoStore (or a bundled
+    /// resource name for demo sessions). Optional — sessions saved before
+    /// video playback existed have none.
+    var videoFileName: String? = nil
 
     var detectionRate: Double {
         sampledFrames > 0 ? Double(frameCount) / Double(sampledFrames) : 1.0
+    }
+
+    /// Playable URL for this session's video, if it still exists.
+    var videoURL: URL? {
+        SessionVideoStore.url(forFileName: videoFileName)
     }
 
     var summary: String {
@@ -72,7 +81,8 @@ struct AnalysisResult: Hashable, Codable, Sendable {
             "High-elbow catch: point your elbow at the lane rope, not the pool floor.",
             "Add a 2-beat kick (one per arm stroke) to keep your hips rotating.",
         ],
-        analyzedAt: Date()
+        analyzedAt: Date(),
+        videoFileName: "swim_test.mp4"
     )
     #endif
 }
@@ -84,6 +94,7 @@ extension AnalysisResult {
     enum CodingKeys: String, CodingKey {
         case id, score, grade, strokeCount, kickRatePerMin, strokeAsymmetry
         case frameCount, sampledFrames, fps, issues, tips, analyzedAt
+        case videoFileName
     }
 
     init(from decoder: Decoder) throws {
@@ -100,6 +111,7 @@ extension AnalysisResult {
         issues = try c.decode([TechniqueIssue].self, forKey: .issues)
         tips = try c.decode([String].self, forKey: .tips)
         analyzedAt = try c.decode(Date.self, forKey: .analyzedAt)
+        videoFileName = try c.decodeIfPresent(String.self, forKey: .videoFileName)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -116,5 +128,6 @@ extension AnalysisResult {
         try c.encode(issues, forKey: .issues)
         try c.encode(tips, forKey: .tips)
         try c.encode(analyzedAt, forKey: .analyzedAt)
+        try c.encodeIfPresent(videoFileName, forKey: .videoFileName)
     }
 }

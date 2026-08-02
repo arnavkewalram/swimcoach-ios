@@ -15,6 +15,7 @@
 		1761B3D81C1BE2041A855BFB /* SwimSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C6D30A519EEDA7A9575174 /* SwimSession.swift */; };
 		1FC82D44803A100487309E60 /* SpaceGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BF7185FE87172D94D300296 /* SpaceGrotesk-Regular.ttf */; };
 		2815930944855657E8A7EB06 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8EDC90DCD052513240CF58 /* HomeView.swift */; };
+		2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */; };
 		2D40371DC278AB39902B6CFF /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 73EF644DB5F84FB24F8FDA4B /* OFL.txt */; };
 		310CB56C4250CC47283D5AD5 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */; };
 		3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */; };
@@ -64,6 +65,7 @@
 		24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngine.swift; sourceTree = "<group>"; };
 		2D8EDC90DCD052513240CF58 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealFootageFixtures.swift; sourceTree = "<group>"; };
+		3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionVideoStore.swift; sourceTree = "<group>"; };
 		3A9CE282550C08C6A515A0E9 /* SpaceGrotesk-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Medium.ttf"; sourceTree = "<group>"; };
 		40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunnerTests.swift; sourceTree = "<group>"; };
 		4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunner.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */,
 				24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */,
 				BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */,
+				3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */,
 				4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */,
 			);
 			path = Core;
@@ -413,6 +416,7 @@
 				425EEA4E5FE5FB6C3C333A82 /* PoseAnalyzer.swift in Sources */,
 				1196B0A2E342B9F875B025C3 /* ResultsView.swift in Sources */,
 				944F046C848F3370BA9966DA /* RootView.swift in Sources */,
+				2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */,
 				882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */,
 				1761B3D81C1BE2041A855BFB /* SwimSession.swift in Sources */,
 				7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */,

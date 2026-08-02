@@ -69,6 +69,8 @@ struct HistoryView: View {
                                         }
                                         Button(role: .destructive) {
                                             if let idx = sessions.firstIndex(where: { $0.id == session.id }) {
+                                                SessionVideoStore.delete(
+                                                    fileName: sessions[idx].decoded()?.videoFileName)
                                                 context.delete(sessions[idx])
                                             }
                                         } label: {

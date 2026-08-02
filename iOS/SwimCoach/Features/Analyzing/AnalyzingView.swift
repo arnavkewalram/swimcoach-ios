@@ -216,13 +216,16 @@ struct AnalyzingView: View {
 
             await update(progress: 0.92, status: "Building report…")
 
-            // 5 — Assemble result
+            // 5 — Assemble result (persist the source video first so Results
+            // and History can play it back — temp files get reclaimed)
             let score = BiomechanicsEngine.score(from: issues)
             let grade = BiomechanicsEngine.grade(from: score)
             let sortedIssues = issues.sorted { $0.severity > $1.severity }
+            let resultID = UUID()
+            let videoName = SessionVideoStore.persist(videoURL, for: resultID)
 
             var result = AnalysisResult(
-                id: UUID(),
+                id: resultID,
                 score: score,
                 grade: grade,
                 strokeCount: metrics.strokeCount,
@@ -233,10 +236,11 @@ struct AnalyzingView: View {
                 fps: fps / Double(PoseAnalyzer.sampleRate),
                 issues: sortedIssues,
                 tips: sortedIssues.prefix(3).map(\.tip),
-                analyzedAt: Date()
+                analyzedAt: Date(),
+                videoFileName: videoName
             )
 
-            // 6 — AI coaching tips (Claude Haiku)
+            // 6 — AI coaching tips
             await update(progress: 0.98, status: "Generating coaching tips…")
             let aiTips = await CoachingService.generateTips(for: result)
             if !aiTips.isEmpty {
@@ -246,7 +250,8 @@ struct AnalyzingView: View {
                     strokeAsymmetry: result.strokeAsymmetry, frameCount: result.frameCount,
                     sampledFrames: result.sampledFrames,
                     fps: result.fps, issues: result.issues, tips: aiTips,
-                    analyzedAt: result.analyzedAt
+                    analyzedAt: result.analyzedAt,
+                    videoFileName: result.videoFileName
                 )
             }
 
@@ -336,10 +341,11 @@ struct AnalyzingView: View {
             fps: 30.0,
             issues: sorted,
             tips: sorted.prefix(3).map(\.tip),
-            analyzedAt: Date()
+            analyzedAt: Date(),
+            videoFileName: videoURL.lastPathComponent   // bundled demo video
         )
 
-        // Step 3 — real Claude tips call
+        // Step 3 — AI coaching tips
         await update(progress: 0.98, status: "Generating coaching tips…")
         let aiTips = await CoachingService.generateTips(for: result)
         if !aiTips.isEmpty {
@@ -349,7 +355,8 @@ struct AnalyzingView: View {
                 strokeAsymmetry: result.strokeAsymmetry, frameCount: result.frameCount,
                 sampledFrames: result.sampledFrames,
                 fps: result.fps, issues: result.issues, tips: aiTips,
-                analyzedAt: result.analyzedAt
+                analyzedAt: result.analyzedAt,
+                videoFileName: result.videoFileName
             )
         }
 
