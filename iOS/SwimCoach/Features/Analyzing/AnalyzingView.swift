@@ -48,6 +48,24 @@ struct AnalyzingView: View {
 
     private var analysisView: some View {
         VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Spacer()
+                Button {
+                    // Popping cancels the .task; PoseAnalyzer unwinds via
+                    // its cancellation flag.
+                    router.popToRoot()
+                } label: {
+                    Text("CANCEL")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 11))
+                        .tracking(1.4)
+                        .foregroundStyle(DS.inkSecondary)
+                        .padding(.vertical, 10)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Cancel the analysis")
+            }
+            .padding(.top, 8)
+
             Spacer()
 
             Text("ANALYZING")
