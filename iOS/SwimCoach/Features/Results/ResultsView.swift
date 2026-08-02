@@ -527,6 +527,10 @@ struct ResultsView: View {
             metric(value: result.strokeCount > 0 ? "\(result.strokeCount)" : "–",
                    label: "STROKES")
             metricDivider
+            if let spm = result.strokeRatePerMin {
+                metric(value: String(format: "%.0f", spm), label: "STROKES/MIN")
+                metricDivider
+            }
             metric(value: result.kickRatePerMin > 0 ? String(format: "%.0f", result.kickRatePerMin) : "–",
                    label: "KICKS/MIN")
             metricDivider

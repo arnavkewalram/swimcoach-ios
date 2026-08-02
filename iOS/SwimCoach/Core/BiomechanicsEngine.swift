@@ -12,6 +12,7 @@ struct BiomechanicsEngine {
         var strokeCount: Int    = 0
         var kickRatePerMin: Double = 0
         var strokeAsymmetry: Double = 0
+        let durationSeconds: Double
     }
 
     // MARK: - Metrics (always called)
@@ -38,7 +39,8 @@ struct BiomechanicsEngine {
         return Metrics(
             strokeCount: motion.totalStrokes,
             kickRatePerMin: motion.kickRate,
-            strokeAsymmetry: motion.asymmetry
+            strokeAsymmetry: motion.asymmetry,
+            durationSeconds: realDuration
         )
     }
 

@@ -47,6 +47,23 @@ final class SessionExportTests: XCTestCase {
         XCTAssertFalse(text.contains("keypointFrames"), "heavyweight payloads stay out")
     }
 
+    func testDurationBackCompatAndStrokeRate() throws {
+        // Old sessions (no durationSeconds) decode to nil and show no rate
+        var data = try JSONEncoder().encode(AnalysisResult.demo)
+        var json = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json.removeValue(forKey: "durationSeconds")
+        data = try JSONSerialization.data(withJSONObject: json)
+        let legacy = try JSONDecoder().decode(AnalysisResult.self, from: data)
+        XCTAssertNil(legacy.durationSeconds)
+        XCTAssertNil(legacy.strokeRatePerMin)
+
+        // Current fixture: 48 strokes over 60 s → 48 spm; round-trips
+        XCTAssertEqual(try XCTUnwrap(AnalysisResult.demo.strokeRatePerMin), 48, accuracy: 0.001)
+        let roundTrip = try JSONDecoder().decode(
+            AnalysisResult.self, from: JSONEncoder().encode(AnalysisResult.demo))
+        XCTAssertEqual(roundTrip.durationSeconds, 60)
+    }
+
     func testEmptyStoreStillEncodes() throws {
         let data = try SessionExport.archiveData(from: [])
         XCTAssertFalse(data.isEmpty)

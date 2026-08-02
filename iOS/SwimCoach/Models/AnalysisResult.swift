@@ -23,6 +23,15 @@ struct AnalysisResult: Hashable, Codable, Sendable {
     /// Per-window model probabilities with time spans (issue timeline /
     /// "see it" seeking). Optional — older sessions have none.
     var issueWindows: [IssueWindow]? = nil
+    /// Analyzed clip duration. Optional — sessions saved before stroke
+    /// rate existed have none.
+    var durationSeconds: Double? = nil
+
+    /// Strokes per minute — the tempo number coaches use.
+    var strokeRatePerMin: Double? {
+        guard let d = durationSeconds, d > 0 else { return nil }
+        return Double(strokeCount) / d * 60.0
+    }
 
     var detectionRate: Double {
         sampledFrames > 0 ? Double(frameCount) / Double(sampledFrames) : 1.0
@@ -99,7 +108,8 @@ struct AnalysisResult: Hashable, Codable, Sendable {
                         probs: [0.2, 0.1, 0.7, 0.1, 0.1, 0.1, 0.95, 0.2, 0.60, 0.1]),
             IssueWindow(start: 4.5, end: 7.5,
                         probs: [0.2, 0.1, 0.5, 0.1, 0.1, 0.1, 0.90, 0.2, 0.55, 0.1]),
-        ]
+        ],
+        durationSeconds: 60
     )
 
     /// Synthetic skeleton path matching the demo cartoon's swimmer band —
@@ -182,7 +192,7 @@ extension AnalysisResult {
     enum CodingKeys: String, CodingKey {
         case id, score, grade, strokeCount, kickRatePerMin, strokeAsymmetry
         case frameCount, sampledFrames, fps, issues, tips, analyzedAt
-        case videoFileName, keypointFrames, issueWindows
+        case videoFileName, keypointFrames, issueWindows, durationSeconds
     }
 
     init(from decoder: Decoder) throws {
@@ -202,6 +212,7 @@ extension AnalysisResult {
         videoFileName = try c.decodeIfPresent(String.self, forKey: .videoFileName)
         keypointFrames = try c.decodeIfPresent([KeypointFrame].self, forKey: .keypointFrames)
         issueWindows = try c.decodeIfPresent([IssueWindow].self, forKey: .issueWindows)
+        durationSeconds = try c.decodeIfPresent(Double.self, forKey: .durationSeconds)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -221,5 +232,6 @@ extension AnalysisResult {
         try c.encodeIfPresent(videoFileName, forKey: .videoFileName)
         try c.encodeIfPresent(keypointFrames, forKey: .keypointFrames)
         try c.encodeIfPresent(issueWindows, forKey: .issueWindows)
+        try c.encodeIfPresent(durationSeconds, forKey: .durationSeconds)
     }
 }
