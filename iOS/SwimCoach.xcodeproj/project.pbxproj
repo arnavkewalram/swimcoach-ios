@@ -22,6 +22,7 @@
 		3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */; };
 		39A0758B17361B3A08098E43 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98186D217795042F6E6B7D7A /* OnboardingView.swift */; };
 		425EEA4E5FE5FB6C3C333A82 /* PoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */; };
+		4769E21B8981C4D77BF4D01B /* TrainingLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D334215248B1046E54DC5BF /* TrainingLog.swift */; };
 		48AB4C100E6842402B6589CF /* SessionComparisonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */; };
 		4CE292A8943BD4E8BA57E2E1 /* CoachingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 730F3A8523C913A0E0248CDD /* CoachingService.swift */; };
 		50D1AE085B8472446B1A7E08 /* FoundationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE9BA827876E8FAE3D764408 /* FoundationModels.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -36,9 +37,11 @@
 		882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E721FA48603268C362E7F84E /* SwimCoachApp.swift */; };
 		891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228631A15A23306938ED17ED /* TechniqueIssue.swift */; };
 		944F046C848F3370BA9966DA /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5321399BE9F3645B9111A95C /* RootView.swift */; };
+		96333E9BF629DC3E167FC3C7 /* Sparkline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A59A49638F1335B4DE0B04D /* Sparkline.swift */; };
 		99FD6C30E05CF624EE90AE1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50E3FF3C10BF299B700EBF8A /* Assets.xcassets */; };
 		9AB3F3314B67D293DBB5D3F7 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31C0FDB5AD5DC59E0B820A9 /* HistoryView.swift */; };
 		A25AF3BF4A7B97D169314265 /* IssueWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD161114DD1D2892C9515515 /* IssueWindowTests.swift */; };
+		A3B1E9443D343FF9B5564F05 /* TrainingLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */; };
 		A55C8C4B1FCE196C5B445113 /* ReportCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA260E8E7098342EEBFE586 /* ReportCardView.swift */; };
 		A58B3D216C76EE2B7B9460C1 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D7CDB20F3A4841EE3E9036C /* CameraManager.swift */; };
 		A83D57DAC1237DD9C5EC6ABC /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1962A1582111C7A9B84F96A3 /* AppLog.swift */; };
@@ -78,6 +81,7 @@
 		1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		228631A15A23306938ED17ED /* TechniqueIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechniqueIssue.swift; sourceTree = "<group>"; };
 		24D0FE1E737A492DAB89A346 /* FeedbackEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEngine.swift; sourceTree = "<group>"; };
+		2D334215248B1046E54DC5BF /* TrainingLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLog.swift; sourceTree = "<group>"; };
 		2D8EDC90DCD052513240CF58 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealFootageFixtures.swift; sourceTree = "<group>"; };
 		3998D8ED79F51711A0E32A6D /* SessionVideoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionVideoStore.swift; sourceTree = "<group>"; };
@@ -100,7 +104,9 @@
 		983DF83A1982B648EA414060 /* OverlayVideoExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayVideoExporter.swift; sourceTree = "<group>"; };
 		999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngine.swift; sourceTree = "<group>"; };
 		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9A59A49638F1335B4DE0B04D /* Sparkline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkline.swift; sourceTree = "<group>"; };
 		9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngineTests.swift; sourceTree = "<group>"; };
+		A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogTests.swift; sourceTree = "<group>"; };
 		A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractorTests.swift; sourceTree = "<group>"; };
 		AC20876C011158E31B687438 /* SkeletonOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonOverlayView.swift; sourceTree = "<group>"; };
 		AD161114DD1D2892C9515515 /* IssueWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindowTests.swift; sourceTree = "<group>"; };
@@ -137,6 +143,7 @@
 			isa = PBXGroup;
 			children = (
 				2D8EDC90DCD052513240CF58 /* HomeView.swift */,
+				9A59A49638F1335B4DE0B04D /* Sparkline.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -209,6 +216,7 @@
 				F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */,
 				8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */,
 				40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */,
+				A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */,
 			);
 			path = SwimCoachTests;
 			sourceTree = "<group>";
@@ -239,6 +247,7 @@
 				6CF341904BDF6F1F4F63756E /* SessionComparison.swift */,
 				52C6D30A519EEDA7A9575174 /* SwimSession.swift */,
 				228631A15A23306938ED17ED /* TechniqueIssue.swift */,
+				2D334215248B1046E54DC5BF /* TrainingLog.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -444,6 +453,7 @@
 				D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */,
 				48AB4C100E6842402B6589CF /* SessionComparisonTests.swift in Sources */,
 				116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */,
+				A3B1E9443D343FF9B5564F05 /* TrainingLogTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -477,10 +487,12 @@
 				DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */,
 				2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */,
 				EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */,
+				96333E9BF629DC3E167FC3C7 /* Sparkline.swift in Sources */,
 				882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */,
 				1761B3D81C1BE2041A855BFB /* SwimSession.swift in Sources */,
 				7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */,
 				891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */,
+				4769E21B8981C4D77BF4D01B /* TrainingLog.swift in Sources */,
 				72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -531,7 +543,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -545,7 +557,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -661,7 +673,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -681,7 +693,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.7.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
