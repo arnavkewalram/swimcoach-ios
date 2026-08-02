@@ -27,4 +27,5 @@ enum AppDestination: Hashable {
     case results(AnalysisResult)
     case history
     case compare(earlier: AnalysisResult, later: AnalysisResult)
+    case report(AnalysisResult)
 }

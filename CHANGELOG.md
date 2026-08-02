@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.3.0] — 2026-08-02 — "Share"
+
+### Added
+- **Report-card export**: every Results screen renders a shareable 1080×1350
+  report card in the editorial style (score, grade, metrics, issues) —
+  share icon in the toolbar sends it anywhere via the system sheet.
+
 ## [1.2.0] — 2026-08-02 — "Progress"
 
 ### Added

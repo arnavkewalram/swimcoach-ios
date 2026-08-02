@@ -19,6 +19,12 @@ struct RootView: View {
                         HistoryView()
                     case .compare(let earlier, let later):
                         CompareView(earlier: earlier, later: later)
+                    case .report(let result):
+                        ScrollView {
+                            ReportCardView(result: result)
+                                .scaleEffect(0.68, anchor: .top)
+                        }
+                        .background(DS.ink.opacity(0.06))
                     }
                 }
         }

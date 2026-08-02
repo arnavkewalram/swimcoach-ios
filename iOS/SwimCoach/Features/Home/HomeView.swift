@@ -116,6 +116,8 @@ struct HomeView: View {
             if router.path.isEmpty {
                 if args.contains("-demoResults") {
                     router.push(.results(AnalysisResult.demo))
+                } else if args.contains("-demoReport") {
+                    router.push(.report(AnalysisResult.demo))
                 } else if args.contains("-demoCompare") {
                     router.push(.compare(earlier: AnalysisResult.demoEarlier,
                                          later: AnalysisResult.demo))
