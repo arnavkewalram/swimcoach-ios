@@ -7,6 +7,8 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var context
     @Environment(AppRouter.self) private var router
     @State private var sessionToRename: SwimSession? = nil
+    @State private var compareSelection: [SwimSession] = []
+    @State private var selectingForCompare = false
 
     private var bestScore: Int { sessions.map(\.score).max() ?? 0 }
     private var avgScore: Int {
@@ -51,14 +53,23 @@ struct HistoryView: View {
                             SectionHeader(title: "Sessions")
                                 .padding(.top, 8)
 
+                            if selectingForCompare {
+                                Text("Pick two sessions to compare")
+                                    .font(.footnote)
+                                    .foregroundStyle(DS.accent)
+                            }
+
                             LazyVStack(spacing: 8) {
                                 ForEach(sessions) { session in
                                     Button {
-                                        if let result = session.decoded() {
+                                        if selectingForCompare {
+                                            toggleCompare(session)
+                                        } else if let result = session.decoded() {
                                             router.push(.results(result))
                                         }
                                     } label: {
-                                        SessionRow(session: session)
+                                        SessionRow(session: session,
+                                                   isSelected: compareSelection.contains { $0.id == session.id })
                                     }
                                     .buttonStyle(ScaleButtonStyle())
                                     .contextMenu {
@@ -93,6 +104,33 @@ struct HistoryView: View {
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(DS.background, for: .navigationBar)
+        .toolbar {
+            if sessions.count >= 2 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(selectingForCompare ? "Cancel" : "Compare") {
+                        selectingForCompare.toggle()
+                        compareSelection = []
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(DS.accent)
+                }
+            }
+        }
+    }
+
+    private func toggleCompare(_ session: SwimSession) {
+        if let idx = compareSelection.firstIndex(where: { $0.id == session.id }) {
+            compareSelection.remove(at: idx)
+            return
+        }
+        compareSelection.append(session)
+        guard compareSelection.count == 2,
+              let a = compareSelection[0].decoded(),
+              let b = compareSelection[1].decoded() else { return }
+        let (earlier, later) = a.analyzedAt <= b.analyzedAt ? (a, b) : (b, a)
+        selectingForCompare = false
+        compareSelection = []
+        router.push(.compare(earlier: earlier, later: later))
     }
 
     private var summaryStrip: some View {
@@ -132,6 +170,7 @@ struct HistoryView: View {
 
 private struct SessionRow: View {
     let session: SwimSession
+    var isSelected: Bool = false
 
     private var gradeColor: Color { DS.gradeColor(session.grade) }
 
@@ -162,10 +201,10 @@ private struct SessionRow: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .glassCard()
+        .glassCard(borderColor: isSelected ? DS.accent : DS.border)
         .overlay(alignment: .leading) {
             UnevenRoundedRectangle(topLeadingRadius: 12, bottomLeadingRadius: 12)
-                .fill(gradeColor)
+                .fill(isSelected ? DS.accent : gradeColor)
                 .frame(width: 3)
         }
         .accessibilityElement(children: .ignore)

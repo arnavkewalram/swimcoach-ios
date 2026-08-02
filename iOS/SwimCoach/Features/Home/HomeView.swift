@@ -116,6 +116,9 @@ struct HomeView: View {
             if router.path.isEmpty {
                 if args.contains("-demoResults") {
                     router.push(.results(AnalysisResult.demo))
+                } else if args.contains("-demoCompare") {
+                    router.push(.compare(earlier: AnalysisResult.demoEarlier,
+                                         later: AnalysisResult.demo))
                 } else if args.contains("-openHistory") {
                     router.push(.history)
                 } else if let i = args.firstIndex(of: "-analyzeDocs"), i + 1 < args.count,

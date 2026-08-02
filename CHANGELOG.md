@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.2.0] — 2026-08-02 — "Progress"
+
+### Added
+- **Session comparison**: pick any two sessions from History (Compare mode)
+  for a head-to-head view — score and metric deltas plus a per-issue verdict
+  (NEW / RESOLVED / IMPROVED / WORSE / SAME) ordered by what needs attention.
+
 ## [1.1.0] — 2026-08-02 — "See It"
 
 ### Added

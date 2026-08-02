@@ -17,6 +17,8 @@ struct RootView: View {
                         ResultsView(result: result)
                     case .history:
                         HistoryView()
+                    case .compare(let earlier, let later):
+                        CompareView(earlier: earlier, later: later)
                     }
                 }
         }

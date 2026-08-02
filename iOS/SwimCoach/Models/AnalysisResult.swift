@@ -100,6 +100,52 @@ struct AnalysisResult: Hashable, Codable, Sendable {
                         probs: [0.2, 0.1, 0.5, 0.1, 0.1, 0.1, 0.90, 0.2, 0.55, 0.1]),
         ]
     )
+
+    /// An earlier, weaker session for the compare demo: body_sag worse then,
+    /// late_hand_entry has since resolved, low_kick_rate unchanged, and
+    /// left_elbow_collapse is NEW in the later session.
+    static let demoEarlier = AnalysisResult(
+        id: UUID(),
+        score: 61,
+        grade: "D",
+        strokeCount: 44,
+        kickRatePerMin: 38.0,
+        strokeAsymmetry: 0.26,
+        frameCount: 500,
+        sampledFrames: 0,
+        fps: 30.0,
+        issues: [
+            TechniqueIssue(
+                name: "body_sag",
+                displayName: "Body Sag",
+                severity: .major,
+                observedValue: 0.97,
+                threshold: 0.45,
+                description: "Hips and legs sinking below the waterline — creates significant drag.",
+                tip: "Press your chest gently down to float your hips. Engage core every stroke."
+            ),
+            TechniqueIssue(
+                name: "late_hand_entry",
+                displayName: "Late Hand Entry",
+                severity: .moderate,
+                observedValue: 0.58,
+                threshold: 0.45,
+                description: "Hand entering the water past the head centerline.",
+                tip: "Reach straight forward from the shoulder."
+            ),
+            TechniqueIssue(
+                name: "low_kick_rate",
+                displayName: "Low Kick Rate",
+                severity: .minor,
+                observedValue: 0.50,
+                threshold: 0.45,
+                description: "Kick rate too low — hurts body rotation timing and forward balance.",
+                tip: "Add a 2-beat kick (one per arm stroke) to keep your hips rotating."
+            ),
+        ],
+        tips: [],
+        analyzedAt: Date().addingTimeInterval(-7 * 24 * 3600)
+    )
     #endif
 }
 
