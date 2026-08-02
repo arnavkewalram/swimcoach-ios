@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.6.1] — 2026-08-01
+
+### Fixed
+- The app bundle now carries the real version: XcodeGen's generated
+  Info.plist hardcoded 1.0 (1), so every install to date reported 1.0
+  regardless of `project.yml`. `CFBundleShortVersionString` /
+  `CFBundleVersion` are now mapped to MARKETING_VERSION /
+  CURRENT_PROJECT_VERSION.
+
 ## [1.6.0] — 2026-08-01 — "Proof"
 
 ### Added

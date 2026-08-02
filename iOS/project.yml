@@ -11,8 +11,8 @@ settings:
   IPHONEOS_DEPLOYMENT_TARGET: "17.0"
   DEVELOPMENT_TEAM: 4VH58A4KM6
   CODE_SIGN_STYLE: Automatic
-  MARKETING_VERSION: 1.6.0
-  CURRENT_PROJECT_VERSION: 7
+  MARKETING_VERSION: 1.6.1
+  CURRENT_PROJECT_VERSION: 8
 
 targets:
   SwimCoach:
@@ -33,6 +33,10 @@ targets:
     info:
       path: SwimCoach/Info.plist
       properties:
+        # XcodeGen's generated plist hardcodes 1.0/1 unless these are mapped
+        # to the build settings — without them every install reports 1.0 (1).
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UIAppFonts:
           - SpaceGrotesk-Regular.ttf
           - SpaceGrotesk-Medium.ttf
