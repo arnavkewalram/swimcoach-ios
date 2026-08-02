@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.5.0] — 2026-08-02 — "Refine"
+
+### Changed
+- Results: bare metrics strip (varied surface hierarchy), quieter quality
+  notes (left-bar treatment instead of alarm boxes), tighter rhythm.
+- History: summary strip matches the bare editorial treatment.
+- Navigation titles across Results/History/Compare set in Space Grotesk —
+  the brand typeface now carries through the nav bar.
+
 ## [1.4.0] — 2026-08-02 — "Polish"
 
 ### Changed
