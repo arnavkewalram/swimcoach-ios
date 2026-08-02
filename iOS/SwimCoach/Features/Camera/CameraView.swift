@@ -3,6 +3,7 @@ import AVFoundation
 
 struct CameraView: View {
     @StateObject private var camera = CameraManager()
+    @StateObject private var level = LevelMonitor()
     @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -47,6 +48,12 @@ struct CameraView: View {
                 topBar
                     .padding(.top, 8)
 
+                if !camera.isRecording, let roll = level.rollDegrees {
+                    levelIndicator(roll: roll)
+                        .padding(.top, 14)
+                        .transition(.opacity)
+                }
+
                 Spacer()
 
                 // Tips card
@@ -81,10 +88,12 @@ struct CameraView: View {
         .navigationBarHidden(true)
         .onAppear {
             camera.setup()
+            level.start()
             startTipCycling()
         }
         .onDisappear {
             camera.stop()
+            level.stop()
             tipTimer?.invalidate()
             tipTimer = nil
         }
@@ -149,6 +158,36 @@ struct CameraView: View {
         }
         .padding(.horizontal, 20)
         .animation(.easeInOut(duration: 0.3), value: camera.isRecording)
+    }
+
+    // MARK: - Level indicator
+
+    private func levelIndicator(roll: Double) -> some View {
+        let isLevel = LevelMath.isLevel(roll)
+        return VStack(spacing: 6) {
+            ZStack {
+                // Fixed reference horizon
+                Rectangle()
+                    .fill(.white.opacity(0.35))
+                    .frame(width: 64, height: 1)
+                // Live horizon, rotating with the device
+                Rectangle()
+                    .fill(isLevel ? Color(red: 0.30, green: 0.72, blue: 0.46) : .white)
+                    .frame(width: 64, height: 2)
+                    .rotationEffect(.degrees(-roll))
+                    .animation(.linear(duration: 0.1), value: roll)
+            }
+            .frame(height: 24)
+
+            Text(isLevel ? "LEVEL" : String(format: "%+.0f°", roll))
+                .font(.caption2.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(isLevel ? Color(red: 0.30, green: 0.72, blue: 0.46) : .white.opacity(0.75))
+                .shadow(color: .black.opacity(0.5), radius: 2)
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(isLevel ? "Camera is level" : "Camera tilted \(Int(abs(roll))) degrees")
     }
 
     // MARK: - Framing guide
