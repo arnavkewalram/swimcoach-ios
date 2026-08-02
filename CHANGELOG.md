@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.12.0] — 2026-08-01 — "Journal"
+
+### Added
+- **Session notes**: every saved session can carry a free-text training
+  note alongside its name. History's rename sheet is now Edit Session
+  (name + notes); rows show a one-line note snippet; Results shows a quiet
+  NAME THIS SESSION affordance for saved sessions that opens the same
+  sheet. Existing stores migrate losslessly (new field defaults empty).
+
 ## [1.11.0] — 2026-08-01 — "Level"
 
 ### Added
