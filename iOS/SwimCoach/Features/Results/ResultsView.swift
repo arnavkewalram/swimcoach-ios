@@ -41,6 +41,7 @@ struct ResultsView: View {
     @State private var reportImage: UIImage? = nil
 
     @State private var sessionToEdit: SwimSession? = nil
+    @State private var celebratedBest = false
 
     enum VideoExportState: Equatable {
         case idle, exporting(Double), ready(URL), failed
@@ -224,6 +225,10 @@ struct ResultsView: View {
             withAnimation(.easeOut(duration: 1.0)) { animatedScore = Double(result.score) }
             sectionsVisible = true
             if reportImage == nil {
+                if isNewBest && !celebratedBest {
+                    celebratedBest = true
+                    Haptics.success()
+                }
                 reportImage = ReportCardView.render(
                     result: result, trendScores: reportTrendScores, newBest: isNewBest)
             }

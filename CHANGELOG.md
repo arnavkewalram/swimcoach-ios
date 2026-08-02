@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.14.0] — 2026-08-01 — "Ready"
+
+### Added
+- **Privacy manifest** (`PrivacyInfo.xcprivacy`), required for App Store
+  submission: no tracking, no data collection; declares UserDefaults
+  (CA92.1) and file-timestamp (C617.1) API use. Bundling is test-enforced.
+- **Haptics**: a light tap on record start/stop, and a success tap when an
+  analysis finishes and when a session sets a new personal best.
+
 ## [1.13.1] — 2026-08-01
 
 ### Fixed

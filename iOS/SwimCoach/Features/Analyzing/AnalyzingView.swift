@@ -283,7 +283,8 @@ struct AnalyzingView: View {
                 progress = 1.0
                 // replaceTop: Back from Results must not land on this screen —
                 // its .task would re-run the whole analysis and save a duplicate.
-                router.replaceTop(with: .results(result))
+                Haptics.success()
+            router.replaceTop(with: .results(result))
             }
 
         } catch is CancellationError {
@@ -393,6 +394,7 @@ struct AnalyzingView: View {
         guard !Task.isCancelled else { return }
         await MainActor.run {
             progress = 1.0
+            Haptics.success()
             router.replaceTop(with: .results(result))
         }
     }

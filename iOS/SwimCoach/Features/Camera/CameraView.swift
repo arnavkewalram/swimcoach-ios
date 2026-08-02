@@ -256,6 +256,7 @@ struct CameraView: View {
 
     private var recordButton: some View {
         Button {
+            Haptics.tap()
             withAnimation(.spring(response: 0.3, dampingFraction: 0.65)) {
                 if camera.isRecording { camera.stopRecording() }
                 else { camera.startRecording() }
