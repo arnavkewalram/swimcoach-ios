@@ -13,15 +13,23 @@ struct HistoryView: View {
     @State private var gradeFilter: Set<String> = []
     @State private var swimmerFilter: Set<String> = []
 
-    private var bestScore: Int { sessions.map(\.score).max() ?? 0 }
+    /// Charts and stats follow the swimmer filter (an identity scope) but
+    /// deliberately ignore grade/search — those only narrow the list.
+    private var swimmerScopedSessions: [SwimSession] {
+        swimmerFilter.isEmpty
+            ? Array(sessions)
+            : sessions.filter { swimmerFilter.contains($0.swimmer) }
+    }
+
+    private var bestScore: Int { swimmerScopedSessions.map(\.score).max() ?? 0 }
     private var avgScore: Int {
-        guard !sessions.isEmpty else { return 0 }
-        return sessions.map(\.score).reduce(0, +) / sessions.count
+        guard !swimmerScopedSessions.isEmpty else { return 0 }
+        return swimmerScopedSessions.map(\.score).reduce(0, +) / swimmerScopedSessions.count
     }
 
     // Chronological order for the chart
     private var chronologicalSessions: [SwimSession] {
-        sessions.reversed()
+        swimmerScopedSessions.reversed()
     }
 
     private var filteredSessions: [SwimSession] {
@@ -61,14 +69,19 @@ struct HistoryView: View {
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 16) {
-                            summaryStrip
-                                .padding(.top, 8)
-
-                            if sessions.count >= 2 {
-                                ConsistencyStrip(sessions: sessions)
+                            if presentSwimmers.count > 1 {
+                                swimmerChips
+                                    .padding(.top, 8)
                             }
 
-                            if sessions.count >= 2 {
+                            summaryStrip
+                                .padding(.top, presentSwimmers.count > 1 ? 0 : 8)
+
+                            if swimmerScopedSessions.count >= 2 {
+                                ConsistencyStrip(sessions: swimmerScopedSessions)
+                            }
+
+                            if swimmerScopedSessions.count >= 2 {
                                 ScoreTrendChart(sessions: chronologicalSessions) { session in
                                     if let result = session.decoded() {
                                         router.push(.results(result))
@@ -76,16 +89,12 @@ struct HistoryView: View {
                                 }
                             }
 
-                            if sessions.count >= 2 {
-                                IssueFrequencyChart(sessions: sessions)
+                            if swimmerScopedSessions.count >= 2 {
+                                IssueFrequencyChart(sessions: swimmerScopedSessions)
                             }
 
                             SectionHeader(title: "Sessions")
                                 .padding(.top, 8)
-
-                            if presentSwimmers.count > 1 {
-                                swimmerChips
-                            }
 
                             if presentGrades.count > 1 {
                                 gradeChips
@@ -149,6 +158,14 @@ struct HistoryView: View {
         .sheet(item: $sessionToRename) { session in
             EditSessionSheet(session: session)
         }
+        #if DEBUG
+        .onAppear {
+            let args = ProcessInfo.processInfo.arguments
+            if let i = args.firstIndex(of: "-historySwimmer"), i + 1 < args.count {
+                swimmerFilter = [args[i + 1]]
+            }
+        }
+        #endif
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -248,7 +265,7 @@ struct HistoryView: View {
 
     private var summaryStrip: some View {
         HStack(spacing: 0) {
-            summaryCell(value: "\(sessions.count)", label: "SESSIONS")
+            summaryCell(value: "\(swimmerScopedSessions.count)", label: "SESSIONS")
             summaryDivider
             summaryCell(value: "\(bestScore)", label: "BEST")
             summaryDivider
