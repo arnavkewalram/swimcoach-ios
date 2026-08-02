@@ -120,6 +120,8 @@ struct HistoryView: View {
                 .font(.statUnit)
                 .tracking(1.2)
                 .foregroundStyle(DS.inkTertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
@@ -147,14 +149,14 @@ private struct SessionRow: View {
                     .font(.grotesk(15, .medium))
                     .foregroundStyle(DS.ink)
                 Text("Score \(session.score) · \(session.issueCount) issue\(session.issueCount == 1 ? "" : "s") · \(session.strokeCount) strokes")
-                    .font(.system(size: 12))
+                    .font(.caption)
                     .foregroundStyle(DS.inkSecondary)
             }
 
             Spacer()
 
             Image(systemName: "arrow.right")
-                .font(.system(size: 13, weight: .medium))
+                .font(.footnote.weight(.medium))
                 .foregroundStyle(DS.inkTertiary)
                 .accessibilityHidden(true)
         }
@@ -184,7 +186,7 @@ private struct ScoreTrendChart: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Score trend")
             Text("Tap a point to open that session")
-                .font(.system(size: 12))
+                .font(.caption)
                 .foregroundStyle(DS.inkTertiary)
 
             Chart {
@@ -221,7 +223,7 @@ private struct ScoreTrendChart: View {
                     AxisTick().foregroundStyle(Color.clear)
                     AxisValueLabel()
                         .foregroundStyle(DS.inkTertiary)
-                        .font(.system(size: 10))
+                        .font(.caption2)
                 }
             }
             .chartYAxis {
@@ -229,7 +231,7 @@ private struct ScoreTrendChart: View {
                     AxisGridLine().foregroundStyle(DS.border.opacity(0.6))
                     AxisValueLabel()
                         .foregroundStyle(DS.inkTertiary)
-                        .font(.system(size: 10))
+                        .font(.caption2)
                 }
             }
             .frame(height: 150)
@@ -305,7 +307,7 @@ private struct IssueFrequencyChart: View {
                     AxisMarks { _ in
                         AxisValueLabel()
                             .foregroundStyle(DS.ink)
-                            .font(.system(size: 11))
+                            .font(.caption2)
                     }
                 }
                 .frame(height: CGFloat(issues.count) * 34 + 16)
@@ -335,7 +337,7 @@ private struct RenameSessionSheet: View {
 
                 VStack(spacing: 20) {
                     TextField("Session name", text: $name)
-                        .font(.system(size: 16))
+                        .font(.callout)
                         .foregroundStyle(DS.ink)
                         .padding(12)
                         .background(DS.surface)
@@ -365,7 +367,7 @@ private struct RenameSessionSheet: View {
                         dismiss()
                     }
                     .foregroundStyle(DS.accent)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.callout.weight(.semibold))
                 }
             }
         }

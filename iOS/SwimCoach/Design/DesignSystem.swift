@@ -43,16 +43,28 @@ enum DS {
 // MARK: - Typography
 
 extension Font {
-    /// Display numerals & wordmarks — Space Grotesk
+    /// Display numerals & wordmarks — Space Grotesk, scaling with Dynamic
+    /// Type relative to a text style inferred from the base size.
     static func grotesk(_ size: CGFloat, _ weight: GroteskWeight = .bold) -> Font {
-        .custom(weight.postScriptName, size: size)
+        .custom(weight.postScriptName, size: size, relativeTo: Self.styleFor(size))
     }
+
+    private static func styleFor(_ size: CGFloat) -> TextStyle {
+        switch size {
+        case 30...: return .largeTitle
+        case 20..<30: return .title2
+        case 15..<20: return .body
+        case 12..<15: return .footnote
+        default: return .caption2
+        }
+    }
+
     /// Editorial section label — ALL CAPS, tracked (use with .tracking(1.4))
-    static let sectionLabel = Font.custom(GroteskWeight.medium.postScriptName, size: 11)
+    static let sectionLabel = Font.custom(GroteskWeight.medium.postScriptName, size: 11, relativeTo: .caption2)
     /// Stat number
-    static let statNumber   = Font.custom(GroteskWeight.bold.postScriptName, size: 26)
+    static let statNumber   = Font.custom(GroteskWeight.bold.postScriptName, size: 26, relativeTo: .title2)
     /// Stat unit (spm, /min, %)
-    static let statUnit     = Font.custom(GroteskWeight.medium.postScriptName, size: 11)
+    static let statUnit     = Font.custom(GroteskWeight.medium.postScriptName, size: 11, relativeTo: .caption2)
 }
 
 enum GroteskWeight {
@@ -185,7 +197,7 @@ struct PrimaryButtonLabel: View {
         HStack(spacing: 10) {
             if let icon {
                 Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.callout.weight(.semibold))
                     .accessibilityHidden(true)
             }
             Text(title)
@@ -208,7 +220,7 @@ struct SecondaryButtonLabel: View {
         HStack(spacing: 10) {
             if let icon {
                 Image(systemName: icon)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .accessibilityHidden(true)
             }
             Text(title)
