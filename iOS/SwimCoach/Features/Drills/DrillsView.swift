@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// The drill library: editorial index cards grouped by focus area. When
 /// opened from an issue row, the drills that fix that issue are outlined
@@ -6,6 +7,8 @@ import SwiftUI
 struct DrillsView: View {
     /// FeedbackEngine issue name to spotlight, if arriving from Results.
     var highlightIssue: String? = nil
+    @Environment(\.modelContext) private var modelContext
+    @Query private var practiceEvents: [DrillPracticeEvent]
 
     private var highlightedIDs: Set<String> {
         guard let issue = highlightIssue else { return [] }
@@ -33,7 +36,14 @@ struct DrillsView: View {
                                 DrillCard(
                                     number: cardNumber(of: drill),
                                     drill: drill,
-                                    isHighlighted: highlightedIDs.contains(drill.id))
+                                    isHighlighted: highlightedIDs.contains(drill.id),
+                                    practice: DrillPractice.summary(
+                                        for: drill.id, events: practiceEvents),
+                                    onMarkDone: {
+                                        modelContext.insert(
+                                            DrillPracticeEvent(drillID: drill.id))
+                                        Haptics.tap()
+                                    })
                                     .id(drill.id)
                             }
                         }
@@ -72,6 +82,8 @@ private struct DrillCard: View {
     let number: String
     let drill: Drill
     let isHighlighted: Bool
+    let practice: DrillPractice.Summary
+    let onMarkDone: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -120,6 +132,34 @@ private struct DrillCard: View {
                     }
                 }
             }
+
+            HStack {
+                if practice.count > 0, let last = practice.lastDate {
+                    Text("PRACTICED \(practice.count)× · LAST \(last.formatted(.dateTime.day().month()).uppercased())")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                        .tracking(1.0)
+                        .foregroundStyle(DS.severityMinor)
+                }
+                Spacer()
+                Button(action: onMarkDone) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 9, weight: .bold))
+                            .accessibilityHidden(true)
+                        Text("MARK DONE")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                    }
+                    .foregroundStyle(DS.accent)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 6)
+                    .overlay(RoundedRectangle(cornerRadius: 5)
+                        .stroke(DS.accent.opacity(0.45), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Mark \(drill.name) done today")
+            }
+            .padding(.top, 2)
         }
         .padding(16)
         .glassCard(borderColor: isHighlighted ? DS.accent : DS.border)

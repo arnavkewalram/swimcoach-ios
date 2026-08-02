@@ -3,6 +3,13 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.28.0] — 2026-08-02 — "Done"
+
+### Added
+- **Drill practice tracking**: every drill card has a MARK DONE button;
+  practiced drills show a pine-green "PRACTICED N× · LAST <date>" line.
+  The library now remembers what you've actually worked on.
+
 ## [1.27.1] — 2026-08-02
 
 ### Fixed
