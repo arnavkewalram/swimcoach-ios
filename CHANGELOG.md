@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.11.0] — 2026-08-01 — "Level"
+
+### Added
+- **Camera level indicator**: a live horizon line under the top bar while
+  framing — white with a signed degree readout when tilted, green LEVEL
+  within ±2°. A level camera keeps the pose pipeline honest (body-sag
+  detection assumes a level horizon). Hidden while recording and on
+  devices without motion data.
+
 ## [1.10.0] — 2026-08-01 — "Best"
 
 ### Added
