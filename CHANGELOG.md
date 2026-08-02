@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.21.0] — 2026-08-02 — "Archive"
+
+### Added
+- **Your data, portable**: About gains a YOUR DATA section — export the
+  whole training log as readable JSON (dates, names, notes, scores,
+  metrics, fault names; no heavyweight payloads) via the share sheet,
+  or erase every session and its video behind a confirmation. On-device
+  now also means you can take it with you.
+
 ## [1.20.0] — 2026-08-02 — "Focus"
 
 ### Added

@@ -1,9 +1,14 @@
 import SwiftUI
+import SwiftData
 
 /// About: what the app is, the on-device privacy stance, and the type
 /// license we're obliged to ship (Space Grotesk, SIL OFL).
 struct AboutView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
     @State private var showLicense = false
+    @State private var exportURL: URL? = nil
+    @State private var confirmErase = false
 
     private var versionLine: String {
         let info = Bundle.main.infoDictionary
@@ -48,6 +53,35 @@ struct AboutView: View {
                             .font(.footnote)
                             .lineSpacing(4)
                             .foregroundStyle(DS.inkSecondary)
+                    }
+
+                    if !sessions.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            SectionHeader(title: "Your data")
+                            Text("\(sessions.count) session\(sessions.count == 1 ? "" : "s") stored on this iPhone.")
+                                .font(.footnote)
+                                .foregroundStyle(DS.inkSecondary)
+
+                            if let exportURL {
+                                ShareLink(item: exportURL) {
+                                    dataActionLabel("EXPORT TRAINING LOG", icon: "square.and.arrow.up",
+                                                    color: DS.accent)
+                                }
+                            } else {
+                                Button {
+                                    prepareExport()
+                                } label: {
+                                    dataActionLabel("PREPARE EXPORT", icon: "doc.text", color: DS.accent)
+                                }
+                            }
+
+                            Button(role: .destructive) {
+                                confirmErase = true
+                            } label: {
+                                dataActionLabel("ERASE ALL SESSIONS", icon: "trash",
+                                                color: DS.severityMajor)
+                            }
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
@@ -101,5 +135,49 @@ struct AboutView: View {
             }
         }
         .toolbarBackground(DS.background, for: .navigationBar)
+        .confirmationDialog(
+            "Erase all \(sessions.count) sessions?",
+            isPresented: $confirmErase, titleVisibility: .visible
+        ) {
+            Button("Erase everything", role: .destructive) { eraseAll() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Deletes every saved session and its video. This cannot be undone.")
+        }
+    }
+
+    private func dataActionLabel(_ title: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                .tracking(1.2)
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(color.opacity(0.45), lineWidth: 1))
+    }
+
+    private func prepareExport() {
+        do {
+            let data = try SessionExport.archiveData(from: sessions)
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("swimcoach-training-log.json")
+            try data.write(to: url, options: .atomic)
+            exportURL = url
+        } catch {
+            AppLog.storage.error("Training log export failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func eraseAll() {
+        for session in sessions {
+            SessionVideoStore.delete(fileName: session.decoded()?.videoFileName)
+            modelContext.delete(session)
+        }
+        exportURL = nil
     }
 }
