@@ -55,6 +55,9 @@ struct FeedbackEngine {
         catalog.firstIndex { $0.name == name }
     }
 
+    /// Every issue name the model can emit, in probability order.
+    static var issueNames: [String] { catalog.map(\.name) }
+
     static func decode(probabilities: [Float]) -> [TechniqueIssue] {
         probabilities.enumerated().compactMap { i, prob in
             guard i < catalog.count, prob >= threshold else { return nil }

@@ -19,6 +19,8 @@ struct RootView: View {
                         HistoryView()
                     case .compare(let earlier, let later):
                         CompareView(earlier: earlier, later: later)
+                    case .drills(let highlightIssue):
+                        DrillsView(highlightIssue: highlightIssue)
                     case .report(let result):
                         ScrollView {
                             ReportCardView(result: result)

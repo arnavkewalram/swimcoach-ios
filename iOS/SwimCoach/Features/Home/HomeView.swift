@@ -128,6 +128,29 @@ struct HomeView: View {
                         .padding(.top, 6)
                     }
 
+                    Button {
+                        router.push(.drills(highlightIssue: nil))
+                    } label: {
+                        HStack {
+                            Text("Drill library")
+                                .font(.grotesk(15, .medium))
+                                .foregroundStyle(DS.ink)
+                            Spacer()
+                            Text("\(DrillCatalog.all.count) DRILLS")
+                                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                .tracking(1.2)
+                                .foregroundStyle(DS.inkTertiary)
+                            Image(systemName: "arrow.right")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(DS.inkTertiary)
+                                .accessibilityHidden(true)
+                        }
+                        .padding(.vertical, 16)
+                        .overlay(alignment: .bottom) { Rectangle().fill(DS.border).frame(height: 1) }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+
                     // ── Dev tools (DEBUG builds only) ─────────────────────
                     #if DEBUG
                     devTools
@@ -165,6 +188,10 @@ struct HomeView: View {
                                          later: AnalysisResult.demo))
                 } else if args.contains("-openHistory") {
                     router.push(.history)
+                } else if let i = args.firstIndex(of: "-openDrills") {
+                    let issue = i + 1 < args.count && !args[i + 1].hasPrefix("-")
+                        ? args[i + 1] : nil
+                    router.push(.drills(highlightIssue: issue))
                 } else if let i = args.firstIndex(of: "-analyzeDocs"), i + 1 < args.count,
                           let docsDir = FileManager.default.urls(
                               for: .documentDirectory, in: .userDomainMask).first {

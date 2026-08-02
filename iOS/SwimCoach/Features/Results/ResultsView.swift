@@ -106,7 +106,8 @@ struct ResultsView: View {
                             ForEach(result.issues, id: \.name) { issue in
                                 IssueRow(issue: issue,
                                          canSeek: canSeekIssues,
-                                         onSeeIt: { seekToPeak(of: issue) })
+                                         onSeeIt: { seekToPeak(of: issue) },
+                                         onDrills: { router.push(.drills(highlightIssue: issue.name)) })
                             }
                         }
                         .padding(.bottom, 28)
@@ -482,6 +483,7 @@ private struct IssueRow: View {
     let issue: TechniqueIssue
     var canSeek: Bool = false
     var onSeeIt: () -> Void = {}
+    var onDrills: () -> Void = {}
     @State private var expanded = false
 
     private var severityColor: Color {
@@ -544,23 +546,44 @@ private struct IssueRow: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    if canSeek {
-                        Button(action: onSeeIt) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "play.circle")
-                                    .font(.footnote)
-                                    .accessibilityHidden(true)
-                                Text("SEE IT IN YOUR VIDEO")
-                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                                    .tracking(1.2)
+                    HStack(spacing: 8) {
+                        if canSeek {
+                            Button(action: onSeeIt) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "play.circle")
+                                        .font(.footnote)
+                                        .accessibilityHidden(true)
+                                    Text("SEE IT IN YOUR VIDEO")
+                                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                        .tracking(1.2)
+                                }
+                                .foregroundStyle(DS.accent)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .overlay(RoundedRectangle(cornerRadius: 6)
+                                    .stroke(DS.accent.opacity(0.45), lineWidth: 1))
                             }
-                            .foregroundStyle(DS.accent)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 8)
-                            .overlay(RoundedRectangle(cornerRadius: 6)
-                                .stroke(DS.accent.opacity(0.45), lineWidth: 1))
+                            .accessibilityLabel("Play the video where \(issue.displayName) was strongest")
                         }
-                        .accessibilityLabel("Play the video where \(issue.displayName) was strongest")
+
+                        if !DrillCatalog.drills(fixing: issue.name).isEmpty {
+                            Button(action: onDrills) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "figure.pool.swim")
+                                        .font(.footnote)
+                                        .accessibilityHidden(true)
+                                    Text("DRILLS")
+                                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                                        .tracking(1.2)
+                                }
+                                .foregroundStyle(DS.accent)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .overlay(RoundedRectangle(cornerRadius: 6)
+                                    .stroke(DS.accent.opacity(0.45), lineWidth: 1))
+                            }
+                            .accessibilityLabel("Open drills that fix \(issue.displayName)")
+                        }
                     }
                 }
                 .padding(16)
