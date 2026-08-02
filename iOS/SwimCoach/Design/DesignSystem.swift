@@ -177,6 +177,28 @@ struct ConfettiView: View {
     var body: some View { EmptyView() }
 }
 
+// MARK: - Score arc (flat editorial gauge — thin stroke, no glow)
+
+struct ScoreArc: View {
+    let score: Int
+    let color: Color
+    var lineWidth: CGFloat = 6
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .trim(from: 0.10, to: 0.90)
+                .stroke(DS.border, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(90))
+            Circle()
+                .trim(from: 0.10, to: 0.10 + 0.80 * Double(max(0, min(100, score))) / 100.0)
+                .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(90))
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 // MARK: - Buttons
 
 struct ScaleButtonStyle: ButtonStyle {

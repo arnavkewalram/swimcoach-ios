@@ -11,8 +11,8 @@ settings:
   IPHONEOS_DEPLOYMENT_TARGET: "17.0"
   DEVELOPMENT_TEAM: 4VH58A4KM6
   CODE_SIGN_STYLE: Automatic
-  MARKETING_VERSION: 1.3.0
-  CURRENT_PROJECT_VERSION: 4
+  MARKETING_VERSION: 1.4.0
+  CURRENT_PROJECT_VERSION: 5
 
 targets:
   SwimCoach:
@@ -40,7 +40,8 @@ targets:
         NSCameraUsageDescription: "SwimCoach records swimming videos to analyze your stroke technique."
         NSMicrophoneUsageDescription: "SwimCoach records audio alongside video."
         NSPhotoLibraryUsageDescription: "SwimCoach can analyze swimming videos from your photo library."
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchBackground
         # Never expose Documents (users' swim videos live there) via Finder /
         # Files. Dev video staging uses `devicectl device copy` instead.
         UIFileSharingEnabled: false
