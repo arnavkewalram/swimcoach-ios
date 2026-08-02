@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.7.0] — 2026-08-01 — "Trend"
+
+### Added
+- **Training log on Home**: a hairline score sparkline over your recent
+  sessions plus a this-week summary (session count, average score) and a
+  week-over-week delta chip — progress at a glance, in the editorial
+  register. Appears once two or more sessions are saved.
+- DEBUG `-seedTrainingLog` launch argument seeds a deterministic three-week
+  fixture for simulator screenshots.
+
 ## [1.6.1] — 2026-08-01
 
 ### Fixed

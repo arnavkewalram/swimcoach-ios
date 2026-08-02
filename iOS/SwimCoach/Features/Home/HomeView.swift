@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct HomeView: View {
     @Environment(AppRouter.self) private var router
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     #if DEBUG
@@ -68,6 +69,12 @@ struct HomeView: View {
                     // ── Record strip ──────────────────────────────────────
                     if !sessions.isEmpty {
                         RecordStrip(sessions: sessions)
+                            .padding(.bottom, 24)
+                    }
+
+                    // ── Training log (needs ≥2 sessions to draw a trend) ──
+                    if sessions.count >= 2 {
+                        TrainingLogPanel(sessions: sessions)
                             .padding(.bottom, 24)
                     }
 
@@ -145,6 +152,9 @@ struct HomeView: View {
             }
             // Launch-argument hooks for automated screenshot capture / testing
             let args = ProcessInfo.processInfo.arguments
+            if args.contains("-seedTrainingLog") {
+                seedTrainingLog()
+            }
             if router.path.isEmpty {
                 if args.contains("-demoResults") {
                     router.push(.results(AnalysisResult.demo))
@@ -171,6 +181,35 @@ struct HomeView: View {
     // MARK: - Dev tools
 
     #if DEBUG
+    /// Deterministic training-log fixture for simulator screenshots:
+    /// replaces the store with three weeks of improving sessions.
+    private func seedTrainingLog() {
+        sessions.forEach { modelContext.delete($0) }
+        let plan: [(daysAgo: Int, score: Int)] = [
+            (16, 58), (14, 61), (12, 60), (9, 64), (8, 63),
+            (6, 67), (5, 66), (2, 70), (1, 69), (0, 72),
+        ]
+        for item in plan {
+            let base = AnalysisResult.demo
+            let result = AnalysisResult(
+                id: UUID(),
+                score: item.score,
+                grade: item.score >= 70 ? "C" : "D",
+                strokeCount: base.strokeCount,
+                kickRatePerMin: base.kickRatePerMin,
+                strokeAsymmetry: base.strokeAsymmetry,
+                frameCount: base.frameCount,
+                sampledFrames: base.sampledFrames,
+                fps: base.fps,
+                issues: base.issues,
+                tips: base.tips,
+                analyzedAt: Calendar.current.date(
+                    byAdding: .day, value: -item.daysAgo, to: Date()) ?? Date()
+            )
+            modelContext.insert(SwimSession(result: result))
+        }
+    }
+
     private var devTools: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "Dev tools")
@@ -229,6 +268,71 @@ struct HomeView: View {
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(DS.border, lineWidth: 1))
     }
     #endif
+}
+
+// MARK: - Training log (sparkline + this-week line)
+
+private struct TrainingLogPanel: View {
+    let sessions: [SwimSession]
+
+    private var entries: [TrainingLog.Entry] {
+        sessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) }
+    }
+
+    private var thisWeek: TrainingLog.WeekSummary {
+        TrainingLog.summary(for: entries, weekContaining: Date())
+    }
+
+    private var delta: Int? {
+        TrainingLog.weekOverWeekDelta(for: entries)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeader(title: "Training log")
+
+            Sparkline(values: TrainingLog.recentScores(from: entries))
+                .frame(height: 46)
+
+            HStack(alignment: .firstTextBaseline) {
+                Text("THIS WEEK")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.inkTertiary)
+                Text(thisWeek.sessionCount == 0
+                     ? "No sessions yet"
+                     : "\(thisWeek.sessionCount) session\(thisWeek.sessionCount == 1 ? "" : "s") · avg \(thisWeek.averageScore)")
+                    .font(.grotesk(14, .medium))
+                    .foregroundStyle(DS.ink)
+                Spacer()
+                if let d = delta, d != 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: d > 0 ? "arrow.up.right" : "arrow.down.right")
+                            .font(.caption2.weight(.semibold))
+                            .accessibilityHidden(true)
+                        Text("\(abs(d)) VS LAST WK")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                    }
+                    .foregroundStyle(d > 0 ? DS.severityMinor : DS.severityModerate)
+                }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(trainingLogAccessibilityLabel)
+    }
+
+    private var trainingLogAccessibilityLabel: String {
+        var label = thisWeek.sessionCount == 0
+            ? "Training log. No sessions yet this week."
+            : "Training log. \(thisWeek.sessionCount) session\(thisWeek.sessionCount == 1 ? "" : "s") this week, average score \(thisWeek.averageScore)."
+        if let d = delta, d != 0 {
+            label += d > 0
+                ? " Up \(d) points versus last week."
+                : " Down \(-d) points versus last week."
+        }
+        return label
+    }
 }
 
 // MARK: - First-run welcome card

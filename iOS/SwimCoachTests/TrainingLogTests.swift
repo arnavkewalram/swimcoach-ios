@@ -1,0 +1,83 @@
+import XCTest
+@testable import SwimCoach
+
+final class TrainingLogTests: XCTestCase {
+
+    // Fixed calendar so week boundaries don't drift with the runner's locale
+    private var cal: Calendar {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = TimeZone(identifier: "UTC")!
+        c.firstWeekday = 2   // Monday
+        return c
+    }
+
+    private func date(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        cal.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+    }
+
+    func testWeekSummaryCountsOnlyThatWeek() {
+        // Mon 2026-07-27 … Sun 2026-08-02 is one week
+        let entries = [
+            TrainingLog.Entry(date: date(2026, 7, 26), score: 50),  // previous week
+            TrainingLog.Entry(date: date(2026, 7, 27), score: 60),
+            TrainingLog.Entry(date: date(2026, 8, 1), score: 70),
+            TrainingLog.Entry(date: date(2026, 8, 3), score: 90),   // next week
+        ]
+        let summary = TrainingLog.summary(
+            for: entries, weekContaining: date(2026, 7, 29), calendar: cal)
+        XCTAssertEqual(summary, TrainingLog.WeekSummary(sessionCount: 2, averageScore: 65))
+    }
+
+    func testWeekSummaryEmptyWeekIsZero() {
+        let entries = [TrainingLog.Entry(date: date(2026, 7, 1), score: 80)]
+        let summary = TrainingLog.summary(
+            for: entries, weekContaining: date(2026, 8, 1), calendar: cal)
+        XCTAssertEqual(summary.sessionCount, 0)
+        XCTAssertEqual(summary.averageScore, 0)
+    }
+
+    func testWeekOverWeekDelta() {
+        let entries = [
+            TrainingLog.Entry(date: date(2026, 7, 22), score: 60),  // last week (Wed)
+            TrainingLog.Entry(date: date(2026, 7, 24), score: 62),  // last week (Fri)
+            TrainingLog.Entry(date: date(2026, 7, 28), score: 70),  // this week (Tue)
+        ]
+        let delta = TrainingLog.weekOverWeekDelta(
+            for: entries, now: date(2026, 7, 29), calendar: cal)
+        XCTAssertEqual(delta, 9)   // 70 - (60+62)/2
+    }
+
+    func testWeekOverWeekDeltaNilWhenAWeekIsEmpty() {
+        let onlyThisWeek = [TrainingLog.Entry(date: date(2026, 7, 28), score: 70)]
+        XCTAssertNil(TrainingLog.weekOverWeekDelta(
+            for: onlyThisWeek, now: date(2026, 7, 29), calendar: cal))
+        XCTAssertNil(TrainingLog.weekOverWeekDelta(
+            for: [], now: date(2026, 7, 29), calendar: cal))
+    }
+
+    func testRecentScoresChronologicalAndCapped() {
+        // Deliberately unsorted input
+        let entries = (1...12).shuffled().map {
+            TrainingLog.Entry(date: date(2026, 7, $0), score: $0 * 5)
+        }
+        let scores = TrainingLog.recentScores(from: entries, limit: 10)
+        XCTAssertEqual(scores, [15, 20, 25, 30, 35, 40, 45, 50, 55, 60])
+    }
+
+    func testSparklinePointsNormalization() {
+        let size = CGSize(width: 100, height: 50)
+        let pts = Sparkline.points(for: [50, 100, 75], in: size)
+        XCTAssertEqual(pts.count, 3)
+        XCTAssertEqual(pts[0].x, 0);  XCTAssertEqual(pts[2].x, 100)
+        // Higher score → smaller y (top-left origin); min/max keep headroom
+        XCTAssertLessThan(pts[1].y, pts[0].y)
+        XCTAssertEqual(pts[0].y, 50 * (1 - 0.15), accuracy: 0.001)
+        XCTAssertEqual(pts[1].y, 50 * (1 - 0.85), accuracy: 0.001)
+    }
+
+    func testSparklineSingleValueCentersDot() {
+        let pts = Sparkline.points(for: [70], in: CGSize(width: 100, height: 50))
+        XCTAssertEqual(pts.count, 1)
+        XCTAssertEqual(pts[0].x, 50)
+    }
+}
