@@ -58,6 +58,10 @@ struct HistoryView: View {
                                 .padding(.top, 8)
 
                             if sessions.count >= 2 {
+                                ConsistencyStrip(sessions: sessions)
+                            }
+
+                            if sessions.count >= 2 {
                                 ScoreTrendChart(sessions: chronologicalSessions) { session in
                                     if let result = session.decoded() {
                                         router.push(.results(result))
@@ -229,6 +233,53 @@ struct HistoryView: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Consistency strip (sessions per week, trailing 12)
+
+private struct ConsistencyStrip: View {
+    let sessions: [SwimSession]
+
+    private var counts: [Int] {
+        TrainingLog.weeklyCounts(
+            for: sessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) })
+    }
+
+    var body: some View {
+        let counts = counts
+        let peak = max(counts.max() ?? 1, 1)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("CONSISTENCY")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.4)
+                    .foregroundStyle(DS.inkTertiary)
+                Spacer()
+                Text("SESSIONS / WEEK · LAST 12")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                    .tracking(1.0)
+                    .foregroundStyle(DS.inkTertiary)
+            }
+            HStack(alignment: .bottom, spacing: 5) {
+                ForEach(Array(counts.enumerated()), id: \.offset) { _, count in
+                    RoundedRectangle(cornerRadius: 1.5)
+                        .fill(count > 0 ? DS.accent : DS.border)
+                        .frame(height: count > 0
+                               ? max(8, CGFloat(count) / CGFloat(peak) * 34)
+                               : 3)
+                        .frame(maxWidth: .infinity, alignment: .bottom)
+                }
+            }
+            .frame(height: 36, alignment: .bottom)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(consistencyAccessibilityLabel)
+    }
+
+    private var consistencyAccessibilityLabel: String {
+        let active = counts.filter { $0 > 0 }.count
+        return "Consistency: sessions in \(active) of the last 12 weeks."
     }
 }
 

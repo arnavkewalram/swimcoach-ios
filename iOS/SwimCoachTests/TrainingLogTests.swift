@@ -64,6 +64,26 @@ final class TrainingLogTests: XCTestCase {
         XCTAssertEqual(scores, [15, 20, 25, 30, 35, 40, 45, 50, 55, 60])
     }
 
+    func testWeeklyCountsChronologicalWithGaps() {
+        // Sessions in the current week and three weeks back; gap between
+        let now = date(2026, 7, 29)
+        let entries = [
+            TrainingLog.Entry(date: date(2026, 7, 28), score: 70),   // this week
+            TrainingLog.Entry(date: date(2026, 7, 27), score: 68),   // this week
+            TrainingLog.Entry(date: date(2026, 7, 8), score: 60),    // 3 weeks back
+        ]
+        let counts = TrainingLog.weeklyCounts(for: entries, weeks: 4, now: now, calendar: cal)
+        XCTAssertEqual(counts, [1, 0, 0, 2])
+    }
+
+    func testWeeklyCountsEmptyAndZeroWeeks() {
+        XCTAssertEqual(TrainingLog.weeklyCounts(for: [], weeks: 3,
+                                                now: date(2026, 7, 29), calendar: cal),
+                       [0, 0, 0])
+        XCTAssertEqual(TrainingLog.weeklyCounts(for: [], weeks: 0,
+                                                now: date(2026, 7, 29), calendar: cal), [])
+    }
+
     func testIsNewBest() {
         XCTAssertFalse(TrainingLog.isNewBest(score: 90, priorBest: nil),
                        "first session ever has nothing to beat")
