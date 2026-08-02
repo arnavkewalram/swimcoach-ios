@@ -1,11 +1,13 @@
 import SwiftUI
 import SwiftData
+import AVKit
 
 struct ResultsView: View {
     let result: AnalysisResult
     @Environment(AppRouter.self) private var router
     @State private var animatedScore: Double = 0
     @State private var sectionsVisible = false
+    @State private var player: AVPlayer? = nil
 
     var body: some View {
         ZStack {
@@ -38,6 +40,13 @@ struct ResultsView: View {
                         )
                         .padding(.bottom, 10)
                         .staggerIn(sectionsVisible, delay: 0.08)
+                    }
+
+                    // ── Session video ─────────────────────────────────────
+                    if let url = result.videoURL {
+                        videoSection(url: url)
+                            .padding(.bottom, 20)
+                            .staggerIn(sectionsVisible, delay: 0.10)
                     }
 
                     // ── Metrics ───────────────────────────────────────────
@@ -89,6 +98,35 @@ struct ResultsView: View {
         .onAppear {
             withAnimation(.easeOut(duration: 1.0)) { animatedScore = Double(result.score) }
             sectionsVisible = true
+            if player == nil, let url = result.videoURL {
+                let p = AVPlayer(url: url)
+                p.isMuted = true
+                player = p
+            }
+        }
+        .onDisappear {
+            player?.pause()
+        }
+    }
+
+    // MARK: - Session video
+
+    private func videoSection(url: URL) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Session video")
+            Group {
+                if let player {
+                    VideoPlayer(player: player)
+                } else {
+                    Color.black
+                }
+            }
+            .aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .frame(maxWidth: .infinity)
+            .background(Color.black)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.border, lineWidth: 1))
+            .accessibilityLabel("Analyzed swim video. Review your stroke alongside the feedback below.")
         }
     }
 
