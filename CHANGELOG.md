@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.18.0] — 2026-08-01 — "Shade"
+
+### Added
+- **Dark and tinted app icons** (iOS 18 home-screen appearances): dark
+  mode gets a transparent-ground icon with a brighter lane-blue S and
+  paper lane rules; tinted mode gets the grayscale glyph set the system
+  tints. Same geometry as the light icon — one family, three moods.
+
 ## [1.17.0] — 2026-08-01 — "Versus"
 
 ### Added
