@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.13.0] — 2026-08-01 — "Card"
+
+### Changed
+- **Report card shows progress**: the shareable card now carries a
+  PROGRESS sparkline of your recent sessions (ending with this one) and a
+  NEW BEST chip when the session sets a personal best — shares tell the
+  story of improvement, not just one number.
+
 ## [1.12.0] — 2026-08-01 — "Journal"
 
 ### Added
