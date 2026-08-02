@@ -78,9 +78,26 @@ struct TrainingLogPanel: View {
         TrainingLog.weekOverWeekDelta(for: entries)
     }
 
+    private var streak: Int {
+        TrainingLog.weeklyStreak(for: entries)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            SectionHeader(title: "Training log")
+            HStack(spacing: 8) {
+                SectionHeader(title: "Training log")
+                if streak >= 2 {
+                    Text("\(streak)-WEEK STREAK")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.severityMinor)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .overlay(RoundedRectangle(cornerRadius: 4)
+                            .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
+                        .fixedSize()
+                }
+            }
 
             Sparkline(values: TrainingLog.recentScores(from: entries))
                 .frame(height: 46)

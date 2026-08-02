@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.29.0] — 2026-08-02 — "Polish"
+
+### Changed
+- The weekly streak chip now also lives on Home's training log — the
+  motivational number where you see it daily, not just in History.
+- What's New highlights refreshed to cover practice tracking and streaks
+  for the next update announcement.
+
 ## [1.28.0] — 2026-08-02 — "Done"
 
 ### Added
