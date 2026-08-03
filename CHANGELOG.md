@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.41.1] — 2026-08-03
+
+### Fixed
+- Section header rows no longer fracture or squeeze at extreme Dynamic
+  Type sizes — the Results video header, Training Log header, and
+  issue-timeline header drop to a stacked layout when they genuinely
+  can't fit on one line, instead of wrapping mid-word or crushing
+  their lane rules.
+
 ## [1.41.0] — 2026-08-03 — "Nudge"
 
 ### Added

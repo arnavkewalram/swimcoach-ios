@@ -160,6 +160,12 @@ enum GroteskWeight {
 struct SectionHeader: View {
     let title: String
     var icon: String? = nil
+    /// Set this inside the horizontal branch of a `ViewThatFits` row: the
+    /// title then refuses to wrap, so a row that can't hold it on one line
+    /// genuinely fails to fit and the stacked fallback engages instead of
+    /// the label fracturing mid-word. The lane rule stays greedy either
+    /// way, so it still absorbs the slack when the row does fit.
+    var singleLine: Bool = false
 
     var body: some View {
         HStack(spacing: 8) {
@@ -167,6 +173,7 @@ struct SectionHeader: View {
                 .font(.sectionLabel)
                 .tracking(1.6)
                 .foregroundStyle(DS.inkSecondary)
+                .fixedSize(horizontal: singleLine, vertical: false)
             LaneRule()
         }
     }
