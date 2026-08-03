@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.38.1] — 2026-08-02
+
+### Changed
+- What's New sheet refreshed for the 1.36–1.38 wave: per-swimmer weekly
+  goals, CSV spreadsheet export, and the shareable session card replace
+  the older highlights. A content test now pins the current wave's
+  titles and icons so the sheet can't silently go stale.
+
 ## [1.38.0] — 2026-08-02 — "Poster"
 
 ### Added

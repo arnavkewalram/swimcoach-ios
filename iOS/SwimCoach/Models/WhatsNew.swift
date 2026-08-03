@@ -24,20 +24,14 @@ enum WhatsNew {
     /// Highlights for the current release wave. Curated, not exhaustive —
     /// update alongside CHANGELOG when headline features ship.
     static let highlights: [Highlight] = [
-        Highlight(icon: "photo.on.rectangle",
-                  title: "Import from Photos",
-                  detail: "Analyze any swim video from your library — not just live recordings."),
-        Highlight(icon: "figure.pool.swim",
-                  title: "Drill library with practice tracking",
-                  detail: "Ten drills mapped to every fault — mark them done and the library remembers."),
-        Highlight(icon: "chart.line.uptrend.xyaxis",
-                  title: "Training log, goals, focus & streaks",
-                  detail: "Home tracks your score trend, weekly goal, focus fault, and consecutive training weeks."),
+        Highlight(icon: "target",
+                  title: "Weekly goals, per swimmer",
+                  detail: "The goal follows the Home swimmer scope — each swimmer holds their own target, inheriting the Everyone goal until they set one."),
+        Highlight(icon: "tablecells",
+                  title: "Your history as a spreadsheet",
+                  detail: "About → Your data now exports a CSV — one row per session — alongside the JSON archive."),
         Highlight(icon: "square.and.arrow.up",
-                  title: "Share the proof",
-                  detail: "Export your video with the skeleton burned in, or a report card with your progress curve."),
-        Highlight(icon: "metronome",
-                  title: "Stroke rate & trends",
-                  detail: "Strokes per minute on every new analysis; History shows 12-week consistency and per-fault direction."),
+                  title: "Shareable session card",
+                  detail: "SHARE CARD in Results renders your session as a square social image — score, verdict, top issues — straight to the share sheet."),
     ]
 }
