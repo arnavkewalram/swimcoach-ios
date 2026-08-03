@@ -47,6 +47,7 @@ struct ResultsView: View {
 
     @State private var scrollProxy: ScrollViewProxy? = nil
     @State private var reportImage: UIImage? = nil
+    @State private var shareCardImage: UIImage? = nil
 
     @State private var sessionToEdit: SwimSession? = nil
     @State private var celebratedBest = false
@@ -275,6 +276,17 @@ struct ResultsView: View {
                 reportImage = ReportCardView.render(
                     result: result, trendScores: reportTrendScores, newBest: isNewBest)
             }
+            if shareCardImage == nil {
+                // Deferred off the appearance frame so first paint isn't
+                // blocked by a second ImageRenderer pass stacked on the
+                // score animations. ImageRenderer must stay on the main
+                // actor; the SHARE CARD control appears once this lands.
+                let model = shareCardModel
+                Task(priority: .utility) { @MainActor in
+                    guard shareCardImage == nil else { return }
+                    shareCardImage = ShareCardView.render(model: model)
+                }
+            }
             if player == nil, let url = result.videoURL {
                 let p = AVPlayer(url: url)
                 p.isMuted = true
@@ -288,6 +300,12 @@ struct ResultsView: View {
                     }
                 }
             }
+        }
+        // The pencil button edits the saved session's name/swimmer in place —
+        // re-render the cached card whenever an edit changes what the card
+        // would show (ShareCardModel is Equatable over exactly those inputs).
+        .onChange(of: shareCardModel) { _, model in
+            shareCardImage = ShareCardView.render(model: model)
         }
         .onDisappear {
             player?.pause()
@@ -354,6 +372,7 @@ struct ResultsView: View {
 
     @ViewBuilder
     private var videoControls: some View {
+        shareCardControl
         if hasSkeletonData {
             Button {
                 showSkeleton.toggle()
@@ -370,6 +389,37 @@ struct ResultsView: View {
             .accessibilityLabel(showSkeleton ? "Hide detected joints overlay" : "Show detected joints overlay")
 
             exportControl
+        }
+    }
+
+    /// The formatted content of the square social card — swimmer/name come
+    /// from the saved session when there is one.
+    private var shareCardModel: ShareCardModel {
+        let saved = savedSessions.first
+        return ShareCardModel(result: result,
+                              swimmer: saved?.swimmer ?? "",
+                              sessionName: saved?.name ?? "")
+    }
+
+    /// Share the square session summary card — sits with the video export
+    /// controls and shares their compact bordered style.
+    @ViewBuilder
+    private var shareCardControl: some View {
+        if let shareCardImage {
+            ShareLink(
+                item: Image(uiImage: shareCardImage),
+                preview: SharePreview(shareCardModel.previewTitle,
+                                      image: Image(uiImage: shareCardImage))
+            ) {
+                Text("SHARE CARD")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.inkSecondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.border, lineWidth: 1))
+            }
+            .accessibilityLabel("Share session summary card")
         }
     }
 
@@ -437,15 +487,7 @@ struct ResultsView: View {
 
     private var gradeColor: Color { DS.gradeColor(result.grade) }
 
-    private var verdict: String {
-        switch result.grade {
-        case "A": return "Excellent technique"
-        case "B": return "Good form"
-        case "C": return "Room to improve"
-        case "D": return "Needs work"
-        default:  return "Keep practicing"
-        }
-    }
+    private var verdict: String { ShareCardModel.verdict(for: result.grade) }
 
     private var scorePanel: some View {
         VStack(alignment: .leading, spacing: 0) {
