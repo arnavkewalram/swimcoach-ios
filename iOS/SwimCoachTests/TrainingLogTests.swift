@@ -130,8 +130,20 @@ final class TrainingLogTests: XCTestCase {
     func testWhatsNewHighlightsWellFormed() {
         XCTAssertFalse(WhatsNew.highlights.isEmpty)
         XCTAssertTrue(WhatsNew.highlights.allSatisfy { !$0.title.isEmpty && !$0.detail.isEmpty })
+        XCTAssertTrue(WhatsNew.highlights.allSatisfy { !$0.icon.isEmpty })
         XCTAssertEqual(WhatsNew.highlights.map(\.id).count,
                        Set(WhatsNew.highlights.map(\.id)).count, "titles must be unique ids")
+    }
+
+    func testWhatsNewAnnouncesCurrentWave() {
+        // The 1.36–1.38 wave: per-swimmer goals, CSV export, share card.
+        XCTAssertEqual(WhatsNew.highlights.count, 3)
+        XCTAssertEqual(WhatsNew.highlights.map(\.title),
+                       ["Weekly goals, per swimmer",
+                        "Your history as a spreadsheet",
+                        "Shareable session card"])
+        XCTAssertEqual(WhatsNew.highlights.map(\.icon),
+                       ["target", "tablecells", "square.and.arrow.up"])
     }
 
     func testPrivacyManifestIsBundled() {
