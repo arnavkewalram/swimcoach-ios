@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.41.0] — 2026-08-03 — "Nudge"
+
+### Added
+- Opt-in weekly goal reminder: a "Remind me" toggle with a day/time
+  picker in the Weekly Goal sheet schedules a weekly nudge when the
+  goal isn't met. The copy refreshes with the live session count on
+  every app open and session save, and already-met weeks are skipped
+  automatically.
+- Reminder settings are per swimmer scope, inheriting the Everyone
+  setting just like the goal itself.
+
 ## [1.40.3] — 2026-08-03
 
 ### Fixed
