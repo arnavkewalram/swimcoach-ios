@@ -4,6 +4,10 @@ import SwiftUI
 struct WhatsNewSheet: View {
     let onDismiss: () -> Void
 
+    /// Fade zone above the pinned Continue button so highlights scrolled
+    /// beneath it dissolve into the ground instead of hard-clipping.
+    private static let scrimHeight: CGFloat = 36
+
     var body: some View {
         ZStack {
             DS.sheetSurface.ignoresSafeArea()
@@ -48,11 +52,27 @@ struct WhatsNewSheet: View {
                     }
                     .padding(.bottom, 16)
                 }
+                // Pin Continue as a bottom inset: the scroll content is
+                // automatically padded by the full inset height (button +
+                // scrim), so at the medium detent the last highlight can
+                // always scroll clear of the button, and anything mid-scroll
+                // fades through the scrim instead of severing.
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    VStack(spacing: 0) {
+                        LinearGradient(
+                            colors: [DS.background.opacity(0), DS.background],
+                            startPoint: .top,
+                            endPoint: .bottom)
+                            .frame(height: Self.scrimHeight)
+                            .allowsHitTesting(false)
 
-                Button(action: onDismiss) {
-                    PrimaryButtonLabel(title: "Continue")
+                        Button(action: onDismiss) {
+                            PrimaryButtonLabel(title: "Continue")
+                        }
+                        .buttonStyle(ScaleButtonStyle())
+                        .background(DS.background)
+                    }
                 }
-                .buttonStyle(ScaleButtonStyle())
             }
             .padding(24)
         }
