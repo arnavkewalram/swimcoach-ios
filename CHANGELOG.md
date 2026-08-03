@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.40.0] — 2026-08-02 — "Night Meet"
+
+### Added
+- **Night Meet dark theme**: the app now follows the system appearance.
+  Dark renders the meet sheet on a wet-slate evening pool deck — chalk
+  ink, chlorine-blue lane hairlines, a brighter lane-blue accent, and
+  severity colors retuned to hold contrast on the dark ground. The
+  launch screen and system tint gain matching dark variants.
+
+### Changed
+- Share and report cards intentionally stay light paper in both
+  appearances — what you share looks like the printed sheet.
+
 ## [1.39.4] — 2026-08-02
 
 ### Fixed
