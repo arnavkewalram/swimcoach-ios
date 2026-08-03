@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.39.0] — 2026-08-02 — "Replay"
+
+### Changed
+- The issue timeline under the Results video is now one severity-colored
+  lane spanning the whole clip: overlapping detections merge with the
+  worst severity winning, tapping a mark jumps the video to that moment,
+  and a legend plus 0:00/M:SS end labels make the strip readable at a
+  glance. Geometry moved into a tested pure model (`IssueTimelineModel`);
+  the strip hides cleanly on legacy sessions without windows or duration.
+
 ## [1.38.1] — 2026-08-02
 
 ### Changed

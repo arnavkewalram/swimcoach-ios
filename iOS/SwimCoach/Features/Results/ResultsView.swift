@@ -351,13 +351,13 @@ struct ResultsView: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.border, lineWidth: 1))
             .accessibilityLabel("Analyzed swim video with detected joint overlay. Review your stroke alongside the feedback below.")
 
-            if let windows = result.issueWindows, !windows.isEmpty, !result.issues.isEmpty {
-                IssueTimelineStrip(
-                    windows: windows,
-                    issues: result.issues,
-                    onSelect: { time in seek(to: time) }
-                )
-            }
+            // Hides itself for legacy sessions (nil windows/duration).
+            IssueTimelineStrip(
+                windows: result.issueWindows,
+                issues: result.issues,
+                durationSeconds: result.durationSeconds,
+                onSeek: { time in seek(to: time) }
+            )
         }
         .id(videoSectionID)
     }
