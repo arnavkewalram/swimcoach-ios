@@ -22,11 +22,11 @@ enum SessionCSV {
         let duration = session.decoded()?.durationSeconds
         return [
             session.analyzedAt.formatted(.iso8601),
-            escape(session.name),
-            escape(session.swimmer),
+            escapeUserText(session.name),
+            escapeUserText(session.swimmer),
             String(session.score),
             escape(session.grade),
-            escape(session.issueNames.joined(separator: "; ")),
+            escapeUserText(session.issueNames.joined(separator: "; ")),
             String(session.strokeCount),
             number(session.kickRatePerMin),
             duration.map { number($0) } ?? "",
@@ -41,6 +41,23 @@ enum SessionCSV {
         }
         guard needsQuoting else { return field }
         return "\"\(field.replacingOccurrences(of: "\"", with: "\"\""))\""
+    }
+
+    /// Leading characters that Excel/Numbers/Sheets treat as the start of
+    /// a formula when a CSV cell begins with them.
+    private static let formulaTriggers: Set<Character> = ["=", "+", "-", "@"]
+
+    /// Escaping for user-editable free text (name, swimmer, issue list):
+    /// neutralizes spreadsheet formula injection by prefixing a literal
+    /// apostrophe when the field starts with `=`, `+`, `-`, or `@`, then
+    /// applies the same RFC 4180 quoting as `escape`. Program-generated
+    /// numeric columns never pass through here, so negative numbers are
+    /// untouched.
+    static func escapeUserText(_ field: String) -> String {
+        guard let first = field.first, formulaTriggers.contains(first) else {
+            return escape(field)
+        }
+        return escape("'" + field)
     }
 
     /// Locale-independent numeric field: up to two decimals with trailing

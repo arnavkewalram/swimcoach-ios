@@ -9,11 +9,13 @@ final class SessionCSVTests: XCTestCase {
     private func makeSession(name: String = "",
                              swimmer: String = "",
                              analyzedAt: Date = Date(),
-                             durationSeconds: Double? = nil) -> SwimSession {
+                             durationSeconds: Double? = nil,
+                             kickRatePerMin: Double? = nil) -> SwimSession {
         let base = AnalysisResult.demo
         let result = AnalysisResult(
             id: UUID(), score: 72, grade: "C",
-            strokeCount: base.strokeCount, kickRatePerMin: base.kickRatePerMin,
+            strokeCount: base.strokeCount,
+            kickRatePerMin: kickRatePerMin ?? base.kickRatePerMin,
             strokeAsymmetry: base.strokeAsymmetry, frameCount: base.frameCount,
             sampledFrames: base.sampledFrames, fps: base.fps,
             issues: base.issues, tips: base.tips,
@@ -66,6 +68,46 @@ final class SessionCSVTests: XCTestCase {
         XCTAssertEqual(SessionCSV.escape("a,b"), "\"a,b\"")
         XCTAssertEqual(SessionCSV.escape("say \"hi\""), "\"say \"\"hi\"\"\"")
         XCTAssertEqual(SessionCSV.escape("line\nbreak"), "\"line\nbreak\"")
+    }
+
+    func testNeutralizesFormulaInjectionInSessionName() {
+        // Arrange — user-editable name crafted as a spreadsheet formula
+        let session = makeSession(name: "=1+1", swimmer: "@SUM(A1:A9)")
+
+        // Act
+        let row = String(SessionCSV.csv(from: [session]).split(separator: "\n")[1])
+
+        // Assert — both fields carry the apostrophe neutralizer
+        XCTAssertTrue(row.contains(",'=1+1,'@SUM(A1:A9),"),
+                      "expected neutralized name/swimmer in: \(row)")
+        XCTAssertFalse(row.contains(",=1+1,"),
+                       "raw formula must not reach the CSV: \(row)")
+    }
+
+    func testEscapeUserTextNeutralizesFormulaTriggers() {
+        // Each spreadsheet formula trigger gets an apostrophe prefix
+        XCTAssertEqual(SessionCSV.escapeUserText("=1+1"), "'=1+1")
+        XCTAssertEqual(SessionCSV.escapeUserText("+A2"), "'+A2")
+        XCTAssertEqual(SessionCSV.escapeUserText("-2+3"), "'-2+3")
+        XCTAssertEqual(SessionCSV.escapeUserText("@SUM(A1)"), "'@SUM(A1)")
+        // Non-leading triggers and plain text pass through untouched
+        XCTAssertEqual(SessionCSV.escapeUserText("Taper set"), "Taper set")
+        XCTAssertEqual(SessionCSV.escapeUserText("a=b"), "a=b")
+        // Neutralization composes with RFC 4180 quoting
+        XCTAssertEqual(SessionCSV.escapeUserText("=cmd,x"), "\"'=cmd,x\"")
+    }
+
+    func testNegativeNumericFieldIsNotMangled() {
+        // Arrange — numeric columns are program-generated and must never
+        // pick up the apostrophe neutralizer
+        let session = makeSession(name: "Sprint", kickRatePerMin: -3.5)
+
+        // Act
+        let row = String(SessionCSV.csv(from: [session]).split(separator: "\n")[1])
+
+        // Assert
+        XCTAssertTrue(row.contains(",48,-3.5,"), "expected raw negative kick rate in: \(row)")
+        XCTAssertFalse(row.contains("'-3.5"), "numeric field must not be neutralized: \(row)")
     }
 
     func testRowsSortedNewestFirst() {
