@@ -4,15 +4,19 @@ import AVKit
 
 struct ResultsView: View {
     let result: AnalysisResult
-    @Environment(AppRouter.self) private var router
-    @State private var animatedScore: Double = 0
+    // Several members are internal (not private): the video/export and
+    // section builders moved to ResultsView+Video.swift and
+    // ResultsView+Sections.swift in the code-health split, and extensions
+    // in sibling files cannot see file-private state.
+    @Environment(AppRouter.self) var router
+    @State var animatedScore: Double = 0
     @State private var sectionsVisible = false
-    @State private var player: AVPlayer? = nil
-    @State private var videoNaturalSize: CGSize = .zero
-    @State private var showSkeleton = true
+    @State var player: AVPlayer? = nil
+    @State var videoNaturalSize: CGSize = .zero
+    @State var showSkeleton = true
     // Saved-state read from SwiftData itself — the footer never claims a save
     // that didn't happen.
-    @Query private var savedSessions: [SwimSession]
+    @Query var savedSessions: [SwimSession]
     @Query private var allSessions: [SwimSession]
 
     init(result: AnalysisResult) {
@@ -21,7 +25,7 @@ struct ResultsView: View {
         _savedSessions = Query(filter: #Predicate<SwimSession> { $0.id == id })
     }
 
-    private var isSaved: Bool { !savedSessions.isEmpty }
+    var isSaved: Bool { !savedSessions.isEmpty }
 
     /// Chronological recent scores for the report sparkline, ending with
     /// this session (appended manually when it isn't in the store yet).
@@ -40,24 +44,22 @@ struct ResultsView: View {
             .decoded()
     }
 
-    private var isNewBest: Bool {
+    var isNewBest: Bool {
         let prior = allSessions.filter { $0.id != result.id }.map(\.score).max()
         return TrainingLog.isNewBest(score: result.score, priorBest: prior)
     }
 
     @State private var scrollProxy: ScrollViewProxy? = nil
     @State private var reportImage: UIImage? = nil
-    @State private var shareCardImage: UIImage? = nil
+    @State var shareCardImage: UIImage? = nil
 
     @State private var sessionToEdit: SwimSession? = nil
     @State private var celebratedBest = false
 
-    enum VideoExportState: Equatable {
-        case idle, exporting(Double), ready(URL), failed
-    }
-    @State private var exportState: VideoExportState = .idle
-    @State private var exportTask: Task<Void, Never>? = nil
-    private let videoSectionID = "session-video"
+    // VideoExportState is declared in ResultsView+Video.swift.
+    @State var exportState: VideoExportState = .idle
+    @State var exportTask: Task<Void, Never>? = nil
+    let videoSectionID = "session-video"
 
     private var canSeekIssues: Bool {
         result.videoURL != nil && !(result.issueWindows?.isEmpty ?? true)
@@ -71,7 +73,7 @@ struct ResultsView: View {
         seek(to: peak.start)
     }
 
-    private func seek(to seconds: Double) {
+    func seek(to seconds: Double) {
         withAnimation { scrollProxy?.scrollTo(videoSectionID, anchor: .top) }
         player?.seek(to: CMTime(seconds: seconds, preferredTimescale: 600),
                      toleranceBefore: .zero, toleranceAfter: .zero)
@@ -328,336 +330,6 @@ struct ResultsView: View {
         }
         .sheet(item: $sessionToEdit) { session in
             EditSessionSheet(session: session)
-        }
-    }
-
-    // MARK: - Session video
-
-    private func videoSection(url: URL) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // At extreme type sizes the header row can't fit beside the
-            // controls — fall to a vertical stack instead of letting the
-            // label break mid-word. The horizontal branch pins its texts
-            // to one line (singleLine header + fixedSize controls) so it
-            // can genuinely fail to fit; without that, wrapping text lets
-            // it satisfy any width and the fallback never engages.
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    SectionHeader(title: videoSectionTitle, singleLine: true)
-                    HStack { videoControls }
-                        .fixedSize(horizontal: true, vertical: false)
-                }
-                VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(title: videoSectionTitle)
-                    HStack { videoControls }
-                }
-            }
-            ZStack {
-                if let player {
-                    VideoPlayer(player: player)
-                    if showSkeleton, let frames = result.keypointFrames, !frames.isEmpty {
-                        SkeletonOverlayView(player: player, frames: frames,
-                                            videoSize: videoNaturalSize)
-                    }
-                } else {
-                    Color.black
-                }
-            }
-            .aspectRatio(16.0 / 9.0, contentMode: .fit)
-            .frame(maxWidth: .infinity)
-            .background(Color.black)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(DS.border, lineWidth: 1))
-            .accessibilityLabel("Analyzed swim video with detected joint overlay. Review your stroke alongside the feedback below.")
-
-            // Hides itself for legacy sessions (nil windows/duration).
-            IssueTimelineStrip(
-                windows: result.issueWindows,
-                issues: result.issues,
-                durationSeconds: result.durationSeconds,
-                onSeek: { time in seek(to: time) }
-            )
-        }
-        .id(videoSectionID)
-    }
-
-    private var hasSkeletonData: Bool {
-        !(result.keypointFrames?.isEmpty ?? true)
-    }
-
-    private var videoSectionTitle: String {
-        result.durationText.map { "Video · \($0)" } ?? "Session video"
-    }
-
-    @ViewBuilder
-    private var videoControls: some View {
-        shareCardControl
-        if hasSkeletonData {
-            Button {
-                showSkeleton.toggle()
-            } label: {
-                Text(showSkeleton ? "HIDE JOINTS" : "SHOW JOINTS")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(showSkeleton ? DS.accent : DS.inkTertiary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .overlay(RoundedRectangle(cornerRadius: 5)
-                        .stroke(showSkeleton ? DS.accent.opacity(0.5) : DS.border, lineWidth: 1))
-            }
-            .accessibilityLabel(showSkeleton ? "Hide detected joints overlay" : "Show detected joints overlay")
-
-            exportControl
-        }
-    }
-
-    /// The formatted content of the square social card — swimmer/name come
-    /// from the saved session when there is one.
-    private var shareCardModel: ShareCardModel {
-        let saved = savedSessions.first
-        return ShareCardModel(result: result,
-                              swimmer: saved?.swimmer ?? "",
-                              sessionName: saved?.name ?? "")
-    }
-
-    /// Share the square session summary card — sits with the video export
-    /// controls and shares their compact bordered style.
-    @ViewBuilder
-    private var shareCardControl: some View {
-        if let shareCardImage {
-            ShareLink(
-                item: Image(uiImage: shareCardImage),
-                preview: SharePreview(shareCardModel.previewTitle,
-                                      image: Image(uiImage: shareCardImage))
-            ) {
-                Text("SHARE CARD")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.inkSecondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.border, lineWidth: 1))
-            }
-            .accessibilityLabel("Share session summary card")
-        }
-    }
-
-    @ViewBuilder
-    private var exportControl: some View {
-        switch exportState {
-        case .idle, .failed:
-            Button {
-                startExport()
-            } label: {
-                Text(exportState == .failed ? "RETRY EXPORT" : "EXPORT")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.inkSecondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.border, lineWidth: 1))
-            }
-            .accessibilityLabel("Export video with skeleton overlay")
-        case .exporting(let p):
-            Text("\(Int(p * 100))%")
-                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                .tracking(1.2)
-                .foregroundStyle(DS.accent)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 5)
-                .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.accent.opacity(0.4), lineWidth: 1))
-                .accessibilityLabel("Exporting video, \(Int(p * 100)) percent")
-        case .ready(let url):
-            ShareLink(item: url) {
-                Text("SHARE VIDEO")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.onAccent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(DS.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: 5))
-            }
-            .accessibilityLabel("Share exported video")
-        }
-    }
-
-    private func startExport() {
-        guard let url = result.videoURL, let frames = result.keypointFrames else { return }
-        exportState = .exporting(0)
-        exportTask = Task {
-            do {
-                let out = try await OverlayVideoExporter.export(videoURL: url, frames: frames) { p in
-                    Task { @MainActor in
-                        if case .exporting = exportState { exportState = .exporting(p) }
-                    }
-                }
-                await MainActor.run { exportState = .ready(out) }
-            } catch is CancellationError {
-                await MainActor.run { exportState = .idle }
-            } catch {
-                AppLog.storage.error("Overlay export failed: \(error.localizedDescription)")
-                await MainActor.run { exportState = .failed }
-            }
-        }
-    }
-
-    // MARK: - Score panel
-
-    private var gradeColor: Color { DS.gradeColor(result.grade) }
-
-    private var verdict: String { ShareCardModel.verdict(for: result.grade) }
-
-    private var scorePanel: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("TECHNIQUE SCORE")
-                .font(.sectionLabel)
-                .tracking(1.6)
-                .foregroundStyle(DS.inkTertiary)
-                .padding(.bottom, 6)
-
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text("\(Int(animatedScore))")
-                    .font(.grotesk(84, .bold))
-                    .foregroundStyle(DS.ink)
-                    .contentTransition(.numericText())
-                Text(result.grade)
-                    .font(.grotesk(32, .bold))
-                    .foregroundStyle(gradeColor)
-                Spacer()
-            }
-            .padding(.bottom, 10)
-
-            // Score rule — flat 0–100 bar in the grade color
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Rectangle().fill(DS.border)
-                    Rectangle()
-                        .fill(gradeColor)
-                        .frame(width: geo.size.width * animatedScore / 100)
-                }
-            }
-            .frame(height: 6)
-            .clipShape(Capsule())
-            .padding(.bottom, 12)
-
-            HStack {
-                Text(verdict.uppercased())
-                    .font(.grotesk(13, .medium))
-                    .tracking(1.8)
-                    .foregroundStyle(gradeColor)
-                Spacer()
-                if isNewBest {
-                    HStack(spacing: 5) {
-                        Image(systemName: "arrow.up.to.line")
-                            .font(.system(size: 9, weight: .semibold))
-                            .accessibilityHidden(true)
-                        Text("NEW BEST")
-                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                            .tracking(1.4)
-                    }
-                    .foregroundStyle(DS.severityMinor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .overlay(RoundedRectangle(cornerRadius: 5)
-                        .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
-                }
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Technique score \(result.score) out of 100, grade \(result.grade). \(verdict)." +
-                            (isNewBest ? " New personal best." : ""))
-    }
-
-    // MARK: - Quality note
-
-    private func qualityNote(icon: String, color: Color, text: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: icon)
-                .font(.footnote)
-                .foregroundStyle(color)
-                .padding(.top, 1)
-                .accessibilityHidden(true)
-            Text(text)
-                .font(.footnote)
-                .lineSpacing(2)
-                .foregroundStyle(DS.inkSecondary)
-        }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(alignment: .leading) {
-            Rectangle().fill(color.opacity(0.7)).frame(width: 3)
-        }
-        .background(color.opacity(0.05))
-    }
-
-    // MARK: - Metrics
-
-    private var metricsStrip: some View {
-        HStack(spacing: 0) {
-            metric(value: result.strokeCount > 0 ? "\(result.strokeCount)" : "–",
-                   label: "STROKES")
-            metricDivider
-            if let spm = result.strokeRatePerMin {
-                metric(value: String(format: "%.0f", spm), label: "STROKES/MIN")
-                metricDivider
-            }
-            metric(value: result.kickRatePerMin > 0 ? String(format: "%.0f", result.kickRatePerMin) : "–",
-                   label: "KICKS/MIN")
-            metricDivider
-            metric(value: result.strokeCount > 0 ? String(format: "%.0f%%", result.strokeAsymmetry * 100) : "–",
-                   label: "ASYMMETRY",
-                   valueColor: result.strokeAsymmetry > 0.3 ? DS.severityModerate : DS.ink)
-        }
-        .padding(.vertical, 8)
-    }
-
-    private var metricDivider: some View {
-        Rectangle().fill(DS.border).frame(width: 1, height: 40)
-    }
-
-    private func metric(value: String, label: String, valueColor: Color = DS.ink) -> some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.grotesk(24, .bold))
-                .foregroundStyle(valueColor)
-                .minimumScaleFactor(0.7)
-                .lineLimit(1)
-            Text(label)
-                .font(.statUnit)
-                .tracking(1.2)
-                .foregroundStyle(DS.inkTertiary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-    }
-
-    // MARK: - Footer
-
-    private var footer: some View {
-        VStack(spacing: 14) {
-            HStack(spacing: 6) {
-                Image(systemName: isSaved ? "checkmark" : "exclamationmark.triangle")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(isSaved ? DS.severityMinor : DS.severityModerate)
-                    .accessibilityHidden(true)
-                Text(isSaved
-                     ? "Session saved"
-                     : "Session not saved — a storage error occurred")
-                    .font(.footnote)
-                    .foregroundStyle(isSaved ? DS.inkSecondary : DS.severityModerate)
-            }
-            .frame(maxWidth: .infinity)
-
-            Button {
-                router.popToRoot()
-            } label: {
-                SecondaryButtonLabel(title: "Done")
-            }
-            .buttonStyle(ScaleButtonStyle())
         }
     }
 }
