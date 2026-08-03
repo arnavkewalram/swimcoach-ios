@@ -277,7 +277,15 @@ struct ResultsView: View {
                     result: result, trendScores: reportTrendScores, newBest: isNewBest)
             }
             if shareCardImage == nil {
-                shareCardImage = ShareCardView.render(model: shareCardModel)
+                // Deferred off the appearance frame so first paint isn't
+                // blocked by a second ImageRenderer pass stacked on the
+                // score animations. ImageRenderer must stay on the main
+                // actor; the SHARE CARD control appears once this lands.
+                let model = shareCardModel
+                Task(priority: .utility) { @MainActor in
+                    guard shareCardImage == nil else { return }
+                    shareCardImage = ShareCardView.render(model: model)
+                }
             }
             if player == nil, let url = result.videoURL {
                 let p = AVPlayer(url: url)
@@ -292,6 +300,12 @@ struct ResultsView: View {
                     }
                 }
             }
+        }
+        // The pencil button edits the saved session's name/swimmer in place —
+        // re-render the cached card whenever an edit changes what the card
+        // would show (ShareCardModel is Equatable over exactly those inputs).
+        .onChange(of: shareCardModel) { _, model in
+            shareCardImage = ShareCardView.render(model: model)
         }
         .onDisappear {
             player?.pause()

@@ -120,6 +120,41 @@ final class ShareCardModelTests: XCTestCase {
         XCTAssertTrue(model.topIssues.isEmpty)
     }
 
+    // MARK: - Invalidation (model equality drives the cached-card re-render)
+
+    func testModelEqualityDetectsSwimmerEdit() {
+        let result = makeResult()
+        let before = ShareCardModel(result: result, swimmer: "Maya", sessionName: "Tuesday threshold")
+        let after = ShareCardModel(result: result, swimmer: "Alex", sessionName: "Tuesday threshold")
+
+        XCTAssertNotEqual(before, after)
+    }
+
+    func testModelEqualityDetectsSessionNameEdit() {
+        let result = makeResult()
+        let before = ShareCardModel(result: result, swimmer: "Maya", sessionName: "Tuesday threshold")
+        let after = ShareCardModel(result: result, swimmer: "Maya", sessionName: "Wednesday sprint")
+
+        XCTAssertNotEqual(before, after)
+    }
+
+    func testModelEqualityUnchangedByCosmeticWhitespaceEdit() {
+        // Whitespace-only edits normalize to the same card content — no
+        // spurious re-render.
+        let result = makeResult()
+        let before = ShareCardModel(result: result, swimmer: "Maya", sessionName: "Tuesday threshold")
+        let after = ShareCardModel(result: result, swimmer: "  Maya ", sessionName: " Tuesday threshold ")
+
+        XCTAssertEqual(before, after)
+    }
+
+    func testModelEqualityUnchangedWhenInputsIdentical() {
+        let result = makeResult()
+
+        XCTAssertEqual(ShareCardModel(result: result, swimmer: "Maya", sessionName: "Tuesday threshold"),
+                       ShareCardModel(result: result, swimmer: "Maya", sessionName: "Tuesday threshold"))
+    }
+
     // MARK: - Share metadata
 
     func testPreviewTitleContainsScoreAndGrade() {
