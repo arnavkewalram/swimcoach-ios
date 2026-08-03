@@ -63,8 +63,15 @@ struct FocusPanel: View {
 
 struct TrainingLogPanel: View {
     let sessions: [SwimSession]
-    @AppStorage("weeklyGoal") private var weeklyGoal: Int = 0
+    @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
     @State private var showGoalSheet = false
+
+    /// Goal for the active swimmer (falls back to the Everyone goal).
+    /// Recomputed on swimmer switches and on goal-sheet dismissal — the
+    /// sheet is the only writer, so those cover every change.
+    private var weeklyGoal: Int {
+        WeeklyGoalStore().goal(for: activeSwimmer)
+    }
 
     private var entries: [TrainingLog.Entry] {
         sessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) }

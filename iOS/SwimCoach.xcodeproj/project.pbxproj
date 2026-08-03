@@ -42,11 +42,13 @@
 		576F12DE83ED304722849181 /* AnalysisResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15435D6D8D4115CA4CB9A9B /* AnalysisResult.swift */; };
 		587186C09D23A6475D1168D5 /* KeypointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB41DA1B0CADFE8AF96B3B07 /* KeypointFrame.swift */; };
 		596F90194883FCE42C428A75 /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAC6C76DBE9C4FCC419F4B7 /* CompareView.swift */; };
+		59B6499DC85D6D23113E8193 /* WeeklyGoalStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A6A673F69034FEFA430F32 /* WeeklyGoalStoreTests.swift */; };
 		5AC6297BE8258500F7D893CD /* DrillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D027762C9F6FC33526494B6F /* DrillsView.swift */; };
 		5F86F0DA01048214F3837B6A /* HomeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */; };
 		65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */; };
 		672EC66C3ADDBBAC9CE60AD8 /* ImportedVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869DD420BA54EE808DAA8590 /* ImportedVideo.swift */; };
 		6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */; };
+		70D20961F8378D3FB1D0129F /* WeeklyGoalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E0029634940BDE3DF69116 /* WeeklyGoalStore.swift */; };
 		7228F23CAD0D288891D943BC /* SwimTCNRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */; };
 		72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */; };
 		76DA86DFB3778BE9E0ED8025 /* DrillCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */; };
@@ -170,10 +172,12 @@
 		B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillCatalogTests.swift; sourceTree = "<group>"; };
 		B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyGoalSheet.swift; sourceTree = "<group>"; };
 		B85E8B75FE6C1C7F07C21F67 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		B8E0029634940BDE3DF69116 /* WeeklyGoalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyGoalStore.swift; sourceTree = "<group>"; };
 		B9D9E931537A6F52120C9319 /* IssueWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueWindow.swift; sourceTree = "<group>"; };
 		BB690A28D61D3F1A6383E7ED /* FeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureExtractor.swift; sourceTree = "<group>"; };
 		BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseAnalyzer.swift; sourceTree = "<group>"; };
 		C5253D1FE2BD2528D422DC30 /* SmokeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeUITests.swift; sourceTree = "<group>"; };
+		C8A6A673F69034FEFA430F32 /* WeeklyGoalStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyGoalStoreTests.swift; sourceTree = "<group>"; };
 		CA67BB92F29577B965B6D2E4 /* SessionFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionFilter.swift; sourceTree = "<group>"; };
 		CD911C621D22DBADBCCFC200 /* SwimCoachUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SwimCoachUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF5F95B5EFDE86670DAE8840 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
@@ -309,6 +313,7 @@
 				40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */,
 				A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */,
 				6E5C39CD071B8B9A74F6A45B /* VideoTransformTests.swift */,
+				C8A6A673F69034FEFA430F32 /* WeeklyGoalStoreTests.swift */,
 			);
 			path = SwimCoachTests;
 			sourceTree = "<group>";
@@ -355,6 +360,7 @@
 				52C6D30A519EEDA7A9575174 /* SwimSession.swift */,
 				228631A15A23306938ED17ED /* TechniqueIssue.swift */,
 				2D334215248B1046E54DC5BF /* TrainingLog.swift */,
+				B8E0029634940BDE3DF69116 /* WeeklyGoalStore.swift */,
 				667FF8EEE7913666DD9CA4FD /* WhatsNew.swift */,
 			);
 			path = Models;
@@ -608,6 +614,7 @@
 				116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */,
 				A3B1E9443D343FF9B5564F05 /* TrainingLogTests.swift in Sources */,
 				2D3FB6852995E34951EDB73E /* VideoTransformTests.swift in Sources */,
+				59B6499DC85D6D23113E8193 /* WeeklyGoalStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -671,6 +678,7 @@
 				D793450460E9BCA2A098D248 /* TrainingLogPanel.swift in Sources */,
 				B21693A6CF7528E594204809 /* VideoTransform.swift in Sources */,
 				F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */,
+				70D20961F8378D3FB1D0129F /* WeeklyGoalStore.swift in Sources */,
 				C02B70A87116FDBF215902FB /* WhatsNew.swift in Sources */,
 				2B4A833E943ADA09095C2271 /* WhatsNewSheet.swift in Sources */,
 				72DC4DEB5E73DCB89144453F /* swim_tcn.mlpackage in Sources */,

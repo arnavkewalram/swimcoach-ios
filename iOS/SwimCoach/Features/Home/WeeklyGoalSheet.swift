@@ -1,12 +1,17 @@
 import SwiftUI
 
 /// Editorial stepper sheet for the weekly session goal. Zero means off.
+/// Edits the goal for the active swimmer scope — "" is Everyone.
 struct WeeklyGoalSheet: View {
-    @AppStorage("weeklyGoal") private var weeklyGoal: Int = 0
+    @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
     @Environment(\.dismiss) private var dismiss
     @State private var draft: Int = 0
 
     private static let maxGoal = 14
+
+    private var scopeName: String {
+        activeSwimmer.isEmpty ? "Everyone" : activeSwimmer
+    }
 
     var body: some View {
         NavigationStack {
@@ -37,13 +42,21 @@ struct WeeklyGoalSheet: View {
                     Spacer()
                 }
             }
-            .navigationTitle("Weekly Goal")
+            .navigationTitle("Weekly Goal — \(scopeName)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Weekly Goal")
-                        .font(.grotesk(17, .medium))
-                        .foregroundStyle(DS.ink)
+                    HStack(spacing: 6) {
+                        Text("Weekly Goal")
+                            .font(.grotesk(17, .medium))
+                            .foregroundStyle(DS.ink)
+                        Text("— \(scopeName)")
+                            .font(.grotesk(17, .medium))
+                            .foregroundStyle(DS.accent)
+                            .lineLimit(1)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Weekly goal for \(scopeName)")
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -51,7 +64,7 @@ struct WeeklyGoalSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        weeklyGoal = draft
+                        WeeklyGoalStore().setGoal(draft, for: activeSwimmer)
                         dismiss()
                     }
                     .foregroundStyle(DS.accent)
@@ -61,7 +74,7 @@ struct WeeklyGoalSheet: View {
         }
         .presentationDetents([.height(280)])
         .presentationBackground(DS.background)
-        .onAppear { draft = weeklyGoal }
+        .onAppear { draft = WeeklyGoalStore().goal(for: activeSwimmer) }
     }
 
     private func stepButton(_ icon: String, enabled: Bool,
