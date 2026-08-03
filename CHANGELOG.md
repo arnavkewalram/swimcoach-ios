@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.42.1] — 2026-08-03
+
+### Changed
+- Split OnboardingView and ResultsView into focused sibling files
+  (pages, video/export, sections) — no behavior changes.
+- Removed unused design-system tokens (`DS.accentDim`,
+  `Font.statNumber`).
+
 ## [1.42.0] — 2026-08-03 — "Program"
 
 ### Changed
