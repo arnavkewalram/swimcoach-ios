@@ -60,7 +60,7 @@ struct WhatsNewSheet: View {
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     VStack(spacing: 0) {
                         LinearGradient(
-                            colors: [DS.background.opacity(0), DS.background],
+                            colors: [DS.sheetSurface.opacity(0), DS.sheetSurface],
                             startPoint: .top,
                             endPoint: .bottom)
                             .frame(height: Self.scrimHeight)
@@ -70,7 +70,7 @@ struct WhatsNewSheet: View {
                             PrimaryButtonLabel(title: "Continue")
                         }
                         .buttonStyle(ScaleButtonStyle())
-                        .background(DS.background)
+                        .background(DS.sheetSurface)
                     }
                 }
             }

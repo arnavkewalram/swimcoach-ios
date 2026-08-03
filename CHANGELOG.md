@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.40.3] — 2026-08-03
+
+### Fixed
+- What's New highlights no longer hard-clip behind the Continue button
+  at the medium detent — content fades through a scrim and can scroll
+  fully clear.
+- The dark-mode app icon now sits on an opaque wet-slate ground,
+  eliminating the light flash during the launch open-zoom on dark
+  wallpaper.
+
 ## [1.40.2] — 2026-08-03
 
 ### Fixed
