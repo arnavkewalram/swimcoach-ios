@@ -49,7 +49,13 @@ enum DS {
         light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 1),  // #111923
         dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 1))  // #E2E9F0
     static let inkSecondary = DS.ink.opacity(0.62)
-    static let inkTertiary  = DS.ink.opacity(0.40)
+    /// Tertiary stays an opacity derivation of `ink`, but the dark step is
+    /// raised: chalk @40% composites to ~3.3:1 on the slate ground (fails
+    /// AA at caption sizes); @58% it holds ≥5:1 on both ground and surface.
+    /// Light keeps the original 40% paper derivation.
+    static let inkTertiary = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.40),  // ink @ 40%
+        dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 0.58))  // ink @ 58%
     /// Hairlines: ink rules on paper / pale chlorine-blue lane lines on slate.
     static let border = Color(
         light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.14),
@@ -57,6 +63,19 @@ enum DS {
     static let borderBold = Color(
         light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.32),
         dark:  UIColor(red: 0.612, green: 0.784, blue: 0.882, alpha: 0.42))
+    /// Muted data mark (empty-week dashes and other zero-state ticks):
+    /// identical to `border` in light, but a half step brighter in dark —
+    /// these encode data, not rules, and must not sink into the lane-line
+    /// hairlines on slate.
+    static let markMuted = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.14),
+        dark:  UIColor(red: 0.612, green: 0.784, blue: 0.882, alpha: 0.30))
+    /// Modal sheet ground: paper in light (a sheet is just another page of
+    /// the meet packet), raised slate in dark so sheets separate from the
+    /// #121820 backdrop behind them instead of sampling identically.
+    static let sheetSurface = Color(
+        light: UIColor(red: 0.969, green: 0.961, blue: 0.937, alpha: 1),  // = background
+        dark:  UIColor(red: 0.106, green: 0.133, blue: 0.169, alpha: 1))  // = surface #1B222B
 
     // Lane blue — the one accent. Used for actions and live data, never decoration.
     static let accent = Color(
