@@ -114,6 +114,28 @@ struct HomeView: View {
                             .padding(.bottom, 16)
                     }
 
+                    // ── Primary action (kept above the fold) ──────────────
+                    Button {
+                        router.push(.camera)
+                    } label: {
+                        HStack {
+                            Text("Analyze a swim")
+                                .font(.grotesk(18, .medium))
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                                .font(.body.weight(.semibold))
+                                .accessibilityHidden(true)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 22)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 60)
+                        .background(DS.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .padding(.bottom, 24)
+
                     // ── Record strip ──────────────────────────────────────
                     if !scopedSessions.isEmpty {
                         RecordStrip(sessions: scopedSessions)
@@ -138,28 +160,7 @@ struct HomeView: View {
 
                     Spacer(minLength: 30)
 
-                    // ── Actions ───────────────────────────────────────────
-                    Button {
-                        router.push(.camera)
-                    } label: {
-                        HStack {
-                            Text("Analyze a swim")
-                                .font(.grotesk(18, .medium))
-                            Spacer()
-                            Image(systemName: "arrow.right")
-                                .font(.body.weight(.semibold))
-                                .accessibilityHidden(true)
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 22)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 60)
-                        .background(DS.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    }
-                    .buttonStyle(ScaleButtonStyle())
-                    .padding(.bottom, 8)
-
+                    // ── Secondary actions ─────────────────────────────────
                     Button {
                         showPhotoPicker = true
                     } label: {

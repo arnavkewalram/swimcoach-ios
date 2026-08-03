@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.39.4] — 2026-08-02
+
+### Fixed
+- "Analyze a swim" now sits directly under the last-session card,
+  keeping the primary action above the fold on standard iPhones even
+  with weeks of training history.
+- The training-log sparkline endpoint dot no longer overhangs the
+  right lane-rule margin.
+- The session-label and "Compare to previous session" rows on Results
+  now meet the 44pt minimum touch target.
+
 ## [1.39.3] — 2026-08-02
 
 ### Fixed

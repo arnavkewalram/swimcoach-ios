@@ -6,9 +6,16 @@ import SwiftUI
 struct Sparkline: View {
     let values: [Int]
 
+    /// Terminal dot diameter. The plot width is inset by the dot's radius
+    /// on the trailing side so the dot's edge lands on the lane-rule
+    /// margin instead of overhanging it.
+    private static let dotDiameter: CGFloat = 6
+
     var body: some View {
         GeometryReader { geo in
-            let pts = Self.points(for: values, in: geo.size)
+            let plotSize = CGSize(width: geo.size.width - Self.dotDiameter / 2,
+                                  height: geo.size.height)
+            let pts = Self.points(for: values, in: plotSize)
             ZStack {
                 if pts.count > 1 {
                     Path { p in p.addLines(pts) }
@@ -18,7 +25,7 @@ struct Sparkline: View {
                 if let last = pts.last {
                     Circle()
                         .fill(DS.accent)
-                        .frame(width: 6, height: 6)
+                        .frame(width: Self.dotDiameter, height: Self.dotDiameter)
                         .position(last)
                 }
             }
