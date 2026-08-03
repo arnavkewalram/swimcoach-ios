@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RootView: View {
     @State private var router = AppRouter()
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         @Bindable var r = router
@@ -35,6 +37,13 @@ struct RootView: View {
                 }
         }
         .environment(router)
+        // Weekly goal reminder copy embeds the live session count, which a
+        // calendar trigger can't know — refresh the pending request every
+        // time the app comes to the foreground (initial launch included).
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            guard phase == .active else { return }
+            GoalReminder.reschedule(context: modelContext)
+        }
         // Follows the system appearance: light is the "meet sheet"
         // editorial; dark is "Night Meet" (see DesignSystem.swift).
         // Dynamic Type scales everywhere; capped at accessibility2 so the

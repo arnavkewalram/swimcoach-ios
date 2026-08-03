@@ -296,6 +296,9 @@ struct AnalyzingView: View {
                 modelContext.insert(session)
                 do {
                     try modelContext.save()
+                    // A new session changes this week's count — refresh the
+                    // goal reminder copy (and skip the week if now met).
+                    GoalReminder.reschedule(context: modelContext)
                 } catch {
                     AppLog.analysis.error("Session save failed: \(error.localizedDescription)")
                 }
@@ -413,6 +416,7 @@ struct AnalyzingView: View {
                 modelContext.insert(session)
             do {
                 try modelContext.save()
+                GoalReminder.reschedule(context: modelContext)
             } catch {
                 AppLog.analysis.error("Demo session save failed: \(error.localizedDescription)")
             }
