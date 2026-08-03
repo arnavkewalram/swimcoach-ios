@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.37.0] — 2026-08-02 — "Ledger"
+
+### Added
+- CSV export of session history: one spreadsheet row per session (date,
+  name, swimmer, score, grade, issues, strokes, kick rate, duration),
+  newest first, with proper CSV escaping and locale-independent numbers.
+  Lives in About → Your data as "EXPORT CSV SPREADSHEET" beside the JSON
+  archive (relabeled "EXPORT JSON ARCHIVE"), shared via the same share
+  flow. Legacy sessions without a stored duration export an empty
+  duration field.
+
 ## [1.36.0] — 2026-08-02 — "Targets"
 
 ### Changed
