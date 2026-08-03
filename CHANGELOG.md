@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.39.2] — 2026-08-02
+
+### Fixed
+- Seeded demo sessions (`-demoResultsSaved` / `-seedTrainingLog`) now
+  carry the bundled demo video, so the video player, SHARE CARD, and
+  issue timeline all render in DEBUG demo flows.
+
+### Changed
+- Report card composition rebalanced: larger progress chart, weightier
+  issue rows, and a new Coach's Focus line eliminate the empty band
+  above the footer. The report screen also gains a share button in the
+  navigation bar.
+
 ## [1.39.1] — 2026-08-02
 
 ### Fixed
