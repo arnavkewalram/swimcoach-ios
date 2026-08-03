@@ -97,7 +97,7 @@ struct ResultsView: View {
                         Button {
                             sessionToEdit = saved
                         } label: {
-                            HStack(spacing: 8) {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
                                 Image(systemName: "pencil.line")
                                     .font(.caption2)
                                     .accessibilityHidden(true)
@@ -106,21 +106,28 @@ struct ResultsView: View {
                                         .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                                         .tracking(1.2)
                                 } else {
-                                    if !saved.swimmer.isEmpty {
-                                        Text(saved.swimmer.uppercased())
-                                            .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
-                                            .tracking(1.0)
-                                            .foregroundStyle(DS.accent)
-                                            .fixedSize()
-                                    }
-                                    Text(saved.name.isEmpty ? "ADD A NOTE" : saved.name)
-                                        .font(.grotesk(13, .medium))
-                                        .lineLimit(1)
-                                    if !saved.notes.isEmpty {
-                                        Text("· \(saved.notes)")
-                                            .font(.caption.italic())
-                                            .foregroundStyle(DS.inkTertiary)
-                                            .lineLimit(1)
+                                    // Name row up top; the note gets its own
+                                    // line so it can wrap instead of truncating.
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                            if !saved.swimmer.isEmpty {
+                                                Text(saved.swimmer.uppercased())
+                                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                                                    .tracking(1.0)
+                                                    .foregroundStyle(DS.accent)
+                                                    .fixedSize()
+                                            }
+                                            Text(saved.name.isEmpty ? "ADD A NOTE" : saved.name)
+                                                .font(.grotesk(13, .medium))
+                                                .lineLimit(1)
+                                        }
+                                        if !saved.notes.isEmpty {
+                                            Text(saved.notes)
+                                                .font(.caption.italic())
+                                                .foregroundStyle(DS.inkTertiary)
+                                                .lineLimit(2)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        }
                                     }
                                 }
                                 Spacer()

@@ -178,6 +178,10 @@ private struct DrillCard: View {
                     .padding(.vertical, 6)
                     .overlay(RoundedRectangle(cornerRadius: 5)
                         .stroke(DS.accent.opacity(0.45), lineWidth: 1))
+                    // Pill stays visually compact; the frame extends the
+                    // tap target to the HIG 44pt minimum.
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Mark \(drill.name) done today")

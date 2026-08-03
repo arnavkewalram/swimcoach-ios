@@ -271,6 +271,7 @@ struct HomeView: View {
                 showWhatsNew = false
             }
             .presentationDetents([.large, .medium])
+            .presentationDragIndicator(.visible)
         }
         .navigationBarHidden(true)
         .onAppear {
