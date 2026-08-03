@@ -136,14 +136,18 @@ final class TrainingLogTests: XCTestCase {
     }
 
     func testWhatsNewAnnouncesCurrentWave() {
-        // The 1.36–1.38 wave: per-swimmer goals, CSV export, share card.
-        XCTAssertEqual(WhatsNew.highlights.count, 3)
+        // The 1.39–1.40 wave leads: Night Meet dark theme and the
+        // tap-to-seek issue timeline. Share card and CSV export carry
+        // over for skip-version upgraders; per-swimmer goals rotate out.
+        XCTAssertEqual(WhatsNew.highlights.count, 4)
         XCTAssertEqual(WhatsNew.highlights.map(\.title),
-                       ["Weekly goals, per swimmer",
-                        "Your history as a spreadsheet",
-                        "Shareable session card"])
+                       ["Night Meet dark theme",
+                        "Tap an issue, see the moment",
+                        "Shareable session card",
+                        "Your history as a spreadsheet"])
         XCTAssertEqual(WhatsNew.highlights.map(\.icon),
-                       ["target", "tablecells", "square.and.arrow.up"])
+                       ["moon.stars", "timeline.selection",
+                        "square.and.arrow.up", "tablecells"])
     }
 
     func testPrivacyManifestIsBundled() {

@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.40.1] — 2026-08-02
+
+### Changed
+- What's New sheet refreshed for the 1.39–1.40 wave: Night Meet dark
+  theme and the tap-to-seek issue timeline lead; the share card and CSV
+  export carry over for skip-version upgraders, per-swimmer goals
+  rotate out. The content test pins the new wave.
+
 ## [1.40.0] — 2026-08-02 — "Night Meet"
 
 ### Added
