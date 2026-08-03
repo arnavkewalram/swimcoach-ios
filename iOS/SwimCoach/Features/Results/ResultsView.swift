@@ -468,7 +468,7 @@ struct ResultsView: View {
                 Text("SHARE VIDEO")
                     .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                     .tracking(1.2)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(DS.onAccent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
                     .background(DS.accent)

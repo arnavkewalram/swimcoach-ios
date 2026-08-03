@@ -35,8 +35,8 @@ struct RootView: View {
                 }
         }
         .environment(router)
-        // Deliberate single-appearance design: light "meet sheet" editorial.
-        .preferredColorScheme(.light)
+        // Follows the system appearance: light is the "meet sheet"
+        // editorial; dark is "Night Meet" (see DesignSystem.swift).
         // Dynamic Type scales everywhere; capped at accessibility2 so the
         // data-dense layouts degrade gracefully instead of shattering.
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)

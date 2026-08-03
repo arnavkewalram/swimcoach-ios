@@ -195,12 +195,16 @@ struct ReportCardView: View {
     }
 
     /// Render the report card to a shareable image (2x scale → 1080×1350).
+    /// Deliberately forced to light: the card leaves the app as a
+    /// print-like paper artifact, so it keeps the meet-sheet paper look
+    /// regardless of the sender's appearance setting.
     @MainActor
     static func render(result: AnalysisResult,
                        trendScores: [Int]? = nil,
                        newBest: Bool = false) -> UIImage? {
         let renderer = ImageRenderer(content: ReportCardView(
-            result: result, trendScores: trendScores, newBest: newBest))
+            result: result, trendScores: trendScores, newBest: newBest)
+            .environment(\.colorScheme, .light))
         renderer.scale = 2
         return renderer.uiImage
     }
@@ -218,6 +222,9 @@ struct ReportScreen: View {
     var body: some View {
         ScrollView {
             ReportCardView(result: result, trendScores: trendScores, newBest: newBest)
+                // The on-screen preview matches the shared artifact: a
+                // light paper card floating on the (adaptive) desk ground.
+                .environment(\.colorScheme, .light)
                 .scaleEffect(0.68, anchor: .top)
         }
         .background(DS.ink.opacity(0.06))

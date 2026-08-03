@@ -126,7 +126,7 @@ struct HomeView: View {
                                 .font(.body.weight(.semibold))
                                 .accessibilityHidden(true)
                         }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(DS.onAccent)
                         .padding(.horizontal, 22)
                         .frame(maxWidth: .infinity)
                         .frame(height: 60)
@@ -350,7 +350,7 @@ struct HomeView: View {
             Text(label.uppercased())
                 .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                 .tracking(1.0)
-                .foregroundStyle(isOn ? .white : DS.accent)
+                .foregroundStyle(isOn ? DS.onAccent : DS.accent)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(isOn ? DS.accent : .clear)
