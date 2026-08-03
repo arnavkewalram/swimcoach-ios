@@ -24,18 +24,13 @@ struct RootView: View {
                     case .about:
                         AboutView()
                     case .report(let result):
-                        ScrollView {
-                            #if DEBUG
-                            ReportCardView(result: result,
-                                           trendScores: [58, 61, 60, 64, 63, 67, 66, 70, 69, 72],
-                                           newBest: true)
-                                .scaleEffect(0.68, anchor: .top)
-                            #else
-                            ReportCardView(result: result)
-                                .scaleEffect(0.68, anchor: .top)
-                            #endif
-                        }
-                        .background(DS.ink.opacity(0.06))
+                        #if DEBUG
+                        ReportScreen(result: result,
+                                     trendScores: [58, 61, 60, 64, 63, 67, 66, 70, 69, 72],
+                                     newBest: true)
+                        #else
+                        ReportScreen(result: result)
+                        #endif
                     }
                 }
         }
