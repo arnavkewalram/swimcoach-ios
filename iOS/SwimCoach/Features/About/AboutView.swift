@@ -9,6 +9,7 @@ struct AboutView: View {
     @Query private var practiceEvents: [DrillPracticeEvent]
     @State private var showLicense = false
     @State private var exportURL: URL? = nil
+    @State private var csvExportURL: URL? = nil
     @State private var confirmErase = false
 
     private var versionLine: String {
@@ -65,14 +66,29 @@ struct AboutView: View {
 
                             if let exportURL {
                                 ShareLink(item: exportURL) {
-                                    dataActionLabel("EXPORT TRAINING LOG", icon: "square.and.arrow.up",
+                                    dataActionLabel("EXPORT JSON ARCHIVE", icon: "square.and.arrow.up",
                                                     color: DS.accent)
                                 }
                             } else {
                                 Button {
                                     prepareExport()
                                 } label: {
-                                    dataActionLabel("PREPARE EXPORT", icon: "doc.text", color: DS.accent)
+                                    dataActionLabel("PREPARE JSON ARCHIVE", icon: "doc.text",
+                                                    color: DS.accent)
+                                }
+                            }
+
+                            if let csvExportURL {
+                                ShareLink(item: csvExportURL) {
+                                    dataActionLabel("EXPORT CSV SPREADSHEET", icon: "square.and.arrow.up",
+                                                    color: DS.accent)
+                                }
+                            } else {
+                                Button {
+                                    prepareCSVExport()
+                                } label: {
+                                    dataActionLabel("PREPARE CSV SPREADSHEET", icon: "tablecells",
+                                                    color: DS.accent)
                                 }
                             }
 
@@ -174,6 +190,18 @@ struct AboutView: View {
         }
     }
 
+    private func prepareCSVExport() {
+        do {
+            let csv = SessionCSV.csv(from: sessions)
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("swimcoach-training-log.csv")
+            try Data(csv.utf8).write(to: url, options: .atomic)
+            csvExportURL = url
+        } catch {
+            AppLog.storage.error("CSV export failed: \(error.localizedDescription)")
+        }
+    }
+
     private func eraseAll() {
         for session in sessions {
             SessionVideoStore.delete(fileName: session.decoded()?.videoFileName)
@@ -184,5 +212,6 @@ struct AboutView: View {
         SessionVideoStore.pruneOrphans(referencedFileNames: [])
         for event in practiceEvents { modelContext.delete(event) }
         exportURL = nil
+        csvExportURL = nil
     }
 }
