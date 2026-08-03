@@ -46,4 +46,18 @@ final class SessionFilterTests: XCTestCase {
         XCTAssertTrue(SessionFilter.matches(grades: ["C", "D"], grade: "C"))
         XCTAssertFalse(SessionFilter.matches(grades: ["A"], grade: "C"))
     }
+
+    func testTogglingSwimmerAddsAndRemoves() {
+        XCTAssertEqual(SessionFilter.toggling([], swimmer: "Maya"), ["Maya"])
+        XCTAssertEqual(SessionFilter.toggling(["Maya"], swimmer: "Arnav"), ["Maya", "Arnav"])
+        XCTAssertEqual(SessionFilter.toggling(["Maya", "Arnav"], swimmer: "Arnav"), ["Maya"])
+        XCTAssertEqual(SessionFilter.toggling(["Maya"], swimmer: "Maya"), [],
+                       "removing the last swimmer returns to the everyone scope")
+    }
+
+    func testTogglingDoesNotMutateInput() {
+        let original: Set<String> = ["Maya"]
+        _ = SessionFilter.toggling(original, swimmer: "Maya")
+        XCTAssertEqual(original, ["Maya"])
+    }
 }

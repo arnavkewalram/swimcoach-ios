@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.39.1] — 2026-08-02
+
+### Fixed
+- History's swimmer filter now leads with an EVERYONE chip (selected
+  whenever no swimmer is filtered), matching Home's swimmer-scope row;
+  the redundant Clear button is gone.
+- History's Compare action restyled from the system blue button to the
+  app's uppercase micro-label language, with a full 44pt hit target.
+
 ## [1.39.0] — 2026-08-02 — "Replay"
 
 ### Changed
