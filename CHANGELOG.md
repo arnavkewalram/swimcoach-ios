@@ -3,6 +3,21 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.38.0] — 2026-08-02 — "Poster"
+
+### Added
+- Shareable session card: a SHARE CARD button next to the video export
+  controls renders a 1440×1440 social-square image — score, grade,
+  verdict, swimmer tag, session name, date, duration, strokes, stroke
+  rate, and the top 3 issues by severity — and hands it to the system
+  share sheet. The card re-renders automatically if the session's name
+  or swimmer is edited, and rendering happens off the appearance frame
+  so Results opens without a hitch.
+
+### Changed
+- The Results verdict line and the share card now share one formatting
+  source (`ShareCardModel`), so the strings can never drift apart.
+
 ## [1.37.0] — 2026-08-02 — "Ledger"
 
 ### Added
