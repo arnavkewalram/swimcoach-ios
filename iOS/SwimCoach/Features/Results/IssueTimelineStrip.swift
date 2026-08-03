@@ -1,81 +1,110 @@
 import SwiftUI
 
-/// Per-issue intensity bands over the swim's duration — shows WHEN each
-/// detected fault flared. Tapping a band cell seeks the video there.
+/// Compact severity-colored issue timeline directly under the Results
+/// video: one lane spanning the clip duration, with segments where
+/// technique issues flared. Tapping a segment seeks the player to that
+/// stretch's start. All geometry lives in `IssueTimelineModel`; the strip
+/// hides itself entirely for legacy sessions (nil windows) or when the
+/// clip duration is unknown.
 struct IssueTimelineStrip: View {
-    let windows: [IssueWindow]
+    let windows: [IssueWindow]?
     let issues: [TechniqueIssue]
-    let onSelect: (Double) -> Void
+    let durationSeconds: Double?
+    let onSeek: (Double) -> Void
 
-    private var span: (start: Double, end: Double)? {
-        guard let first = windows.first, let last = windows.last else { return nil }
-        return (first.start, max(last.end, first.start + 0.001))
-    }
+    private static let barHeight: CGFloat = 14
+    private static let cornerRadius: CGFloat = 3
 
     var body: some View {
-        if let span {
+        if let model = IssueTimelineModel.make(windows: windows,
+                                               issues: issues,
+                                               durationSeconds: durationSeconds) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("WHEN IT HAPPENED")
-                    .font(.sectionLabel)
-                    .tracking(1.6)
-                    .foregroundStyle(DS.inkTertiary)
-
-                VStack(spacing: 6) {
-                    ForEach(issues, id: \.name) { issue in
-                        if let index = FeedbackEngine.labelIndex(of: issue.name) {
-                            band(for: issue, labelIndex: index, span: span)
-                        }
-                    }
+                HStack(spacing: 8) {
+                    Text("ISSUE TIMELINE")
+                        .font(.sectionLabel)
+                        .tracking(1.6)
+                        .foregroundStyle(DS.inkTertiary)
+                    Spacer()
+                    Text("TAP A MARK TO REVIEW")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.accent)
+                        .accessibilityHidden(true)
                 }
+
+                bar(model)
 
                 HStack {
                     Text("0:00")
                     Spacer()
-                    Text(timeLabel(span.end - span.start))
+                    Text(timeLabel(model.durationSeconds))
                 }
                 .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
                 .foregroundStyle(DS.inkTertiary)
+                .accessibilityHidden(true)
+
+                legend(model)
             }
             .padding(.top, 4)
         }
     }
 
-    private func band(for issue: TechniqueIssue, labelIndex: Int,
-                      span: (start: Double, end: Double)) -> some View {
-        let color = severityColor(issue)
-        return HStack(spacing: 10) {
-            Text(issue.displayName)
-                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                .foregroundStyle(DS.inkSecondary)
-                .lineLimit(1)
-                .frame(width: 108, alignment: .leading)
+    // MARK: - Bar
 
-            GeometryReader { geo in
-                let total = span.end - span.start
-                ZStack(alignment: .leading) {
-                    Rectangle().fill(DS.border.opacity(0.5))
-                    ForEach(Array(windows.enumerated()), id: \.offset) { _, w in
-                        if w.probs.indices.contains(labelIndex) {
-                            let x = (w.start - span.start) / total
-                            let width = (w.end - w.start) / total
-                            Rectangle()
-                                .fill(color.opacity(Double(max(0, w.probs[labelIndex] - 0.13)) * 1.1))
-                                .frame(width: geo.size.width * width)
-                                .offset(x: geo.size.width * x)
-                                .onTapGesture { onSelect(w.start) }
-                        }
-                    }
+    private func bar(_ model: IssueTimelineModel) -> some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Rectangle().fill(DS.surface2)
+                ForEach(Array(model.segments.enumerated()), id: \.offset) { _, segment in
+                    Rectangle()
+                        .fill(severityColor(segment.severity))
+                        .frame(width: max(2, geo.size.width * segment.widthFraction))
+                        .offset(x: geo.size.width * segment.startFraction)
                 }
             }
-            .frame(height: 14)
-            .clipShape(RoundedRectangle(cornerRadius: 3))
+            .contentShape(Rectangle())
+            .onTapGesture { location in
+                guard geo.size.width > 0 else { return }
+                if let time = model.seekTime(atFraction: location.x / geo.size.width) {
+                    onSeek(time)
+                }
+            }
         }
+        .frame(height: Self.barHeight)
+        .clipShape(RoundedRectangle(cornerRadius: Self.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: Self.cornerRadius)
+            .stroke(DS.border, lineWidth: 1))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(issue.displayName) intensity over time. Double-tap the row's strongest moment via the see-it button in the issue list.")
+        .accessibilityLabel(accessibilitySummary(model))
+        .accessibilityHint("Use the see-it button on an issue below to jump the video there.")
     }
 
-    private func severityColor(_ issue: TechniqueIssue) -> Color {
-        switch issue.severity {
+    // MARK: - Legend
+
+    private func legend(_ model: IssueTimelineModel) -> some View {
+        HStack(spacing: 14) {
+            ForEach(model.legendSeverities, id: \.self) { severity in
+                HStack(spacing: 5) {
+                    RoundedRectangle(cornerRadius: 1.5)
+                        .fill(severityColor(severity))
+                        .frame(width: 7, height: 7)
+                        .accessibilityHidden(true)
+                    Text(severity.rawValue.uppercased())
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                        .tracking(1.2)
+                        .foregroundStyle(DS.inkTertiary)
+                }
+                .accessibilityElement(children: .combine)
+            }
+            Spacer()
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func severityColor(_ severity: TechniqueIssue.Severity) -> Color {
+        switch severity {
         case .major:    return DS.severityMajor
         case .moderate: return DS.severityModerate
         case .minor:    return DS.severityMinor
@@ -83,7 +112,17 @@ struct IssueTimelineStrip: View {
     }
 
     private func timeLabel(_ seconds: Double) -> String {
-        let s = Int(seconds.rounded())
-        return String(format: "%d:%02d", s / 60, s % 60)
+        let total = Int(seconds.rounded())
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    private func accessibilitySummary(_ model: IssueTimelineModel) -> String {
+        let counts = model.legendSeverities.map { severity in
+            let n = model.segments.filter { $0.severity == severity }.count
+            return "\(n) \(severity.rawValue)"
+        }
+        return "Issue timeline: \(counts.joined(separator: ", "))"
+            + " marked stretch\(model.segments.count == 1 ? "" : "es")"
+            + " across the \(timeLabel(model.durationSeconds)) clip."
     }
 }

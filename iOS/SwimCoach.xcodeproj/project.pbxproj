@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */; };
+		0A05B282348724B1FE6E5C45 /* IssueTimelineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFAFA53F266844F129CB350 /* IssueTimelineModel.swift */; };
 		0DF63EA8693F3E7FFA9CA9F9 /* DrillPracticeEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */; };
 		0E9877EFAFE15EBB8E2F77DE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */; };
 		116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */; };
@@ -49,6 +50,7 @@
 		65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */; };
 		672EC66C3ADDBBAC9CE60AD8 /* ImportedVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869DD420BA54EE808DAA8590 /* ImportedVideo.swift */; };
 		678E061D81D839A6BCEA547E /* SessionCSV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ACBA14CC321BCA9704CD8F8 /* SessionCSV.swift */; };
+		6A30222979ABC9E8A0AA011F /* IssueTimelineModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3C80A3129C457B744C1848 /* IssueTimelineModelTests.swift */; };
 		6A91B2528BE6FB2C53715EC0 /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC62B3FF8334D04AB0B637EA /* ShareCardView.swift */; };
 		6F7E63FDBAC3120338F9FF7A /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F34C674C2A88A6BD022FD1F /* DesignSystem.swift */; };
 		70D20961F8378D3FB1D0129F /* WeeklyGoalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E0029634940BDE3DF69116 /* WeeklyGoalStore.swift */; };
@@ -144,6 +146,7 @@
 		581473BB2D471E034BCE8FC8 /* TrainingLogPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogPanel.swift; sourceTree = "<group>"; };
 		5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */ = {isa = PBXFileReference; path = swim_test.mp4; sourceTree = "<group>"; };
 		5B7BECFC0E9326C22CD9437B /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		5DFAFA53F266844F129CB350 /* IssueTimelineModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueTimelineModel.swift; sourceTree = "<group>"; };
 		65121B38AC1FDF7DE043E733 /* SpaceGrotesk-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Bold.ttf"; sourceTree = "<group>"; };
 		667FF8EEE7913666DD9CA4FD /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
 		6868AD80A9E69F4E03AFBC3D /* SessionExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExportTests.swift; sourceTree = "<group>"; };
@@ -166,6 +169,7 @@
 		983DF83A1982B648EA414060 /* OverlayVideoExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayVideoExporter.swift; sourceTree = "<group>"; };
 		999E77ABACB021086D599CF9 /* BiomechanicsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngine.swift; sourceTree = "<group>"; };
 		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9A3C80A3129C457B744C1848 /* IssueTimelineModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueTimelineModelTests.swift; sourceTree = "<group>"; };
 		9A59A49638F1335B4DE0B04D /* Sparkline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkline.swift; sourceTree = "<group>"; };
 		9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngineTests.swift; sourceTree = "<group>"; };
 		A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillPracticeEvent.swift; sourceTree = "<group>"; };
@@ -309,6 +313,7 @@
 				A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */,
 				1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */,
 				D8D016218CB2E6A0CE353E62 /* FocusFaultTests.swift */,
+				9A3C80A3129C457B744C1848 /* IssueTimelineModelTests.swift */,
 				0F22E293B4BD707148F41A19 /* IssueTrendTests.swift */,
 				AD161114DD1D2892C9515515 /* IssueWindowTests.swift */,
 				DEA8FF9E13F542537501D049 /* KeypointFrameTests.swift */,
@@ -364,6 +369,7 @@
 				6F1C5CC95E42646636CE665F /* DrillCatalog.swift */,
 				A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */,
 				440FD098C083BE63E4C44154 /* FocusFault.swift */,
+				5DFAFA53F266844F129CB350 /* IssueTimelineModel.swift */,
 				D7994303E7AA3F1A682B4A9E /* IssueTrend.swift */,
 				B9D9E931537A6F52120C9319 /* IssueWindow.swift */,
 				EB41DA1B0CADFE8AF96B3B07 /* KeypointFrame.swift */,
@@ -614,6 +620,7 @@
 				AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */,
 				C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */,
 				B273B39A76FC83B7EDA6EA92 /* FocusFaultTests.swift in Sources */,
+				6A30222979ABC9E8A0AA011F /* IssueTimelineModelTests.swift in Sources */,
 				8D44D7ABE00975B59F50A23F /* IssueTrendTests.swift in Sources */,
 				A25AF3BF4A7B97D169314265 /* IssueWindowTests.swift in Sources */,
 				D07EC9D31F44F64DDB0BB8AE /* KeypointFrameTests.swift in Sources */,
@@ -670,6 +677,7 @@
 				2815930944855657E8A7EB06 /* HomeView.swift in Sources */,
 				672EC66C3ADDBBAC9CE60AD8 /* ImportedVideo.swift in Sources */,
 				FC8EAEA27AFEDD75D67BAFF4 /* IssueRow.swift in Sources */,
+				0A05B282348724B1FE6E5C45 /* IssueTimelineModel.swift in Sources */,
 				AB95CEAB12265A86D19CD3D7 /* IssueTimelineStrip.swift in Sources */,
 				E81536F228A32D51B4F9E3C1 /* IssueTrend.swift in Sources */,
 				B03EF14770A341DB035E8D42 /* IssueWindow.swift in Sources */,
