@@ -32,8 +32,10 @@ struct CameraView: View {
                     .ignoresSafeArea()
             } else if camera.errorMessage == nil {
                 VStack(spacing: 12) {
-                    ProgressView().tint(DS.accent)
-                    Text("Starting camera…").foregroundStyle(.secondary)
+                    ProgressView().tint(.white)
+                    // Constant white: this sits on the camera surface's
+                    // forced-black ground in both appearances.
+                    Text("Starting camera…").foregroundStyle(.white.opacity(0.75))
                 }
             }
 

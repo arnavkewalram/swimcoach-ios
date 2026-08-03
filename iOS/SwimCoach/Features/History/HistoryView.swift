@@ -247,7 +247,7 @@ struct HistoryView: View {
             Text(label.uppercased())
                 .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                 .tracking(1.0)
-                .foregroundStyle(isOn ? .white : DS.accent)
+                .foregroundStyle(isOn ? DS.onAccent : DS.accent)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(isOn ? DS.accent : .clear)
@@ -268,7 +268,7 @@ struct HistoryView: View {
                 } label: {
                     Text(grade)
                         .font(.grotesk(13, .bold))
-                        .foregroundStyle(isOn ? .white : DS.gradeColor(grade))
+                        .foregroundStyle(isOn ? DS.onAccent : DS.gradeColor(grade))
                         .frame(width: 34, height: 30)
                         .background(isOn ? DS.gradeColor(grade) : .clear)
                         .clipShape(RoundedRectangle(cornerRadius: 7))

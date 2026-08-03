@@ -110,7 +110,7 @@ private struct DrillCard: View {
                     Text("START HERE")
                         .font(.custom(GroteskWeight.medium.postScriptName, size: 8))
                         .tracking(1.2)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(DS.onAccent)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
                         .background(DS.accent)

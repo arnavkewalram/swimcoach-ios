@@ -2,37 +2,97 @@ import SwiftUI
 
 // MARK: - Design Tokens
 //
-// Direction: "meet sheet" sports-science editorial. Warm paper ground, ink
-// navy text, a single saturated lane-blue for action/data, print-register
-// severity colors. Flat surfaces with hairline rules — no blur, no glow,
+// Direction: "meet sheet" sports-science editorial, in two appearances.
+//
+// Light — the original meet sheet: warm paper ground, ink navy text, a
+// single saturated lane-blue for action/data, print-register severity
+// colors. Flat surfaces with hairline rules — no blur, no glow,
 // no gradients. Space Grotesk carries display/data; SF carries body text.
+//
+// Dark — "Night Meet": the same sheet read on a pool deck after sunset.
+// Wet-slate charcoal-blue ground (never pure black), chalk-white ink with
+// the identical tonal hierarchy steps, hairlines that read as pale
+// chlorine-blue lane lines, the lane-blue accent tuned brighter for dark
+// contrast, and severity colors lifted into the same hue families at
+// dark-legible luminance.
+//
+// Every token below resolves per-trait via UIColor dynamic providers, so
+// call sites are appearance-agnostic and this file stays the single
+// source of truth for both palettes.
+
+private extension Color {
+    /// Adaptive token: resolves per the current appearance.
+    init(light: UIColor, dark: UIColor) {
+        self.init(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? dark : light
+        })
+    }
+}
 
 enum DS {
     // Ground + ink
-    static let background = Color(red: 0.969, green: 0.961, blue: 0.937) // warm paper
-    static let surface    = Color.white                                   // cards
-    static let surface2   = Color(red: 0.066, green: 0.098, blue: 0.137).opacity(0.05) // recessed fields
-    static let ink        = Color(red: 0.066, green: 0.098, blue: 0.137) // #111923
+    /// Warm paper / wet-slate deck.
+    static let background = Color(
+        light: UIColor(red: 0.969, green: 0.961, blue: 0.937, alpha: 1),  // #F7F5EF
+        dark:  UIColor(red: 0.071, green: 0.094, blue: 0.125, alpha: 1))  // #121820
+    /// Cards: white stock / raised slate.
+    static let surface = Color(
+        light: .white,
+        dark:  UIColor(red: 0.106, green: 0.133, blue: 0.169, alpha: 1))  // #1B222B
+    /// Recessed fields: ink wash on paper / chalk wash on slate.
+    static let surface2 = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.05),
+        dark:  UIColor(red: 0.863, green: 0.906, blue: 0.941, alpha: 0.07))
+    /// Ink navy / chalk white. Secondary and tertiary steps derive by
+    /// opacity so the tonal hierarchy is identical in both appearances.
+    static let ink = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 1),  // #111923
+        dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 1))  // #E2E9F0
     static let inkSecondary = DS.ink.opacity(0.62)
     static let inkTertiary  = DS.ink.opacity(0.40)
-    static let border     = DS.ink.opacity(0.14)   // hairlines
-    static let borderBold = DS.ink.opacity(0.32)
+    /// Hairlines: ink rules on paper / pale chlorine-blue lane lines on slate.
+    static let border = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.14),
+        dark:  UIColor(red: 0.612, green: 0.784, blue: 0.882, alpha: 0.21)) // #9CC8E1
+    static let borderBold = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.32),
+        dark:  UIColor(red: 0.612, green: 0.784, blue: 0.882, alpha: 0.42))
 
     // Lane blue — the one accent. Used for actions and live data, never decoration.
-    static let accent     = Color(red: 0.043, green: 0.322, blue: 0.863) // #0B52DC
-    static let accentDim  = accent.opacity(0.55)
+    static let accent = Color(
+        light: UIColor(red: 0.043, green: 0.322, blue: 0.863, alpha: 1),  // #0B52DC
+        dark:  UIColor(red: 0.290, green: 0.565, blue: 1.000, alpha: 1))  // #4A90FF
+    static let accentDim = accent.opacity(0.55)
+    /// Text/icons sitting ON an accent fill (primary buttons, chips):
+    /// white on the deep light-mode blue; slate on the bright dark-mode
+    /// blue, where white would fall under contrast.
+    static let onAccent = Color(
+        light: .white,
+        dark:  UIColor(red: 0.043, green: 0.071, blue: 0.106, alpha: 1))  // #0B121B
 
-    // Severity — print register, not alarm register
-    static let severityMajor    = Color(red: 0.788, green: 0.263, blue: 0.212) // brick red
-    static let severityModerate = Color(red: 0.800, green: 0.541, blue: 0.078) // ochre
-    static let severityMinor    = Color(red: 0.243, green: 0.537, blue: 0.357) // pine green
+    // Severity — print register, not alarm register. Same hue families in
+    // dark, lifted to hold contrast on the slate ground.
+    static let severityMajor = Color(
+        light: UIColor(red: 0.788, green: 0.263, blue: 0.212, alpha: 1),  // brick red
+        dark:  UIColor(red: 0.937, green: 0.502, blue: 0.443, alpha: 1))  // coral brick #EF8071
+    static let severityModerate = Color(
+        light: UIColor(red: 0.800, green: 0.541, blue: 0.078, alpha: 1),  // ochre
+        dark:  UIColor(red: 0.929, green: 0.702, blue: 0.302, alpha: 1))  // amber #EDB34D
+    static let severityMinor = Color(
+        light: UIColor(red: 0.243, green: 0.537, blue: 0.357, alpha: 1),  // pine green
+        dark:  UIColor(red: 0.451, green: 0.784, blue: 0.588, alpha: 1))  // spearmint #73C896
+
+    /// Grade-D orange sits between C's ochre and F's brick.
+    private static let gradeD = Color(
+        light: UIColor(red: 0.804, green: 0.408, blue: 0.129, alpha: 1),
+        dark:  UIColor(red: 0.925, green: 0.596, blue: 0.322, alpha: 1))  // #EC9852
 
     static func gradeColor(_ grade: String) -> Color {
         switch grade {
         case "A": return severityMinor
         case "B": return accent
         case "C": return severityModerate
-        case "D": return Color(red: 0.804, green: 0.408, blue: 0.129)
+        case "D": return gradeD
         default:  return severityMajor
         }
     }
@@ -200,7 +260,7 @@ struct PrimaryButtonLabel: View {
             Text(title)
                 .font(.grotesk(17, .medium))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(DS.onAccent)
         .frame(maxWidth: .infinity)
         .frame(height: 56)
         .background(DS.accent)

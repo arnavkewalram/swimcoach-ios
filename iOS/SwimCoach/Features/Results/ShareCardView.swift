@@ -167,9 +167,13 @@ struct ShareCardView: View {
     }
 
     /// Render the card to a shareable image (3x scale → 1440×1440 px).
+    /// Deliberately forced to light: the card leaves the app as a
+    /// print-like paper artifact, so it keeps the meet-sheet paper look
+    /// regardless of the sender's appearance setting.
     @MainActor
     static func render(model: ShareCardModel) -> UIImage? {
-        let renderer = ImageRenderer(content: ShareCardView(model: model))
+        let renderer = ImageRenderer(content: ShareCardView(model: model)
+            .environment(\.colorScheme, .light))
         renderer.scale = 3
         return renderer.uiImage
     }
