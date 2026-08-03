@@ -89,20 +89,37 @@ struct TrainingLogPanel: View {
         TrainingLog.weeklyStreak(for: entries)
     }
 
+    /// Bordered streak chip; `fixedSize` keeps it whole so the header's
+    /// `ViewThatFits` row fails cleanly instead of squeezing it.
+    @ViewBuilder
+    private var streakChip: some View {
+        if streak >= 2 {
+            Text("\(streak)-WEEK STREAK")
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                .tracking(1.2)
+                .foregroundStyle(DS.severityMinor)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .overlay(RoundedRectangle(cornerRadius: 4)
+                    .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
+                .fixedSize()
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                SectionHeader(title: "Training log")
-                if streak >= 2 {
-                    Text("\(streak)-WEEK STREAK")
-                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
-                        .tracking(1.2)
-                        .foregroundStyle(DS.severityMinor)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .overlay(RoundedRectangle(cornerRadius: 4)
-                            .stroke(DS.severityMinor.opacity(0.55), lineWidth: 1))
-                        .fixedSize()
+            // At accessibility type sizes the fixed-size streak chip eats
+            // the row and fractures "TRAINING LOG" mid-word — same
+            // ViewThatFits fallback as ResultsView's video header: the
+            // chip drops below the label when the row can't hold both.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    SectionHeader(title: "Training log", singleLine: true)
+                    streakChip
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: "Training log")
+                    streakChip
                 }
             }
 

@@ -20,17 +20,22 @@ struct IssueTimelineStrip: View {
                                                issues: issues,
                                                durationSeconds: durationSeconds) {
             VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 8) {
-                    Text("ISSUE TIMELINE")
-                        .font(.sectionLabel)
-                        .tracking(1.6)
-                        .foregroundStyle(DS.inkTertiary)
-                    Spacer()
-                    Text("TAP A MARK TO REVIEW")
-                        .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
-                        .tracking(1.2)
-                        .foregroundStyle(DS.accent)
-                        .accessibilityHidden(true)
+                // At accessibility type sizes the two labels can't share
+                // the row — stack them instead of wrapping side by side.
+                // The horizontal branch pins both to one line so it can
+                // genuinely fail to fit and the fallback engages.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        titleLabel
+                            .fixedSize(horizontal: true, vertical: false)
+                        Spacer()
+                        tapHint
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        titleLabel
+                        tapHint
+                    }
                 }
 
                 bar(model)
@@ -48,6 +53,23 @@ struct IssueTimelineStrip: View {
             }
             .padding(.top, 4)
         }
+    }
+
+    // MARK: - Header labels
+
+    private var titleLabel: some View {
+        Text("ISSUE TIMELINE")
+            .font(.sectionLabel)
+            .tracking(1.6)
+            .foregroundStyle(DS.inkTertiary)
+    }
+
+    private var tapHint: some View {
+        Text("TAP A MARK TO REVIEW")
+            .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+            .tracking(1.2)
+            .foregroundStyle(DS.accent)
+            .accessibilityHidden(true)
     }
 
     // MARK: - Bar

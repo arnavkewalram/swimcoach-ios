@@ -335,13 +335,17 @@ struct ResultsView: View {
 
     private func videoSection(url: URL) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // At accessibility type sizes the header row can't fit beside
-            // the controls — fall to a vertical stack instead of letting
-            // the label break mid-word.
+            // At extreme type sizes the header row can't fit beside the
+            // controls — fall to a vertical stack instead of letting the
+            // label break mid-word. The horizontal branch pins its texts
+            // to one line (singleLine header + fixedSize controls) so it
+            // can genuinely fail to fit; without that, wrapping text lets
+            // it satisfy any width and the fallback never engages.
             ViewThatFits(in: .horizontal) {
                 HStack {
-                    SectionHeader(title: videoSectionTitle)
-                    videoControls
+                    SectionHeader(title: videoSectionTitle, singleLine: true)
+                    HStack { videoControls }
+                        .fixedSize(horizontal: true, vertical: false)
                 }
                 VStack(alignment: .leading, spacing: 10) {
                     SectionHeader(title: videoSectionTitle)
