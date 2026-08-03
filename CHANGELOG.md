@@ -3,6 +3,21 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.42.0] — 2026-08-03 — "Program"
+
+### Changed
+- Onboarding rebuilt in the meet-sheet design language: each page is a
+  numbered EVENT with a tracked kicker, heat counter, and lane-rule
+  masthead on Home's leading grid. New composed visuals — a lane-field
+  hero with swimmer glyph, a camera framing diagram, and severity-
+  marked result previews with a sample trend sparkline. The CTA now
+  matches Home's hero button, with lane-tick page markers and a SKIP
+  INTRO micro-label replacing the stock dots.
+
+### Added
+- DEBUG: `-onboardingPage <0-2>` launch arg opens the intro on a
+  specific page for screenshot runs.
+
 ## [1.41.1] — 2026-08-03
 
 ### Fixed
