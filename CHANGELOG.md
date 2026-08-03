@@ -3,6 +3,20 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.40.2] — 2026-08-03
+
+### Fixed
+- Dark-mode contrast of muted labels (section kickers, stat labels,
+  timestamps, chart axes) raised to ≥5:1 on all Night Meet surfaces
+  (was 3.3:1, below AA).
+- The report screen now grounds on the Night Meet slate instead of
+  near-black in dark mode.
+- History: empty weeks in the consistency strip are brighter in dark
+  mode, and the longest issue names in Common Issues no longer
+  truncate.
+- The What's New sheet uses a raised surface in dark mode so it
+  separates from the backdrop.
+
 ## [1.40.1] — 2026-08-02
 
 ### Changed
