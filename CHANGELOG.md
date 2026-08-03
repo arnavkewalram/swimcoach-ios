@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.36.0] — 2026-08-02 — "Targets"
+
+### Changed
+- Weekly goals are now per swimmer: the goal row and sheet follow the
+  Home swimmer scope, so each swimmer holds their own target (or turns
+  theirs off) without touching anyone else's. Swimmers without an
+  explicit goal inherit the Everyone goal, and existing goals carry
+  over unchanged as the Everyone goal. The sheet now says whose goal
+  is being edited ("Weekly Goal — Maya").
+
 ## [1.35.0] — 2026-08-02 — "Inherit"
 
 ### Added
