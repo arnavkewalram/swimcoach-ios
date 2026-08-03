@@ -366,6 +366,15 @@ struct HomeView: View {
     /// replaces the store with three weeks of improving sessions.
     private func seedTrainingLog() {
         sessions.forEach { modelContext.delete($0) }
+        // The newest seeded session carries the bundled demo clip through
+        // the same write path a real analysis uses (SessionVideoStore
+        // .persist — bundle resources resolve to their resource name, no
+        // copy), so the video player, issue timeline, and SHARE CARD all
+        // render in the -demoResultsSaved / -seedTrainingLog flows.
+        let newestID = UUID()
+        let seededVideoName = Bundle.main
+            .url(forResource: "swim_test", withExtension: "mp4")
+            .flatMap { SessionVideoStore.persist($0, for: newestID) }
         let plan: [(daysAgo: Int, score: Int)] = [
             (16, 58), (14, 61), (12, 60), (9, 64), (8, 63),
             (6, 67), (5, 66), (2, 70), (1, 69), (0, 72),
@@ -377,8 +386,9 @@ struct HomeView: View {
             let issues = item.daysAgo <= 6
                 ? base.issues.filter { $0.name != "low_kick_rate" }
                 : base.issues
+            let isNewest = item.daysAgo == 0
             let result = AnalysisResult(
-                id: UUID(),
+                id: isNewest ? newestID : UUID(),
                 score: item.score,
                 grade: item.score >= 70 ? "C" : "D",
                 strokeCount: base.strokeCount,
@@ -390,7 +400,14 @@ struct HomeView: View {
                 issues: issues,
                 tips: base.tips,
                 analyzedAt: Calendar.current.date(
-                    byAdding: .day, value: -item.daysAgo, to: Date()) ?? Date()
+                    byAdding: .day, value: -item.daysAgo, to: Date()) ?? Date(),
+                // Video + timeline data on the newest session only — it is
+                // the one -demoResultsSaved opens, and history rows stay
+                // representative of legacy video-less sessions.
+                videoFileName: isNewest ? seededVideoName : nil,
+                keypointFrames: isNewest ? base.keypointFrames : nil,
+                issueWindows: isNewest ? base.issueWindows : nil,
+                durationSeconds: isNewest ? base.durationSeconds : nil
             )
             let session = SwimSession(result: result)
             session.swimmer = item.daysAgo % 2 == 0 ? "Arnav" : "Maya"
