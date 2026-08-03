@@ -193,6 +193,9 @@ struct TrainingLogPanel: View {
                 }
             }
             .padding(.top, 2)
+            // Row content is short; the frame extends the tap target to
+            // the HIG 44pt minimum without changing the visual weight.
+            .frame(minHeight: 44)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

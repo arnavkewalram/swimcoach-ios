@@ -122,6 +122,8 @@ struct AboutView: View {
                                         .accessibilityHidden(true)
                                 }
                                 .foregroundStyle(DS.accent)
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
                             }
 
                             if showLicense {
@@ -176,6 +178,10 @@ struct AboutView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(color.opacity(0.45), lineWidth: 1))
+        // Pill stays visually compact; the frame extends the tap target
+        // to the HIG 44pt minimum.
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
     }
 
     private func prepareExport() {

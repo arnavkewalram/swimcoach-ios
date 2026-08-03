@@ -539,9 +539,6 @@ private struct IssueFrequencyChart: View {
         let name: String
         let count: Int
         let trend: IssueTrend
-        var shortName: String {
-            name.count > 18 ? String(name.prefix(17)) + "…" : name
-        }
     }
 
     private var topIssues: [IssueFreqItem] {
@@ -586,7 +583,7 @@ private struct IssueFrequencyChart: View {
                 Chart(issues, id: \.name) { item in
                     BarMark(
                         x: .value("Count", item.count),
-                        y: .value("Issue", item.shortName)
+                        y: .value("Issue", item.name)
                     )
                     .foregroundStyle(DS.accent.opacity(0.85))
                     .cornerRadius(3)
@@ -609,10 +606,17 @@ private struct IssueFrequencyChart: View {
                 }
                 .chartXAxis(.hidden)
                 .chartYAxis {
-                    AxisMarks { _ in
-                        AxisValueLabel()
-                            .foregroundStyle(DS.ink)
-                            .font(.caption2)
+                    AxisMarks { value in
+                        // Full fault names, wrapped to two lines in a capped
+                        // label column — no manual "…" truncation.
+                        AxisValueLabel {
+                            Text(value.as(String.self) ?? "")
+                                .font(.caption2)
+                                .foregroundStyle(DS.ink)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.trailing)
+                                .frame(maxWidth: 96, alignment: .trailing)
+                        }
                     }
                 }
                 .frame(height: CGFloat(issues.count) * 34 + 16)

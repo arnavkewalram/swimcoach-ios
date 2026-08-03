@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.39.3] — 2026-08-02
+
+### Fixed
+- All small tappable controls (About data exports/erase and license
+  toggle, Drills MARK DONE, Home weekly-goal row) now meet the 44pt
+  HIG touch-target minimum without changing their visual size.
+- Saved-session notes in Results wrap on their own line instead of
+  truncating after the session name.
+- The COMMON ISSUES chart in History shows full fault names, wrapping
+  to two lines instead of cutting off.
+- The What's New sheet shows a drag indicator so it's clear it can
+  expand to full height.
+
 ## [1.39.2] — 2026-08-02
 
 ### Fixed
