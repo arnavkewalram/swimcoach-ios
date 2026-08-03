@@ -361,7 +361,7 @@ private struct ConsistencyStrip: View {
             HStack(alignment: .bottom, spacing: 5) {
                 ForEach(Array(counts.enumerated()), id: \.offset) { _, count in
                     RoundedRectangle(cornerRadius: 1.5)
-                        .fill(count > 0 ? DS.accent : DS.border)
+                        .fill(count > 0 ? DS.accent : DS.markMuted)
                         .frame(height: count > 0
                                ? max(8, CGFloat(count) / CGFloat(peak) * 34)
                                : 3)
@@ -608,14 +608,16 @@ private struct IssueFrequencyChart: View {
                 .chartYAxis {
                     AxisMarks { value in
                         // Full fault names, wrapped to two lines in a capped
-                        // label column — no manual "…" truncation.
+                        // label column — no manual "…" truncation. 112pt fits
+                        // the longest catalog names ("Right Elbow
+                        // Overextension") at caption2; 96pt ellipsized them.
                         AxisValueLabel {
                             Text(value.as(String.self) ?? "")
                                 .font(.caption2)
                                 .foregroundStyle(DS.ink)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.trailing)
-                                .frame(maxWidth: 96, alignment: .trailing)
+                                .frame(maxWidth: 112, alignment: .trailing)
                         }
                     }
                 }

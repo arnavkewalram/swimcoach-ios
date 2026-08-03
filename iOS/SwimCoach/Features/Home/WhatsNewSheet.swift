@@ -6,7 +6,7 @@ struct WhatsNewSheet: View {
 
     var body: some View {
         ZStack {
-            DS.background.ignoresSafeArea()
+            DS.sheetSurface.ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 Text("WHAT'S NEW")

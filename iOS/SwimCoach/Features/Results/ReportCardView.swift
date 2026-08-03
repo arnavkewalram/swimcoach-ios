@@ -227,7 +227,11 @@ struct ReportScreen: View {
                 .environment(\.colorScheme, .light)
                 .scaleEffect(0.68, anchor: .top)
         }
+        // Ink-wash desk layered over the DS ground — without the explicit
+        // ground the wash composited over system black in dark (#0E0E0E)
+        // instead of the Night Meet slate.
         .background(DS.ink.opacity(0.06))
+        .background(DS.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
