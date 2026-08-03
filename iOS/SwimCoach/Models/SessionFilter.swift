@@ -32,4 +32,13 @@ enum SessionFilter {
     static func matches(swimmers: Set<String>, swimmer: String) -> Bool {
         swimmers.isEmpty || swimmers.contains(swimmer)
     }
+
+    /// Toggle one swimmer chip, returning a new selection. The empty set is
+    /// the "everyone" scope (see `matches(swimmers:swimmer:)`), so removing
+    /// the last swimmer falls back to showing everyone.
+    static func toggling(_ selection: Set<String>, swimmer: String) -> Set<String> {
+        selection.contains(swimmer)
+            ? selection.subtracting([swimmer])
+            : selection.union([swimmer])
+    }
 }

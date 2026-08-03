@@ -179,12 +179,23 @@ struct HistoryView: View {
         .toolbar {
             if sessions.count >= 2 {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(selectingForCompare ? "Cancel" : "Compare") {
+                    // Micro-label action, matching FULL RESULTS / COMPARE TO
+                    // PREVIOUS SESSION — not the system title-case button.
+                    Button {
                         selectingForCompare.toggle()
                         compareSelection = []
+                    } label: {
+                        Text(selectingForCompare ? "CANCEL" : "COMPARE")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                            .foregroundStyle(DS.accent)
+                            .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                            .contentShape(Rectangle())
                     }
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(DS.accent)
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(selectingForCompare
+                                        ? "Cancel comparing"
+                                        : "Compare two sessions")
                 }
             }
         }
@@ -205,35 +216,47 @@ struct HistoryView: View {
         router.push(.compare(earlier: earlier, later: later))
     }
 
+    /// Swimmer scope row — same capsule language as Home's swimmer scope.
+    /// EVERYONE is selected whenever no swimmer filter is active (empty
+    /// selection = everyone, per `SessionFilter.matches`).
     private var swimmerChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
+                swimmerChip(label: "Everyone",
+                            isOn: swimmerFilter.isEmpty,
+                            accessibilityLabel: "Show everyone's sessions") {
+                    swimmerFilter = []
+                }
                 ForEach(presentSwimmers, id: \.self) { swimmer in
                     let isOn = swimmerFilter.contains(swimmer)
-                    Button {
-                        if isOn { swimmerFilter.remove(swimmer) }
-                        else { swimmerFilter.insert(swimmer) }
-                    } label: {
-                        Text(swimmer.uppercased())
-                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                            .tracking(1.0)
-                            .foregroundStyle(isOn ? .white : DS.accent)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(isOn ? DS.accent : .clear)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(
-                                DS.accent.opacity(isOn ? 0 : 0.5), lineWidth: 1))
+                    swimmerChip(label: swimmer,
+                                isOn: isOn,
+                                accessibilityLabel: "\(isOn ? "Remove" : "Add") \(swimmer) filter") {
+                        swimmerFilter = SessionFilter.toggling(swimmerFilter, swimmer: swimmer)
                     }
-                    .accessibilityLabel("\(isOn ? "Remove" : "Add") \(swimmer) filter")
-                }
-                if !swimmerFilter.isEmpty {
-                    Button("Clear") { swimmerFilter = [] }
-                        .font(.footnote)
-                        .foregroundStyle(DS.accent)
                 }
             }
         }
+    }
+
+    /// Capsule chip matching HomeView's `swimmerScopeChip` styling.
+    private func swimmerChip(label: String, isOn: Bool,
+                             accessibilityLabel: String,
+                             action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label.uppercased())
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                .tracking(1.0)
+                .foregroundStyle(isOn ? .white : DS.accent)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(isOn ? DS.accent : .clear)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(
+                    DS.accent.opacity(isOn ? 0 : 0.5), lineWidth: 1))
+        }
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
     private var gradeChips: some View {
