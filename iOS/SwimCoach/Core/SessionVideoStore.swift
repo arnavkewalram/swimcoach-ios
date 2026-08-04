@@ -42,8 +42,9 @@ struct PendingClip: Hashable {
 // A clip that never reaches a saved session is NOT garbage on sight. The
 // sweeper defers to `UnfinishedTakes`: an unclaimed clip is held for a
 // retention window and offered back on Home, and only a genuinely expired one
-// is deleted. The single explicit "no" is `discard` — Retake — which still
-// removes the file immediately.
+// is deleted. Retention only ever covers clips nobody has decided about — an
+// explicit "no" deletes immediately and ignores the window, whether it is
+// `discard` (Retake, Delete) or `removeAll` (Erase everything).
 //
 // Bundled demo videos are resolved from the app bundle instead of being
 // copied, so they never appear in `directory` and the sweeper never sees them.
@@ -183,6 +184,25 @@ enum SessionVideoStore {
         let context = ModelContext(container)
         let sessions = (try? context.fetch(FetchDescriptor<SwimSession>())) ?? []
         pruneOrphans(referencedIDs: Set(sessions.map(\.id.uuidString)))
+    }
+
+    // MARK: - Erasure
+
+    /// Delete every stored video outright — no retention, no reference check.
+    ///
+    /// The erase-everything path only, and deliberately not a sweep. Retention
+    /// is a policy for clips nobody has decided about; this is the user
+    /// deciding, so it belongs with `discard` rather than with `pruneOrphans`.
+    /// Routing erase through the sweeper would hand each file to
+    /// `UnfinishedTakes.classify`, which files anything younger than the window
+    /// under `takes` rather than `expired` — every recent clip would survive
+    /// the erase and, being unclaimed, come straight back on Home as a
+    /// recoverable take.
+    static func removeAll() {
+        for file in storedFiles() {
+            try? FileManager.default.removeItem(at: directory.appendingPathComponent(file.name))
+        }
+        AppLog.storage.info("Erased all stored session videos")
     }
 
     // MARK: - Unfinished takes

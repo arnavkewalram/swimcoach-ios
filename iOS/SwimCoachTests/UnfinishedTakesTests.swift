@@ -330,6 +330,61 @@ final class UnfinishedTakesStoreTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
     }
 
+    // MARK: - Erase everything
+
+    /// Retention is a policy for clips nobody has decided about. "Erase
+    /// everything" is a decision, and About promises "this cannot be undone" —
+    /// so it must outrank the window the launch sweep respects.
+    func testEraseRemovesAClipTooFreshForTheSweeperToTouch() throws {
+        let id = UUID()
+        let url = try writeStoredClip(id: id, ageSeconds: 60)
+
+        SessionVideoStore.removeAll()
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path),
+                       "A clip filmed a minute ago must not survive an explicit erase")
+    }
+
+    /// The sessions are deleted before the videos are, so by the time erase
+    /// reaches the store every file looks unclaimed. A claimed video has to go
+    /// too — that is the half of the promise the dialog spells out ("every
+    /// saved session and its video").
+    func testEraseRemovesAClaimedSessionVideoToo() throws {
+        let id = UUID()
+        let url = try writeStoredClip(id: id, ageSeconds: 3600)
+
+        SessionVideoStore.removeAll()
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path),
+                       "The video of an erased session must be deleted with it")
+    }
+
+    /// The resurrection symptom: videos that outlive an erase are unclaimed by
+    /// construction, so Home offers the swims the user just erased straight
+    /// back as recoverable takes.
+    func testEraseLeavesNothingForRecoveryToSurface() throws {
+        let fresh = UUID(), older = UUID()
+        try writeStoredClip(id: fresh, ageSeconds: 60)
+        try writeStoredClip(id: older, ext: "mp4", ageSeconds: 3 * 24 * 60 * 60)
+
+        SessionVideoStore.removeAll()
+
+        let takes = SessionVideoStore.unfinishedTakes(referencedIDs: [])
+        XCTAssertFalse(takes.contains { $0.id == fresh || $0.id == older },
+                       "An erased swim must not come back as an unfinished take")
+    }
+
+    func testEraseEmptiesTheStoreOutright() throws {
+        try writeStoredClip(ageSeconds: 30)
+        try writeStoredClip(ageSeconds: UnfinishedTakes.retention * 2)
+        try writeStoredClip(ext: "mp4", ageSeconds: 6 * 24 * 60 * 60)
+
+        SessionVideoStore.removeAll()
+
+        XCTAssertTrue(storedNames().isEmpty,
+                      "Erase sweeps the whole store, whatever age or claim state")
+    }
+
     /// The failure path: a clip adopted at record time is still there after an
     /// analysis that never saved a session, and it is listed rather than gone.
     func testAdoptedClipSurvivesAnAnalysisThatNeverClaimedIt() throws {
