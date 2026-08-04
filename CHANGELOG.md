@@ -3,6 +3,26 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.44.2] — 2026-08-04
+
+### Changed
+- The analysis-failure screen is now written in the app's own language
+  rather than looking like a generic error state. It reads top-down from
+  a masthead and stamp, states the problem in one sentence at a legible
+  size, and turns the filming advice into a numbered checklist instead
+  of a dense paragraph in the smallest type on screen. A run-log strip
+  shows which stage of the pipeline stopped.
+- The three actions now read as three tiers, so "Back to Home" no longer
+  competes with the action you probably want.
+
+### Fixed
+- A file with no video track is treated as unusable footage instead of
+  offering "Try again", which could never have succeeded.
+- The CANCEL control while analyzing now meets the 44pt minimum touch
+  target.
+- The progress checklist no longer switches typeface as each stage
+  completes.
+
 ## [1.44.1] — 2026-08-04
 
 ### Fixed

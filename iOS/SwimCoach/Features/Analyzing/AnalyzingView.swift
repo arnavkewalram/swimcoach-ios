@@ -14,10 +14,11 @@ struct AnalyzingView: View {
     @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
 
     @State private var progress: Double = 0
-    @State private var statusText = "Extracting pose keypoints…"
-    @State private var failed = false
-    @State private var failureMessage = ""
-    @State private var failureKind: AnalysisFailureKind = .footageRejected
+    /// Non-nil once the run has stopped for a reason worth showing. Holding
+    /// the whole failure (rather than a bool plus loose message/kind fields)
+    /// keeps the copy, the checklist and the recovery actions from ever
+    /// disagreeing about which failure is on screen.
+    @State private var failure: AnalysisFailure?
     /// Bumped by "Try again". Drives `.task(id:)` so the retry runs inside the
     /// view's own structured task and is cancelled when the view goes away —
     /// a bare `Task { await runAnalysis() }` would outlive the screen and could
@@ -42,8 +43,8 @@ struct AnalyzingView: View {
         ZStack {
             DS.background.ignoresSafeArea()
 
-            if failed {
-                failureView
+            if let failure {
+                failureView(failure)
             } else {
                 analysisView
             }
@@ -77,6 +78,11 @@ struct AnalyzingView: View {
                         .tracking(1.4)
                         .foregroundStyle(DS.inkSecondary)
                         .padding(.vertical, 10)
+                        // 11pt caps + 10pt insets is a ~34pt tap target. The
+                        // frame lifts it to the 44pt minimum before
+                        // `contentShape` decides what is tappable — after it,
+                        // the added area would not take the hit.
+                        .frame(minWidth: 44, minHeight: 44)
                         .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Cancel the analysis")
@@ -146,57 +152,190 @@ struct AnalyzingView: View {
         return .pending
     }
 
-    private var failureView: some View {
+    /// Top-anchored like every other page in the app: masthead, then the
+    /// reason, then what to do about it, with the ways out anchored to the
+    /// bottom. It used to float between two `Spacer()`s, which left the band
+    /// the analyzing screen fills with CANCEL empty — so the transition into
+    /// failure read as the header being cut off.
+    private func failureView(_ failure: AnalysisFailure) -> some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    failureMasthead(failure)
+
+                    // The diagnosis is the only content the user can act on,
+                    // so it carries a body tier rather than the caption tier
+                    // the recovery buttons were out-shouting.
+                    Text(failure.message)
+                        .font(.system(size: 16))
+                        .lineSpacing(4)
+                        .foregroundStyle(DS.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.bottom, 24)
+
+                    failureChecklist(failure)
+
+                    runLog
+                        .padding(.top, 22)
+
+                    Spacer(minLength: 16)
+                }
+                // 28pt, matching the analyzing state rather than the 24pt
+                // siblings: these two states swap in place, so the measure
+                // has to hold still across the swap.
+                .padding(.horizontal, 28)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+
+            failureActions(failure)
+        }
+    }
+
+    private func failureMasthead(_ failure: AnalysisFailure) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Spacer()
+            HStack(alignment: .firstTextBaseline) {
+                Text("ANALYSIS FAILED")
+                    .font(.sectionLabel)
+                    .tracking(2.0)
+                    .foregroundStyle(DS.severityModerate)
+                Spacer(minLength: 8)
+                // Replaces a stock alarm triangle that repeated, in the same
+                // colour, what the label beneath it already said. A meet
+                // sheet marks a swim that did not count with a stamped code,
+                // so this slot carries one — and it fills the same trailing
+                // register as Review's "TAKE · 0:12" and Home's date.
+                FailureStamp(code: failure.kind.stamp)
+            }
+            .padding(.top, 14)
 
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 34, weight: .medium))
-                .foregroundStyle(DS.severityModerate)
-                .padding(.bottom, 20)
-                .accessibilityHidden(true)
-
-            Text("ANALYSIS FAILED")
-                .font(.sectionLabel)
-                .tracking(2.0)
-                .foregroundStyle(DS.severityModerate)
-                .padding(.bottom, 8)
-
-            Text(failureKind.headline)
+            Text(failure.kind.headline)
                 .font(.grotesk(30, .bold))
                 .foregroundStyle(DS.ink)
-                .padding(.bottom, 14)
+                .padding(.top, 10)
+                .padding(.bottom, 16)
 
-            Text(failureMessage)
-                .font(.footnote)
-                .lineSpacing(3)
-                .foregroundStyle(DS.inkSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.bottom, 32)
+            LaneRule()
+                .padding(.bottom, 18)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Analysis failed. \(failure.kind.headline.replacingOccurrences(of: "\n", with: " ")).")
+    }
 
-            // The failure copy tells the user to re-film, so the screen has to
-            // be able to reach the camera. `.navigationBarHidden(true)` removes
-            // the system Back button and CANCEL only exists while analyzing —
-            // without this stack the screen is a dead end.
-            VStack(spacing: 12) {
-                ForEach(Array(failureKind.actions.enumerated()), id: \.element) { index, action in
-                    Button {
-                        perform(action)
-                    } label: {
-                        if index == 0 {
-                            PrimaryButtonLabel(title: action.title, icon: action.icon)
-                        } else {
-                            SecondaryButtonLabel(title: action.title, icon: action.icon)
-                        }
+    /// The advice is genuinely actionable — "Record again" reaches the camera —
+    /// so it gets the numbered card the analyzing steps and Review's framing
+    /// checks already use, instead of a paragraph of prose.
+    private func failureChecklist(_ failure: AnalysisFailure) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: failure.checklistTitle)
+
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(failure.checklist.enumerated()), id: \.offset) { index, item in
+                    RequirementRow(index: index, text: item)
+                    if index < failure.checklist.count - 1 {
+                        Rectangle().fill(DS.border).frame(height: 1)
                     }
-                    .buttonStyle(ScaleButtonStyle())
-                    .accessibilityLabel(action.accessibilityLabel)
                 }
             }
+            .glassCard()
+        }
+    }
 
-            Spacer()
+    /// The 01–05 pipeline the analyzing state was stepping through, frozen at
+    /// the point the run stopped — five lanes, with the one it died in marked.
+    ///
+    /// This is the screen's data register, and it answers the question the old
+    /// failure screen left open: how far did it actually get? Kept to a strip
+    /// rather than the full row card so that evidence stays below the
+    /// actionable checklist in weight as well as in order.
+    private var runLog: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Run log")
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    ForEach(steps.indices, id: \.self) { i in
+                        VStack(spacing: 6) {
+                            Text(String(format: "%02d", i + 1))
+                                .font(.grotesk(11, i == currentStep ? .bold : .medium))
+                                .foregroundStyle(laneColor(i, forRule: false))
+                            Rectangle()
+                                .fill(laneColor(i, forRule: true))
+                                .frame(height: 3)
+                        }
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    Text("STOPPED AT")
+                        .font(.sectionLabel)
+                        .tracking(1.4)
+                        .foregroundStyle(DS.inkTertiary)
+                    Text("\(String(format: "%02d", currentStep + 1)) · \(steps[currentStep])")
+                        .font(.grotesk(13, .medium))
+                        .foregroundStyle(DS.ink)
+                    Spacer(minLength: 0)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
+            .glassCard()
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Run log: stopped at step \(currentStep + 1) of \(steps.count), \(steps[currentStep])")
+        }
+    }
+
+    /// `progress` is left where the run died, so the step that was in flight
+    /// is the one that stopped: cleared lanes behind it, untouched ahead.
+    /// Unreached lanes take the muted mark, but their numerals take the
+    /// tertiary ink — a hairline-weight token is unreadable as type.
+    private func laneColor(_ index: Int, forRule: Bool) -> Color {
+        if index < currentStep { return DS.severityMinor }
+        if index == currentStep { return DS.severityModerate }
+        return forRule ? DS.markMuted : DS.inkTertiary
+    }
+
+    /// The failure copy tells the user to re-film, so the screen has to be able
+    /// to reach the camera. `.navigationBarHidden(true)` removes the system
+    /// Back button and CANCEL only exists while analyzing — without this stack
+    /// the screen is a dead end.
+    ///
+    /// Three buttons at one weight read as three equal choices; the tiers keep
+    /// the next-best move ahead of the escape hatch.
+    private func failureActions(_ failure: AnalysisFailure) -> some View {
+        VStack(spacing: 10) {
+            LaneRule()
+                .padding(.bottom, 4)
+
+            ForEach(failure.actions, id: \.self) { action in
+                Button {
+                    perform(action)
+                } label: {
+                    switch failure.kind.tier(for: action) {
+                    case .primary:
+                        PrimaryButtonLabel(title: action.title, icon: action.icon)
+                    case .secondary:
+                        SecondaryButtonLabel(title: action.title, icon: action.icon)
+                    case .tertiary:
+                        Text(action.title.uppercased())
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 11))
+                            .tracking(1.4)
+                            .foregroundStyle(DS.inkSecondary)
+                            .frame(maxWidth: .infinity)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                }
+                // A custom ButtonStyle replaces the system one wholesale, so
+                // the tertiary label keeps its own foreground instead of
+                // picking up the default accent tint.
+                .buttonStyle(ScaleButtonStyle())
+                .accessibilityLabel(action.accessibilityLabel)
+            }
         }
         .padding(.horizontal, 28)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
+        .background(DS.background)
     }
 
     private func perform(_ action: AnalysisFailureAction) {
@@ -219,7 +358,7 @@ struct AnalyzingView: View {
             // Restart the view's own `.task` rather than spawning a detached
             // one, so leaving mid-retry cancels the work (see `attempt`).
             progress = 0
-            failed = false
+            failure = nil
             attempt += 1
         }
     }
@@ -241,7 +380,6 @@ struct AnalyzingView: View {
             let (timedObservations, fps, sampledFrames) = try await PoseAnalyzer.analyze(videoURL: videoURL) { p in
                 Task { @MainActor in
                     self.progress = p * 0.60
-                    self.statusText = "Extracting pose keypoints… \(Int(p * 100))%"
                 }
             }
 
@@ -256,7 +394,7 @@ struct AnalyzingView: View {
                 return
             }
 
-            await update(progress: 0.65, status: "Running SwimTCN model…")
+            await update(progress: 0.65)
 
             // 2 — Feature extraction: 3-second windows in the model's timebase
             let effectiveFPS = fps / Double(PoseAnalyzer.sampleRate)
@@ -279,9 +417,9 @@ struct AnalyzingView: View {
             }
             let probs = probSum.map { $0 / Float(tensors.count) }
             let issues = FeedbackEngine.decode(probabilities: probs)
-            await update(progress: 0.80, status: "Decoding technique issues…")
+            await update(progress: 0.80)
 
-            await update(progress: 0.85, status: "Computing stroke metrics…")
+            await update(progress: 0.85)
 
             // 4 — Motion metrics
             let metrics = BiomechanicsEngine().metrics(
@@ -289,7 +427,7 @@ struct AnalyzingView: View {
                 sampledFrames: sampledFrames
             )
 
-            await update(progress: 0.92, status: "Building report…")
+            await update(progress: 0.92)
 
             // 5 — Assemble result (persist the source video first so Results
             // and History can play it back — temp files get reclaimed)
@@ -324,7 +462,7 @@ struct AnalyzingView: View {
             )
 
             // 6 — AI coaching tips
-            await update(progress: 0.98, status: "Generating coaching tips…")
+            await update(progress: 0.98)
             let aiTips = await CoachingService.generateTips(for: result)
             if !aiTips.isEmpty {
                 result = AnalysisResult(
@@ -385,11 +523,11 @@ struct AnalyzingView: View {
     private func runDemoAnalysis() async {
         // Step 1 — simulate pose extraction
         for i in stride(from: 0.0, through: 0.60, by: 0.04) {
-            await update(progress: i, status: "Extracting pose keypoints…")
+            await update(progress: i)
             try? await Task.sleep(nanoseconds: 80_000_000)
         }
 
-        await update(progress: 0.65, status: "Running SwimTCN model…")
+        await update(progress: 0.65)
         try? await Task.sleep(nanoseconds: 700_000_000)
 
         // Step 2 — build realistic issues
@@ -423,13 +561,13 @@ struct AnalyzingView: View {
             ),
         ]
 
-        await update(progress: 0.80, status: "Decoding technique issues…")
+        await update(progress: 0.80)
         try? await Task.sleep(nanoseconds: 500_000_000)
 
-        await update(progress: 0.87, status: "Computing stroke metrics…")
+        await update(progress: 0.87)
         try? await Task.sleep(nanoseconds: 400_000_000)
 
-        await update(progress: 0.92, status: "Building report…")
+        await update(progress: 0.92)
         try? await Task.sleep(nanoseconds: 300_000_000)
 
         let score = BiomechanicsEngine.score(from: issues)
@@ -454,7 +592,7 @@ struct AnalyzingView: View {
         )
 
         // Step 3 — AI coaching tips
-        await update(progress: 0.98, status: "Generating coaching tips…")
+        await update(progress: 0.98)
         let aiTips = await CoachingService.generateTips(for: result)
         if !aiTips.isEmpty {
             result = AnalysisResult(
@@ -491,18 +629,15 @@ struct AnalyzingView: View {
         }
     }
 
-    @MainActor private func update(progress p: Double, status s: String) {
+    @MainActor private func update(progress p: Double) {
         withAnimation { progress = p }
-        statusText = s
     }
 
     /// Called straight from the analysis task instead of being fired into a
     /// detached `Task`, so a screen the user already left cannot flash a
     /// failure state after the fact.
     @MainActor private func failWith(_ failure: AnalysisFailure) {
-        failureMessage = failure.message
-        failureKind = failure.kind
-        failed = true
+        self.failure = failure
     }
 }
 
@@ -566,42 +701,119 @@ enum AnalysisFailureKind: Hashable {
         case .transient: return [.tryAgain, .recordAgain, .backToHome]
         }
     }
+
+    /// Visual weight for one of `actions`. Rendering the stack at a single
+    /// weight made the escape hatch compete with the next-best move; Home is
+    /// always the quiet way out, and only the lead action is loud.
+    func tier(for action: AnalysisFailureAction) -> AnalysisActionTier {
+        if action == .backToHome { return .tertiary }
+        return action == actions.first ? .primary : .secondary
+    }
+
+    /// The meet-sheet stamp for a swim that did not count.
+    var stamp: String {
+        switch self {
+        case .footageRejected: return "NO READ"
+        case .transient: return "STOPPED"
+        }
+    }
 }
+
+/// How loudly a recovery action is drawn.
+enum AnalysisActionTier { case primary, secondary, tertiary }
 
 /// A failure message paired with the kind that decides its recovery actions.
 /// Constructed only through the named cases below so no failure site can ship
 /// a message without classifying it.
 struct AnalysisFailure: Equatable {
     let kind: AnalysisFailureKind
+    /// The diagnosis, one sentence, in the app's voice — rendered at body
+    /// tier. Advice belongs in `checklist`, not stapled onto the end of this.
     let message: String
+    /// What to do about it, as register lines rather than prose. Every
+    /// failure carries at least one: a screen that can reach the camera owes
+    /// the user something to change before they film again.
+    let checklist: [String]
+    let checklistTitle: String
 
     var actions: [AnalysisFailureAction] { kind.actions }
 
+    // MARK: Footage rejections
+
     static let noSwimmerDetected = AnalysisFailure(
         kind: .footageRejected,
-        message: "No horizontal swimmer detected. " +
-            "Film from the pool deck at water level with the swimmer's full body in frame. " +
-            "The swimmer must be actively stroking above the water line — avoid underwater angles."
+        message: "No horizontal swimmer detected anywhere in this clip.",
+        checklist: [
+            "Film side-on from the pool deck, camera at water level",
+            "Keep the full body in frame, head to feet",
+            "Capture strokes above the waterline — not underwater angles",
+        ],
+        checklistTitle: "What the model needs"
     )
 
     static func tooFewFrames(_ count: Int) -> AnalysisFailure {
         AnalysisFailure(
             kind: .footageRejected,
-            message: "Too few swimmer frames detected (\(count)). " +
-                "Film from pool deck height at water level, side-on to the swimmer, " +
-                "with the full body visible above the waterline. " +
-                "Stay within 3–6 m of the swimmer."
+            message: "Too few frames held a swimmer (\(count)) — not enough to read a stroke.",
+            checklist: [
+                "Film side-on at pool-deck height, camera at water level",
+                "Stay within 3–6 m so the full body stays in frame",
+                "Record at least one full length at a normal pace",
+            ],
+            checklistTitle: "What the model needs"
         )
     }
 
     static let unusablePoses = AnalysisFailure(
         kind: .footageRejected,
-        message: "Could not prepare the detected poses for analysis. " +
-            "Try re-recording with the swimmer's full body clearly visible."
+        message: "A swimmer was found, but the detected poses were too broken to analyze.",
+        checklist: [
+            "Keep the whole body clearly visible for the whole length",
+            "Pan smoothly with the swimmer instead of holding still",
+            "Avoid heavy splash, surface glare and crossing swimmers",
+        ],
+        checklistTitle: "What the model needs"
     )
 
+    /// The file itself is not a video the reader can open. Deterministic:
+    /// `videoURL` is immutable, so a second pass re-reads the same bytes and
+    /// fails identically — this is a footage rejection, not a retry.
+    private static func unreadableRecording(_ message: String) -> AnalysisFailure {
+        AnalysisFailure(
+            kind: .footageRejected,
+            message: message,
+            checklist: [
+                "Record the clip with SwimCoach's own camera",
+                "Or import a video the Photos app can play back",
+            ],
+            checklistTitle: "What to try"
+        )
+    }
+
+    // MARK: Mid-run errors
+
+    /// Classifies a thrown error rather than calling everything transient.
+    ///
+    /// `.noVideoTrack` is a property of the file: no amount of retrying puts a
+    /// video track into it, so offering "Try again" was a lie the screen told
+    /// every time a non-video landed here. `.readerFailed` keeps the retry —
+    /// `startReading()` also fails under momentary resource pressure, and a
+    /// wasted retry is cheaper there than a wasted re-film. Everything else
+    /// (CoreML load, inference, persistence) is genuinely worth a second pass.
     static func unexpected(_ error: Error) -> AnalysisFailure {
-        AnalysisFailure(kind: .transient, message: error.localizedDescription)
+        if let readError = error as? AnalysisError, case .noVideoTrack = readError {
+            return unreadableRecording(readError.localizedDescription)
+        }
+        return AnalysisFailure(
+            kind: .transient,
+            message: error.localizedDescription,
+            checklist: [
+                "The clip is still on your device — retrying costs nothing",
+                "Close and reopen SwimCoach if it stops again",
+                "Free up storage if your device is nearly full",
+            ],
+            checklistTitle: "What to try"
+        )
     }
 }
 
@@ -635,8 +847,12 @@ private struct StepRow: View {
             .frame(width: 22, alignment: .leading)
             .accessibilityHidden(true)
 
+            // Grotesk in every state: these are stage names in the data
+            // register, and swapping to SF for pending/completed made the
+            // letterforms visibly reflow as each step advanced. Weight — not
+            // family — carries the state.
             Text(label)
-                .font(state == .active ? .grotesk(14, .medium) : .system(size: 14))
+                .font(.grotesk(14, state == .active ? .medium : .regular))
                 .foregroundStyle(state == .pending ? DS.inkTertiary : DS.ink)
 
             Spacer()
@@ -651,5 +867,56 @@ private struct StepRow: View {
         .padding(.vertical, 13)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(label): \(state == .completed ? "done" : state == .active ? "in progress" : "pending")")
+    }
+}
+
+// MARK: - Failure checklist row & stamp
+
+/// One numbered requirement on the failure screen — the same register as the
+/// analyzing steps above and Review's framing checks, so the advice reads as
+/// part of the sheet rather than as a paragraph of apology. Grotesk numerals
+/// carry the data register; SF carries the sentence.
+private struct RequirementRow: View {
+    let index: Int
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(String(format: "%02d", index + 1))
+                .font(.grotesk(12, .medium))
+                .foregroundStyle(DS.accent)
+                .frame(width: 22, alignment: .leading)
+                .accessibilityHidden(true)
+            Text(text)
+                .font(.system(size: 14))
+                .lineSpacing(2)
+                .foregroundStyle(DS.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 13)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The trailing masthead mark: a stamped code, the way a meet sheet annotates
+/// a swim that did not count. Replaces a stock alarm triangle that repeated
+/// the label beneath it in the same colour.
+private struct FailureStamp: View {
+    let code: String
+
+    var body: some View {
+        Text(code)
+            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+            .tracking(1.6)
+            .foregroundStyle(DS.severityModerate)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(DS.severityModerate.opacity(0.55), lineWidth: 1)
+            )
+            .accessibilityHidden(true)
     }
 }
