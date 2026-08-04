@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.3] — 2026-08-04
+
+### Fixed
+- **"Erase everything" really erases again.** Since the unfinished-takes
+  feature shipped, the wipe reused the launch cleanup, which by design
+  keeps recent clips — so every video from the last seven days survived,
+  and Home then offered the just-erased swims back as takes to recover.
+  Erasing is an explicit decision, so it now clears the store outright,
+  while the launch cleanup keeps its seven-day grace for clips you
+  haven't decided about.
+
 ## [1.45.2] — 2026-08-04
 
 ### Changed

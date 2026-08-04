@@ -212,10 +212,13 @@ struct AboutView: View {
         for session in sessions {
             modelContext.delete(session)
         }
-        // Sweeping against an empty reference set clears every stored video
-        // in one pass — no per-session blob decode, and nothing left behind
-        // by a session whose blob would have failed to decode.
-        SessionVideoStore.pruneOrphans(referencedIDs: [])
+        // Erase deletes the store outright rather than sweeping it. The sweeper
+        // is retention-aware — it holds unclaimed clips for a week and offers
+        // them back on Home — and every video here looks unclaimed now that the
+        // sessions are gone, so a sweep would leave the last week of swims on
+        // disk and then resurrect them as recoverable takes. The dialog
+        // promises this cannot be undone, so retention does not apply.
+        SessionVideoStore.removeAll()
         for event in practiceEvents { modelContext.delete(event) }
         exportURL = nil
         csvExportURL = nil
