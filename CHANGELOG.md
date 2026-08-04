@@ -3,6 +3,14 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.4] — 2026-08-04
+
+### Fixed
+- Tapping "Retake" while reviewing a clip now returns to the camera you
+  came from instead of stacking a second one on top of it. Every
+  record-then-retake cycle used to add another camera screen to the
+  stack, so backing out afterwards walked you through all of them.
+
 ## [1.45.3] — 2026-08-04
 
 ### Fixed
