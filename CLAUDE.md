@@ -64,7 +64,9 @@ cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
   (seeds the store, opens a saved session — label/compare/NEW BEST rows),
   `-demoCompare`, `-demoReport`, `-demoReview` (post-recording clip review,
   otherwise only reachable by recording), `-openHistory`, `-openDrills [issue]`,
-  `-openAbout`, `-seedTrainingLog` (deterministic 3-week fixture; wipes
+  `-openAbout`, `-openTakes` (unfinished-takes recovery screen),
+  `-seedUnfinishedTakes` (replaces the waiting takes with two back-dated
+  clips), `-seedTrainingLog` (deterministic 3-week fixture; wipes
   the store), `-analyzeDocs <file>` (file from the app's Documents dir).
 - `iOS/SwimCoach/Resources/swim_test.mp4` is a synthetic cartoon — it
   validates plumbing, not model accuracy.

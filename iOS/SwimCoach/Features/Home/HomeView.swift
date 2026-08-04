@@ -14,6 +14,10 @@ struct HomeView: View {
     @State private var showPhotoPicker = false
     @State private var photoItem: PhotosPickerItem? = nil
     @State private var isImporting = false
+    /// Clips adopted into the session store that no analysis ever claimed.
+    /// Derived from the filesystem, so it is refreshed on every return to
+    /// Home rather than cached across the app's lifetime.
+    @State private var unfinishedTakes: [UnfinishedTakes.Take] = []
     #if DEBUG
     @State private var showFilePicker = false
     @State private var docsVideoURL: URL? = nil
@@ -135,6 +139,14 @@ struct HomeView: View {
                     }
                     .buttonStyle(ScaleButtonStyle())
                     .padding(.bottom, 24)
+
+                    // ── Unfinished takes (absent at zero) ─────────────────
+                    if !unfinishedTakes.isEmpty {
+                        UnfinishedTakesStrip(takes: unfinishedTakes) {
+                            router.push(.unfinishedTakes)
+                        }
+                        .padding(.bottom, 24)
+                    }
 
                     // ── Record strip ──────────────────────────────────────
                     if !scopedSessions.isEmpty {
@@ -277,6 +289,9 @@ struct HomeView: View {
             .presentationDragIndicator(.visible)
         }
         .navigationBarHidden(true)
+        // First paint, and every return to Home: analyzing a take claims it,
+        // deleting one removes it, and recording adds one.
+        .task(id: router.path.count) { refreshUnfinishedTakes() }
         .onAppear {
             // What's-new: fresh installs just adopt the current version
             // (onboarding covers them); upgrades get the sheet once.
@@ -305,6 +320,10 @@ struct HomeView: View {
             if args.contains("-seedTrainingLog") {
                 seedTrainingLog()
             }
+            if args.contains("-seedUnfinishedTakes") {
+                seedUnfinishedTakes()
+            }
+            refreshUnfinishedTakes()
             if router.path.isEmpty {
                 if args.contains("-demoResultsSaved") {
                     seedTrainingLog()
@@ -331,6 +350,8 @@ struct HomeView: View {
                     if let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
                         router.push(.review(PendingClip(external: url)))
                     }
+                } else if args.contains("-openTakes") {
+                    router.push(.unfinishedTakes)
                 } else if args.contains("-openHistory") {
                     router.push(.history)
                 } else if args.contains("-openAbout") {
@@ -350,6 +371,14 @@ struct HomeView: View {
             }
             #endif
         }
+    }
+
+    /// A directory listing plus the session-id column the @Query already
+    /// holds — no result blob is decoded, so this stays cheap enough to run
+    /// on every appearance.
+    private func refreshUnfinishedTakes() {
+        unfinishedTakes = SessionVideoStore.unfinishedTakes(
+            referencedIDs: Set(sessions.map(\.id.uuidString)))
     }
 
     private func swimmerScopeChip(label: String, value: String) -> some View {
@@ -434,6 +463,33 @@ struct HomeView: View {
                 session.notes = "Worked on high-elbow catch; felt strong"
             }
             modelContext.insert(session)
+        }
+    }
+
+    /// Exactly two unfinished takes, for simulator screenshots and route
+    /// tests: recording is the only thing that produces them for real, and the
+    /// simulator has no camera.
+    ///
+    /// Replaces whatever was waiting rather than adding to it, so repeated
+    /// launches keep giving the same fixture. Copies the bundled clip into the
+    /// session store under fresh ids (so the `<result-id>.<ext>` invariant
+    /// holds) and back-dates them — which also exercises retention for real:
+    /// both land inside the window, so the launch sweep must leave them alone.
+    private func seedUnfinishedTakes() {
+        SessionVideoStore.unfinishedTakes(referencedIDs: Set(sessions.map(\.id.uuidString)))
+            .forEach(SessionVideoStore.delete)
+        guard let source = Bundle.main.url(forResource: "swim_test", withExtension: "mp4")
+        else { return }
+        // Newest first once classified: hours old, then two days old.
+        for hoursAgo in [5, 50] {
+            let id = UUID()
+            let dest = SessionVideoStore.directory
+                .appendingPathComponent("\(id.uuidString).mp4")
+            try? FileManager.default.removeItem(at: dest)
+            guard (try? FileManager.default.copyItem(at: source, to: dest)) != nil else { continue }
+            let filmedAt = Date().addingTimeInterval(-Double(hoursAgo) * 3600)
+            try? FileManager.default.setAttributes(
+                [.modificationDate: filmedAt], ofItemAtPath: dest.path)
         }
     }
 
