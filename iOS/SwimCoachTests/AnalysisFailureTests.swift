@@ -89,7 +89,87 @@ final class AnalysisFailureTests: XCTestCase {
         }
     }
 
+    /// A file with no video track cannot grow one between attempts, so the
+    /// screen must stop offering a retry that can only fail the same way.
+    func testMissingVideoTrackIsAFootageRejectionNotATransientError() {
+        let failure = AnalysisFailure.unexpected(AnalysisError.noVideoTrack)
+        XCTAssertEqual(failure.kind, .footageRejected)
+        XCTAssertFalse(failure.actions.contains(.tryAgain))
+        XCTAssertTrue(failure.actions.contains(.recordAgain))
+    }
+
+    /// `startReading()` also fails under momentary resource pressure, so this
+    /// one keeps the retry — a wasted tap is cheaper than a wasted re-film.
+    func testReaderFailureStaysTransient() {
+        let failure = AnalysisFailure.unexpected(AnalysisError.readerFailed("disk busy"))
+        XCTAssertEqual(failure.kind, .transient)
+        XCTAssertTrue(failure.actions.contains(.tryAgain))
+    }
+
+    // MARK: - Guidance
+
+    private var allFailures: [AnalysisFailure] {
+        struct Boom: LocalizedError { var errorDescription: String? { "inference failed" } }
+        return [
+            .noSwimmerDetected, .tooFewFrames(3), .unusablePoses,
+            .unexpected(AnalysisError.noVideoTrack), .unexpected(Boom()),
+        ]
+    }
+
+    func testEveryFailureCarriesActionableGuidance() {
+        for failure in allFailures {
+            XCTAssertFalse(failure.checklist.isEmpty, failure.message)
+            XCTAssertFalse(failure.checklistTitle.isEmpty, failure.message)
+            for item in failure.checklist {
+                XCTAssertFalse(item.trimmingCharacters(in: .whitespaces).isEmpty, failure.message)
+            }
+        }
+    }
+
+    /// Advice belongs in the checklist, not stapled onto the end of the
+    /// diagnosis — the message is rendered as a single body-tier line.
+    func testDiagnosisMessagesStayShortAndSingleLine() {
+        for failure in allFailures {
+            XCTAssertFalse(failure.message.contains("\n"), failure.message)
+            XCTAssertLessThanOrEqual(failure.message.count, 100, failure.message)
+        }
+    }
+
+    func testChecklistItemsAreDistinctWithinAFailure() {
+        for failure in allFailures {
+            XCTAssertEqual(Set(failure.checklist).count, failure.checklist.count, failure.message)
+        }
+    }
+
     // MARK: - Action presentation
+
+    func testExactlyOneActionPerKindIsPrimary() {
+        for kind in allKinds {
+            let primaries = kind.actions.filter { kind.tier(for: $0) == .primary }
+            XCTAssertEqual(primaries, [kind.actions[0]], "\(kind) must lead with exactly one primary")
+        }
+    }
+
+    /// The escape hatch must never be drawn as loudly as the next-best move.
+    func testBackToHomeIsAlwaysTertiary() {
+        for kind in allKinds {
+            XCTAssertEqual(kind.tier(for: .backToHome), .tertiary, "\(kind)")
+        }
+    }
+
+    func testTransientMiddleActionIsSecondary() {
+        XCTAssertEqual(AnalysisFailureKind.transient.tier(for: .recordAgain), .secondary)
+        XCTAssertEqual(AnalysisFailureKind.footageRejected.tier(for: .recordAgain), .primary)
+    }
+
+    func testEveryKindHasADistinctStamp() {
+        let stamps = allKinds.map(\.stamp)
+        XCTAssertEqual(Set(stamps).count, stamps.count)
+        for stamp in stamps {
+            XCTAssertFalse(stamp.isEmpty)
+            XCTAssertEqual(stamp, stamp.uppercased(), "Stamps are a caps register mark")
+        }
+    }
 
     func testActionTitlesAreDistinctAndNonEmpty() {
         let actions: [AnalysisFailureAction] = [.tryAgain, .recordAgain, .backToHome]
