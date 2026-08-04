@@ -94,6 +94,38 @@ final class SmokeUITests: XCTestCase {
                        "Zero takes must leave no empty state behind on Home")
     }
 
+    /// Both training-log exports build their file off the main thread, so
+    /// each row has to travel prepare → preparing → share on its own. A row
+    /// still reading "PREPARE" here is the async hand-off never coming back
+    /// — the failure mode a synchronous build could not have.
+    func testAboutExportsReachShareReadyState() {
+        let app = launch(["-seedTrainingLog", "-openAbout"])
+        XCTAssertTrue(app.staticTexts["PRIVACY"].waitForExistence(timeout: 10))
+
+        let prepareArchive = app.buttons["PREPARE JSON ARCHIVE"]
+        XCTAssertTrue(scroll(app, to: prepareArchive), "Your-data section never came into view")
+        prepareArchive.tap()
+        XCTAssertTrue(app.buttons["EXPORT JSON ARCHIVE"].waitForExistence(timeout: 10),
+                      "JSON archive never reached its share-ready state")
+
+        let prepareCSV = app.buttons["PREPARE CSV SPREADSHEET"]
+        XCTAssertTrue(scroll(app, to: prepareCSV))
+        prepareCSV.tap()
+        XCTAssertTrue(app.buttons["EXPORT CSV SPREADSHEET"].waitForExistence(timeout: 10),
+                      "CSV spreadsheet never reached its share-ready state")
+    }
+
+    /// Swipe until `target` is on screen — About is a scroll view and the
+    /// Your-data section sits below the fold.
+    private func scroll(_ app: XCUIApplication, to target: XCUIElement,
+                        maxSwipes: Int = 6) -> Bool {
+        for _ in 0..<maxSwipes {
+            if target.exists && target.isHittable { return true }
+            app.swipeUp()
+        }
+        return target.exists && target.isHittable
+    }
+
     func testDemoCompareRendersPanels() {
         let app = launch(["-demoCompare"])
         XCTAssertTrue(app.staticTexts["EARLIER"].waitForExistence(timeout: 10))

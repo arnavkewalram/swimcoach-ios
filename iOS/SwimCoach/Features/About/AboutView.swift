@@ -8,9 +8,16 @@ struct AboutView: View {
     @Query(sort: \SwimSession.analyzedAt, order: .reverse) private var sessions: [SwimSession]
     @Query private var practiceEvents: [DrillPracticeEvent]
     @State private var showLicense = false
-    @State private var exportURL: URL? = nil
-    @State private var csvExportURL: URL? = nil
+    @State private var archiveExport: DataExportState = .idle
+    @State private var csvExport: DataExportState = .idle
     @State private var confirmErase = false
+
+    /// Prepare → share, with the file build in between. Mirrors
+    /// `ResultsView.VideoExportState`; the file here is small enough that
+    /// there is nothing meaningful to report but "working".
+    enum DataExportState: Equatable {
+        case idle, preparing, ready(URL), failed
+    }
 
     private var versionLine: String {
         let info = Bundle.main.infoDictionary
@@ -64,33 +71,11 @@ struct AboutView: View {
                                 .font(.footnote)
                                 .foregroundStyle(DS.inkSecondary)
 
-                            if let exportURL {
-                                ShareLink(item: exportURL) {
-                                    dataActionLabel("EXPORT JSON ARCHIVE", icon: "square.and.arrow.up",
-                                                    color: DS.accent)
-                                }
-                            } else {
-                                Button {
-                                    prepareExport()
-                                } label: {
-                                    dataActionLabel("PREPARE JSON ARCHIVE", icon: "doc.text",
-                                                    color: DS.accent)
-                                }
-                            }
+                            dataExportControl(state: archiveExport, noun: "JSON ARCHIVE",
+                                              icon: "doc.text", prepare: prepareExport)
 
-                            if let csvExportURL {
-                                ShareLink(item: csvExportURL) {
-                                    dataActionLabel("EXPORT CSV SPREADSHEET", icon: "square.and.arrow.up",
-                                                    color: DS.accent)
-                                }
-                            } else {
-                                Button {
-                                    prepareCSVExport()
-                                } label: {
-                                    dataActionLabel("PREPARE CSV SPREADSHEET", icon: "tablecells",
-                                                    color: DS.accent)
-                                }
-                            }
+                            dataExportControl(state: csvExport, noun: "CSV SPREADSHEET",
+                                              icon: "tablecells", prepare: prepareCSVExport)
 
                             Button(role: .destructive) {
                                 confirmErase = true
@@ -166,10 +151,18 @@ struct AboutView: View {
     }
 
     private func dataActionLabel(_ title: String, icon: String, color: Color) -> some View {
-        HStack(spacing: 6) {
+        dataActionLabel(title, color: color) {
             Image(systemName: icon)
                 .font(.caption)
                 .accessibilityHidden(true)
+        }
+    }
+
+    private func dataActionLabel<Leading: View>(
+        _ title: String, color: Color, @ViewBuilder leading: () -> Leading
+    ) -> some View {
+        HStack(spacing: 6) {
+            leading()
             Text(title)
                 .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
                 .tracking(1.2)
@@ -184,27 +177,70 @@ struct AboutView: View {
         .contentShape(Rectangle())
     }
 
-    private func prepareExport() {
-        do {
-            let data = try SessionExport.archiveData(from: sessions, practice: practiceEvents)
-            let url = FileManager.default.temporaryDirectory
-                .appendingPathComponent("swimcoach-training-log.json")
-            try data.write(to: url, options: .atomic)
-            exportURL = url
-        } catch {
-            AppLog.storage.error("Training log export failed: \(error.localizedDescription)")
+    /// One export row: prepare button → spinner while the file builds →
+    /// ShareLink. A failure falls back to a retry button rather than
+    /// leaving the row stuck mid-spin.
+    @ViewBuilder
+    private func dataExportControl(state: DataExportState, noun: String, icon: String,
+                                   prepare: @escaping () -> Void) -> some View {
+        switch state {
+        case .idle, .failed:
+            Button(action: prepare) {
+                dataActionLabel(state == .failed ? "RETRY \(noun)" : "PREPARE \(noun)",
+                                icon: state == .failed ? "arrow.clockwise" : icon,
+                                color: state == .failed ? DS.severityMajor : DS.accent)
+            }
+        case .preparing:
+            dataActionLabel("PREPARING \(noun)", color: DS.inkTertiary) {
+                ProgressView()
+                    .controlSize(.mini)
+                    .accessibilityHidden(true)
+            }
+            .accessibilityLabel("Preparing \(noun.lowercased())")
+        case .ready(let url):
+            ShareLink(item: url) {
+                dataActionLabel("EXPORT \(noun)", icon: "square.and.arrow.up", color: DS.accent)
+            }
         }
     }
 
+    // MARK: - Export
+
+    // Both exports snapshot the fetched models into `Sendable` values here on
+    // the main actor — where the `@Query` results and their `ModelContext`
+    // live — and then hand only those values to `TrainingLogWriter`, whose
+    // nonisolated `async` entry points run the encoding and the file write
+    // off the main thread. Passing the `@Model` objects across instead would
+    // read them off their context's actor, which is a race, not a speedup.
+
+    @MainActor
+    private func prepareExport() {
+        let sessionSnapshots = sessions.map { SessionSnapshot(session: $0) }
+        let practiceSnapshots = practiceEvents.map { PracticeSnapshot(event: $0) }
+        archiveExport = .preparing
+        Task {
+            do {
+                archiveExport = .ready(try await TrainingLogWriter.writeArchive(
+                    sessions: sessionSnapshots, practice: practiceSnapshots))
+            } catch {
+                AppLog.storage.error("Training log export failed: \(error.localizedDescription)")
+                archiveExport = .failed
+            }
+        }
+    }
+
+    @MainActor
     private func prepareCSVExport() {
-        do {
-            let csv = SessionCSV.csv(from: sessions)
-            let url = FileManager.default.temporaryDirectory
-                .appendingPathComponent("swimcoach-training-log.csv")
-            try Data(csv.utf8).write(to: url, options: .atomic)
-            csvExportURL = url
-        } catch {
-            AppLog.storage.error("CSV export failed: \(error.localizedDescription)")
+        let sessionSnapshots = sessions.map { SessionSnapshot(session: $0) }
+        csvExport = .preparing
+        Task {
+            do {
+                csvExport = .ready(try await TrainingLogWriter.writeCSV(
+                    sessions: sessionSnapshots))
+            } catch {
+                AppLog.storage.error("CSV export failed: \(error.localizedDescription)")
+                csvExport = .failed
+            }
         }
     }
 
@@ -220,7 +256,7 @@ struct AboutView: View {
         // promises this cannot be undone, so retention does not apply.
         SessionVideoStore.removeAll()
         for event in practiceEvents { modelContext.delete(event) }
-        exportURL = nil
-        csvExportURL = nil
+        archiveExport = .idle
+        csvExport = .idle
     }
 }

@@ -16,14 +16,22 @@ enum SessionCSV {
         "date,name,swimmer,score,grade,issues,strokeCount,kickRatePerMin,durationSeconds"
 
     /// RFC 4180-style CSV of the session history, newest session first.
+    /// Captures the models on the caller's actor, then builds from the
+    /// snapshots — identical bytes to building from the models directly.
     static func csv(from sessions: [SwimSession]) -> String {
-        let rows = sessions
+        csv(snapshots: sessions.map { SessionSnapshot(session: $0) })
+    }
+
+    /// The building path. Takes `Sendable` values so a background task can
+    /// run it without touching a `ModelContext`.
+    static func csv(snapshots: [SessionSnapshot]) -> String {
+        let rows = snapshots
             .sorted { $0.analyzedAt > $1.analyzedAt }
             .map { row(for: $0) }
         return ([header] + rows).joined(separator: "\n") + "\n"
     }
 
-    private static func row(for session: SwimSession) -> String {
+    private static func row(for session: SessionSnapshot) -> String {
         let duration = duration(for: session)
         return [
             session.analyzedAt.formatted(.iso8601),
@@ -40,13 +48,14 @@ enum SessionCSV {
 
     /// Clip length for the duration column. Reads the denormalized scalar;
     /// 0 is its "unknown" sentinel (`SwimSession.swift`), which pre-v1.43.0
-    /// rows migrated in with — those alone decode the blob to recover the
-    /// duration they still hold. `nil` (empty field) only when neither
+    /// rows migrated in with — those alone fall back to the blob-recovered
+    /// duration the snapshot carries (`SessionSnapshot` does that decode,
+    /// and only for those rows). `nil` (empty field) only when neither
     /// source has a real positive length, which also collapses NaN and
     /// negative junk, matching `AnalysisResult.durationText`.
-    private static func duration(for session: SwimSession) -> Double? {
+    private static func duration(for session: SessionSnapshot) -> Double? {
         if session.durationSeconds > 0 { return session.durationSeconds }
-        guard let legacy = session.decoded()?.durationSeconds, legacy > 0 else { return nil }
+        guard let legacy = session.legacyDurationSeconds, legacy > 0 else { return nil }
         return legacy
     }
 

@@ -28,10 +28,22 @@ enum SessionExport {
     }
 
     /// Chronological (oldest first) JSON archive of the training log.
+    /// Captures the models on the caller's actor, then encodes from the
+    /// snapshots — identical bytes to encoding from the models directly.
     static func archiveData(from sessions: [SwimSession],
                             practice: [DrillPracticeEvent] = [],
                             now: Date = Date()) throws -> Data {
-        let exported = sessions
+        try archiveData(snapshots: sessions.map { SessionSnapshot(session: $0) },
+                        practice: practice.map { PracticeSnapshot(event: $0) },
+                        now: now)
+    }
+
+    /// The encoding path. Takes `Sendable` values so a background task can
+    /// run it without touching a `ModelContext`.
+    static func archiveData(snapshots: [SessionSnapshot],
+                            practice: [PracticeSnapshot] = [],
+                            now: Date = Date()) throws -> Data {
+        let exported = snapshots
             .sorted { $0.analyzedAt < $1.analyzedAt }
             .map { s in
                 ExportedSession(
