@@ -393,8 +393,11 @@ struct HomeView: View {
                 id: isNewest ? newestID : UUID(),
                 score: item.score,
                 grade: item.score >= 70 ? "C" : "D",
-                strokeCount: base.strokeCount,
-                kickRatePerMin: base.kickRatePerMin,
+                // Stroke mechanics track the score story so the History
+                // STROKE MECHANICS panel demos: stroke rate eases down and
+                // kick rate builds as technique improves.
+                strokeCount: base.strokeCount + (72 - item.score) / 2,
+                kickRatePerMin: base.kickRatePerMin - Double(72 - item.score),
                 strokeAsymmetry: base.strokeAsymmetry,
                 frameCount: base.frameCount,
                 sampledFrames: base.sampledFrames,
@@ -409,7 +412,10 @@ struct HomeView: View {
                 videoFileName: isNewest ? seededVideoName : nil,
                 keypointFrames: isNewest ? base.keypointFrames : nil,
                 issueWindows: isNewest ? base.issueWindows : nil,
-                durationSeconds: isNewest ? base.durationSeconds : nil
+                // The three oldest sessions stay duration-less — legacy rows
+                // saved before durations were stored — so the stroke-rate
+                // series demos its gap behavior.
+                durationSeconds: item.daysAgo >= 12 ? nil : base.durationSeconds
             )
             let session = SwimSession(result: result)
             session.swimmer = item.daysAgo % 2 == 0 ? "Arnav" : "Maya"
