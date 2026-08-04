@@ -48,7 +48,15 @@ enum DS {
     static let ink = Color(
         light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 1),  // #111923
         dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 1))  // #E2E9F0
-    static let inkSecondary = DS.ink.opacity(0.62)
+    /// Secondary step. Dark keeps the chalk @62% derivation raised in
+    /// v1.40.2 (5.9–6.2:1 on slate); light was still the original ink @62%,
+    /// which composites to only 4.82:1 on paper — passing AA but sitting
+    /// under the ≥5:1 bar dark was deliberately held to, i.e. the parity gap
+    /// ran the wrong way. Light deepens to @68% → 5.88:1 on paper /
+    /// 6.10:1 on white stock, matching dark step for step.
+    static let inkSecondary = Color(
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.68),  // ink @ 68%
+        dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 0.62))  // ink @ 62%
     /// Tertiary stays an opacity derivation of `ink`, but the dark step is
     /// raised: chalk @40% composites to ~3.3:1 on the slate ground (fails
     /// AA at caption sizes); @58% it holds ≥5:1 on both ground and surface.
@@ -90,19 +98,35 @@ enum DS {
 
     // Severity — print register, not alarm register. Same hue families in
     // dark, lifted to hold contrast on the slate ground.
+    //
+    // The light ramp is set at a MATCHED INK WEIGHT: every light severity
+    // value lands in a 4.64–4.76:1 band on the paper ground, so severity is
+    // carried by hue alone and no step reads heavier than its neighbours.
+    // The four print hues are unchanged (brick 5°, ochre 38°, pine 143°,
+    // grade-D orange 25°) — only value moved down. Rationale:
+    //   • Small tracked text — SeverityBadge (9pt), "ANALYSIS FAILED"
+    //     (11pt), grade chips (13pt) — needs 4.5:1. The old ochre managed
+    //     only 2.67:1 on paper against 9.48:1 for its dark twin, and pine
+    //     (3.91), grade-D (3.44) and brick (4.44) also missed the bar.
+    //   • Grade chips invert to `onAccent` white ON these fills when
+    //     selected; the band clears 4.5:1 in that direction too
+    //     (white-on-ochre was 2.91:1).
+    //   • The same tokens tint non-text marks (34pt warning glyph, focus
+    //     bars, score arc) which only need 3:1 — the band clears that with
+    //     room, so no separate text-tier token is warranted.
     static let severityMajor = Color(
-        light: UIColor(red: 0.788, green: 0.263, blue: 0.212, alpha: 1),  // brick red
+        light: UIColor(red: 0.756, green: 0.252, blue: 0.204, alpha: 1),  // brick red #C14034
         dark:  UIColor(red: 0.937, green: 0.502, blue: 0.443, alpha: 1))  // coral brick #EF8071
     static let severityModerate = Color(
-        light: UIColor(red: 0.800, green: 0.541, blue: 0.078, alpha: 1),  // ochre
+        light: UIColor(red: 0.600, green: 0.384, blue: 0.024, alpha: 1),  // ochre #996206
         dark:  UIColor(red: 0.929, green: 0.702, blue: 0.302, alpha: 1))  // amber #EDB34D
     static let severityMinor = Color(
-        light: UIColor(red: 0.243, green: 0.537, blue: 0.357, alpha: 1),  // pine green
+        light: UIColor(red: 0.219, green: 0.483, blue: 0.321, alpha: 1),  // pine green #387B52
         dark:  UIColor(red: 0.451, green: 0.784, blue: 0.588, alpha: 1))  // spearmint #73C896
 
     /// Grade-D orange sits between C's ochre and F's brick.
     private static let gradeD = Color(
-        light: UIColor(red: 0.804, green: 0.408, blue: 0.129, alpha: 1),
+        light: UIColor(red: 0.675, green: 0.343, blue: 0.108, alpha: 1),  // #AC571C
         dark:  UIColor(red: 0.925, green: 0.596, blue: 0.322, alpha: 1))  // #EC9852
 
     static func gradeColor(_ grade: String) -> Color {

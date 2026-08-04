@@ -3,6 +3,24 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.44.1] — 2026-08-04
+
+### Fixed
+- Severity colours in light mode now meet WCAG AA. The amber used for
+  "moderate" faults measured 2.67:1 on paper — below even the 3:1 floor
+  for graphics, let alone the 4.5:1 needed for text — and it appears in
+  19 places including every severity badge and the grade-C treatment.
+  All four severity colours (and grade D) were re-tuned into a matched
+  contrast band with their hues preserved, so the colour language is
+  unchanged.
+- Selected grade chips in History were white text on those same fills,
+  as low as 2.91:1; they now clear AA too.
+- Secondary body text in light mode was 4.82:1, below the bar dark mode
+  was raised to; it is now 5.88:1.
+- A new contrast test measures every semantic colour in both
+  appearances and fails with the exact shortfall, so these can't
+  regress silently.
+
 ## [1.44.0] — 2026-08-04 — "Take"
 
 ### Added
