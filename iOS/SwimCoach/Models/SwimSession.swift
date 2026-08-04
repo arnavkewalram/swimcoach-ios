@@ -19,6 +19,11 @@ final class SwimSession {
     var issueNames: [String] = []
     var strokeCount: Int
     var kickRatePerMin: Double
+    /// Analyzed clip length in seconds, stored so History can derive stroke
+    /// rate (strokeCount / minutes) without decoding the result blob per row.
+    /// Defaulted so existing stores migrate losslessly; 0 means unknown
+    /// (sessions saved before this field) and renders as a gap in trends.
+    var durationSeconds: Double = 0
     var analyzedAt: Date
     @Attribute(.externalStorage) var resultData: Data
 
@@ -31,6 +36,7 @@ final class SwimSession {
         self.issueNames = result.issues.map(\.name)
         self.strokeCount = result.strokeCount
         self.kickRatePerMin = result.kickRatePerMin
+        self.durationSeconds = result.durationSeconds ?? 0
         self.analyzedAt = result.analyzedAt
         self.resultData = (try? JSONEncoder().encode(result)) ?? Data()
     }
