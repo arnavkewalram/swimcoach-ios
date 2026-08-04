@@ -30,7 +30,11 @@ from .windowing import (  # noqa: E402  (re-exported for compatibility)
 # via SWIM_TCN_AUTOTRAIN=1 (a server must never train inside a request).
 _WEIGHTS_PATH = Path(__file__).parent / "swim_tcn.pt"
 
-# Severity mapping by label
+# Severity mapping by label.
+# MUST match `catalog` in iOS/SwimCoach/Core/FeedbackEngine.swift — both feed
+# the same score formula (minor 5 / moderate 15 / major 25), so any drift makes
+# the CLI and the app grade the same clip differently.
+# Guarded by tests/test_severity_parity.py.
 _SEVERITY = {
     "left_elbow_overextension":  "moderate",
     "right_elbow_overextension": "moderate",
@@ -38,7 +42,7 @@ _SEVERITY = {
     "right_elbow_collapse":      "moderate",
     "left_knee_overbend":        "minor",
     "right_knee_overbend":       "minor",
-    "body_sag":                  "moderate",
+    "body_sag":                  "major",
     "stroke_asymmetry":          "moderate",
     "low_kick_rate":             "minor",
     "excessive_kick_rate":       "minor",
