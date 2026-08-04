@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.43.1] — 2026-08-04
+
+### Fixed
+- The issue timeline under the Results video now anchors to the moment
+  the swimmer was first detected instead of assuming the clip starts at
+  zero. On footage where detection begins late, marks were shifted — or
+  the whole strip silently disappeared. Tapping a mark still seeks to
+  the true video time, and already-saved sessions are repaired without
+  re-analysis.
+
 ## [1.43.0] — 2026-08-04 — "Tempo"
 
 ### Added
