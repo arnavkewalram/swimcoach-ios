@@ -22,12 +22,16 @@ HIP_MIN_VIS = 0.15           # hip vis needed for the torso-angle check
 HORIZONTAL_MAX_DEG = 55.0    # accepted: angle < 55 or > 125 (either direction)
 LOW_DETECTION_RATE = 0.20    # below this, results carry a quality warning
 
-# CLI-only additions. The iOS app gets a distance gate for free — Vision
-# simply fails on small/far people — but MediaPipe happily estimates tiny
-# distant swimmers (1900s archival race footage measured 0.084) and
-# hallucinates impossible geometry on crowd shots (median torso 1.06 on
-# far-field race video). Calibrated against the validation clip set:
-# legitimate 3–6 m footage measures 0.095–0.19.
+# Swimmer-size band. MediaPipe happily estimates tiny distant swimmers (1900s
+# archival race footage measured 0.084) and hallucinates impossible geometry on
+# crowd shots (median torso 1.06 on far-field race video). Calibrated against
+# the validation clip set: legitimate 3–6 m footage measures 0.095–0.19.
+#
+# iOS carries the same two numbers as minTorsoLength / maxTorsoLength in
+# PoseAnalyzer.swift, applied per candidate body rather than to a clip median
+# (Vision reports every person in the frame; MediaPipe reports one). The
+# calibration is shared and must not drift — ml/tests/test_torso_gate_parity.py
+# fails the build if these values and the Swift ones stop matching.
 MIN_MEDIAN_TORSO = 0.09      # normalized shoulder→hip distance
 MAX_MEDIAN_TORSO = 0.60      # larger is geometrically implausible
 

@@ -115,9 +115,10 @@ struct PoseAnalyzer {
                     // Use shoulder confidence as primary filter — shoulders are reliably detected
                     // even for horizontal swimmers where hip landmarks often fall below threshold.
                     let candidates = results.filter { maxShoulderConfidence($0) > minShoulderConfidence }
-                    // Orientation is judged per candidate BEFORE ranking: upright poolside
-                    // spectators are discarded first, so a spectator can never outrank — and
-                    // thereby discard — a swimmer whose hips are occluded.
+                    // Orientation and size are judged per candidate BEFORE ranking: upright
+                    // poolside spectators and far-off bystanders are discarded first, so
+                    // neither can outrank — and thereby discard — a swimmer whose hips are
+                    // occluded.
                     if let index = bestCandidateIndex(candidates.map(poseCandidate)) {
                         let best = candidates[index]
                         let pts = CMSampleBufferGetPresentationTimeStamp(sample)
@@ -145,33 +146,53 @@ struct PoseAnalyzer {
 
     // MARK: - Candidate selection (pure, unit-tested)
 
-    /// The only two values that decide which detected person a frame keeps.
+    /// The only three values that decide which detected person a frame keeps.
     /// Lifted out of `VNHumanBodyPoseObservation` — which cannot be constructed
     /// with chosen joint confidences — so the selection rule stays testable.
     struct PoseCandidate {
         /// Torso angle from horizontal, or nil when hip landmarks were undetectable.
         let alignAngle: Float?
+        /// Shoulder-midpoint→hip-midpoint distance in normalized frame units,
+        /// or nil when the same landmarks were undetectable.
+        let torsoLength: Float?
         /// Best of the two shoulder confidences; used only to break ranking ties.
         let shoulderConfidence: Float
     }
 
     private static let minShoulderConfidence: Float = 0.3
 
+    // Plausible on-screen swimmer size, measured as the normalized distance
+    // between the shoulder midpoint and the hip midpoint. Ported from
+    // MIN_MEDIAN_TORSO / MAX_MEDIAN_TORSO in ml/analysis/gating.py, which
+    // calibrated them against the validation clip set: legitimate 3–6 m footage
+    // measures 0.095–0.19, archival far-field race footage 0.084, and crowd
+    // shots where the detector stitches two people together 1.06.
+    //
+    // The numbers compare directly across platforms: both normalize x by frame
+    // width and y by frame height on an already-orientation-corrected frame,
+    // and the Vision(y-up)→MediaPipe(y-down) flip cancels inside a distance.
+    // ml/tests/test_torso_gate_parity.py fails the build if they drift apart.
+    static let minTorsoLength: Float = 0.09
+    static let maxTorsoLength: Float = 0.60
+
     /// Index of the candidate most likely to be the swimmer, or nil when every
-    /// candidate is clearly upright (the frame is then dropped).
+    /// candidate is clearly upright or implausibly sized (the frame is then dropped).
     ///
-    /// Filter, then rank: only horizontal-or-unknown candidates are considered,
-    /// the flattest of those wins, and equal likelihoods (notably the
-    /// unknown-angle sentinel tying with itself) are broken toward the highest
+    /// Filter, then rank: only horizontal-or-unknown candidates of plausible size
+    /// are considered, the flattest of those wins, and equal likelihoods (notably
+    /// the unknown-angle sentinel tying with itself) are broken toward the highest
     /// shoulder confidence so the result never depends on Vision's ordering.
     static func bestCandidateIndex(_ candidates: [PoseCandidate]) -> Int? {
         var best: Int?
-        for (index, candidate) in candidates.enumerated()
-        where isHorizontalOrUnknown(candidate.alignAngle) {
+        for (index, candidate) in candidates.enumerated() where isSwimmerShaped(candidate) {
             guard let incumbent = best else { best = index; continue }
             if ranksAhead(candidate, of: candidates[incumbent]) { best = index }
         }
         return best
+    }
+
+    private static func isSwimmerShaped(_ candidate: PoseCandidate) -> Bool {
+        isHorizontalOrUnknown(candidate.alignAngle) && isPlausiblySized(candidate.torsoLength)
     }
 
     private static func ranksAhead(_ lhs: PoseCandidate, of rhs: PoseCandidate) -> Bool {
@@ -196,11 +217,45 @@ struct PoseAnalyzer {
         return a < 55 || a > 125
     }
 
+    // Rejects bodies too small to be the filmed swimmer (distant bystanders,
+    // far-field race footage) and bodies too large to be a body at all (a torso
+    // spanning the frame is the detector stitching two people together).
+    //
+    // DELIBERATE DEVIATION from `validate_footage` in ml/analysis/gating.py,
+    // which applies these bounds to the MEDIAN torso over a whole clip:
+    //
+    //  * Per candidate, not per clip. Python only ever sees one MediaPipe body
+    //    per frame, so a clip-level median is its only lever; Vision hands us
+    //    every person in the frame, so the size test belongs where the other
+    //    per-person test (orientation) already lives. It is also the safer half
+    //    of the trade — a too-small person is dropped from that frame instead of
+    //    taking the whole clip down, and a clip whose swimmer is uniformly too
+    //    small loses every frame and lands on the existing "no swimmer" /
+    //    "too few frames" rejection anyway. Dropped frames are zero-filled onto
+    //    FeatureExtractor's uniform time grid, so they cost coverage, not timebase.
+    //  * Unmeasurable → accepted. Python measures the torso even when the hips
+    //    are low-visibility because MediaPipe always emits an estimated position
+    //    for an occluded landmark. Vision does not: an unconfident joint carries
+    //    no usable location, so guessing from one would invent a size. iOS
+    //    therefore measures only when the angle check's landmarks are present
+    //    and treats "unknown size" the way it already treats unknown
+    //    orientation — accept, because rejecting a real swimmer whose hips are
+    //    under the waterline is far worse than keeping a distant bystander.
+    private static func isPlausiblySized(_ torsoLength: Float?) -> Bool {
+        guard let length = torsoLength else { return true }  // unmeasurable → accept
+        return length >= minTorsoLength && length <= maxTorsoLength
+    }
+
     // MARK: - Vision landmark reads
 
     private static func poseCandidate(_ obs: VNHumanBodyPoseObservation) -> PoseCandidate {
-        PoseCandidate(alignAngle: bodyAlignAngle(obs),
-                      shoulderConfidence: maxShoulderConfidence(obs))
+        // Angle and size come from the same measurement, so a candidate is
+        // either fully measured or fully unknown — never half-judged.
+        let torso = torsoSegment(obs)
+        return PoseCandidate(
+            alignAngle: torso.map { abs(atan2($0.dy, $0.dx) * 180 / Float(Double.pi)) },
+            torsoLength: torso.map { hypot($0.dx, $0.dy) },
+            shoulderConfidence: maxShoulderConfidence(obs))
     }
 
     private static func maxShoulderConfidence(_ obs: VNHumanBodyPoseObservation) -> Float {
@@ -209,9 +264,17 @@ struct PoseAnalyzer {
         return max(left, right)
     }
 
-    // Returns the torso angle from horizontal (0° = flat swimmer, 90° = standing person).
-    // Returns nil when shoulder or hip landmarks are below confidence threshold.
-    private static func bodyAlignAngle(_ obs: VNHumanBodyPoseObservation) -> Float? {
+    // Shoulder midpoint → hip midpoint, in Vision's normalized frame coordinates
+    // (x by width, y by height, on the orientation-corrected frame). Its angle
+    // from horizontal is 0° for a flat swimmer and 90° for a standing person;
+    // its magnitude is the swimmer's on-screen size. Vision reports y UP where
+    // MediaPipe reports y DOWN, but that flip only negates dy — which `abs`
+    // absorbs in the angle and a distance absorbs entirely — so both readings
+    // match ml/analysis/gating.py without applying FeatureExtractor's `1 - y`.
+    //
+    // Returns nil when shoulder or hip landmarks are below confidence threshold:
+    // the caller reads that as "orientation and size unknown".
+    private static func torsoSegment(_ obs: VNHumanBodyPoseObservation) -> (dx: Float, dy: Float)? {
         guard
             let ls = (try? obs.recognizedPoint(.leftShoulder)),  ls.confidence > 0.2,
             let rs = (try? obs.recognizedPoint(.rightShoulder)), rs.confidence > 0.2,
@@ -222,8 +285,7 @@ struct PoseAnalyzer {
         let midSY = (ls.location.y + rs.location.y) / 2
         let midHX = (lh.location.x + rh.location.x) / 2
         let midHY = (lh.location.y + rh.location.y) / 2
-        let dx = Float(midHX - midSX), dy = Float(midHY - midSY)
-        return abs(atan2(dy, dx) * 180 / Float(Double.pi))
+        return (dx: Float(midHX - midSX), dy: Float(midHY - midSY))
     }
 }
 
