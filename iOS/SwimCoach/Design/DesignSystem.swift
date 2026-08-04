@@ -81,7 +81,6 @@ enum DS {
     static let accent = Color(
         light: UIColor(red: 0.043, green: 0.322, blue: 0.863, alpha: 1),  // #0B52DC
         dark:  UIColor(red: 0.290, green: 0.565, blue: 1.000, alpha: 1))  // #4A90FF
-    static let accentDim = accent.opacity(0.55)
     /// Text/icons sitting ON an accent fill (primary buttons, chips):
     /// white on the deep light-mode blue; slate on the bright dark-mode
     /// blue, where white would fall under contrast.
@@ -138,8 +137,6 @@ extension Font {
 
     /// Editorial section label — ALL CAPS, tracked (use with .tracking(1.4))
     static let sectionLabel = Font.custom(GroteskWeight.medium.postScriptName, size: 11, relativeTo: .caption2)
-    /// Stat number
-    static let statNumber   = Font.custom(GroteskWeight.bold.postScriptName, size: 26, relativeTo: .title2)
     /// Stat unit (spm, /min, %)
     static let statUnit     = Font.custom(GroteskWeight.medium.postScriptName, size: 11, relativeTo: .caption2)
 }
