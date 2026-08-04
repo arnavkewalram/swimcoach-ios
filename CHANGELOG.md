@@ -3,6 +3,20 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.43.3] — 2026-08-04
+
+### Fixed
+- The analysis-failure screen is no longer a dead end. It offered only
+  "Try again", which re-ran the identical file and failed identically —
+  with no cancel and no back button — while the message told you to go
+  re-film. It now offers **Record again** and **Back to Home**, and only
+  shows "Try again" when the failure was actually transient (an error
+  mid-run) rather than footage the app has already rejected.
+- Retrying no longer leaks work. The retry ran outside the screen's
+  task, so leaving mid-retry could still save a session and push Results
+  on top of Home afterwards. Retries now run inside the screen's own
+  task and cancel when you leave.
+
 ## [1.43.2] — 2026-08-04
 
 ### Fixed
