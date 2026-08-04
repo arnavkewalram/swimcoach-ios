@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.43.5] — 2026-08-04
+
+### Fixed
+- Body Sag now carries the same base severity in the Python pipeline as
+  it does in the app. It was the one fault of ten where the two
+  disagreed, so the same clip scored 10 points differently in the CLI
+  and backend than on the phone. A new parity test pins every fault's
+  severity on both platforms and names the offender if they ever drift
+  apart again.
+
 ## [1.43.4] — 2026-08-04
 
 ### Changed
