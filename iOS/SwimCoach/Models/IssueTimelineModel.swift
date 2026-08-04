@@ -19,6 +19,14 @@ import Foundation
 /// If a detected issue never crosses its threshold in any single window
 /// (it was flagged from the clip-wide average), its peak window is used as
 /// the run so every detected issue still appears on the strip.
+///
+/// Timebase (easy to get wrong): window times are ABSOLUTE source-video
+/// seconds anchored at the first DETECTED frame, while `durationSeconds` is
+/// the LENGTH of that detected span, not an end time. The strip is therefore
+/// laid out over `[origin, origin + duration]` — where `origin` is the
+/// earliest window start — so clips where the swimmer is picked up late are
+/// neither shifted nor clamped off the bar. `seekTime` stays absolute
+/// because it drives the real player timeline.
 struct IssueTimelineModel: Equatable, Sendable {
 
     struct Segment: Equatable, Sendable {
@@ -54,8 +62,14 @@ struct IssueTimelineModel: Equatable, Sendable {
               let duration = durationSeconds,
               duration.isFinite, duration > 0 else { return nil }
 
-        let runs = issueRuns(windows: windows, issues: issues, duration: duration)
-        let segments = flatten(runs: runs, duration: duration)
+        // Anchor to the detected span's own start rather than assuming 0.
+        // `windowRanges` always emits a range with lowerBound 0, so the
+        // earliest window start is exactly the extractor's `t0`.
+        let origin = windows.map(\.start).filter(\.isFinite).min() ?? 0
+
+        let runs = issueRuns(windows: windows, issues: issues,
+                             origin: origin, duration: duration)
+        let segments = flatten(runs: runs, origin: origin, duration: duration)
         guard !segments.isEmpty else { return nil }
         return IssueTimelineModel(durationSeconds: duration, segments: segments)
     }
@@ -84,11 +98,13 @@ struct IssueTimelineModel: Equatable, Sendable {
     }
 
     /// Per-issue threshold-crossing windows (peak-window fallback when none
-    /// cross), clamped to the clip and merged into contiguous runs.
+    /// cross), clamped to the detected span and merged into contiguous runs.
     private static func issueRuns(windows: [IssueWindow],
                                   issues: [TechniqueIssue],
+                                  origin: Double,
                                   duration: Double) -> [Run] {
-        issues.flatMap { issue -> [Run] in
+        let clipEnd = origin + duration
+        return issues.flatMap { issue -> [Run] in
             guard let index = FeedbackEngine.labelIndex(of: issue.name) else { return [] }
             var active = windows.filter {
                 $0.probs.indices.contains(index) && Double($0.probs[index]) >= issue.threshold
@@ -97,8 +113,8 @@ struct IssueTimelineModel: Equatable, Sendable {
                 active = [peak]
             }
             let clamped: [(start: Double, end: Double)] = active.compactMap { w in
-                let s = min(max(w.start, 0), duration)
-                let e = min(max(w.end, 0), duration)
+                let s = min(max(w.start, origin), clipEnd)
+                let e = min(max(w.end, origin), clipEnd)
                 return e - s > epsilon ? (s, e) : nil
             }
             return merge(intervals: clamped, severity: issue.severity)
@@ -125,7 +141,9 @@ struct IssueTimelineModel: Equatable, Sendable {
 
     /// Boundary-sweeps all runs into sorted, non-overlapping segments where
     /// the highest severity at each instant wins.
-    private static func flatten(runs: [Run], duration: Double) -> [Segment] {
+    private static func flatten(runs: [Run],
+                                origin: Double,
+                                duration: Double) -> [Segment] {
         guard !runs.isEmpty else { return [] }
         let bounds = Set(runs.flatMap { [$0.start, $0.end] }).sorted()
         var segments: [Segment] = []
@@ -138,8 +156,8 @@ struct IssueTimelineModel: Equatable, Sendable {
                 return lhs.start > rhs.start   // tie → earlier run wins
             }) else { continue }
 
-            let startF = sliceStart / duration
-            let endF = sliceEnd / duration
+            let startF = (sliceStart - origin) / duration
+            let endF = (sliceEnd - origin) / duration
             if let last = segments.last,
                last.severity == winner.severity,
                last.seekTime == winner.start,

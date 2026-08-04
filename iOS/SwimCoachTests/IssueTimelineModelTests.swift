@@ -25,8 +25,10 @@ final class IssueTimelineModelTests: XCTestCase {
     // MARK: - Normalization
 
     func testSingleWindowNormalizesToClipFraction() throws {
-        // Arrange
-        let windows = [window(start: 3, end: 6, probs: [6: 0.9])]
+        // Arrange — the pipeline's first window always opens at the
+        // detection origin (here 0); only the 3–6 window flags body_sag
+        let windows = [window(start: 0, end: 3, probs: [6: 0.1]),
+                       window(start: 3, end: 6, probs: [6: 0.9])]
         let issues = [issue("body_sag", .major)]
 
         // Act
@@ -58,6 +60,73 @@ final class IssueTimelineModelTests: XCTestCase {
         XCTAssertEqual(segment.startFraction, 0, accuracy: 1e-9)
         XCTAssertEqual(segment.endFraction, 0.5, accuracy: 1e-9)
         XCTAssertEqual(segment.seekTime, 0, accuracy: 1e-9)
+    }
+
+    // MARK: - Detected-span origin
+
+    func testNonZeroOriginNormalizesRelativeToDetectionStart() throws {
+        // Arrange — swimmer first detected at t=10s. Window times are
+        // ABSOLUTE source-video time; `duration` is the LENGTH of the
+        // detected span (10–22), not an end time.
+        let windows = [window(start: 10, end: 13, probs: [6: 0.1]),
+                       window(start: 13, end: 16, probs: [6: 0.9])]
+        let issues = [issue("body_sag", .major)]
+
+        // Act
+        let model = try XCTUnwrap(IssueTimelineModel.make(
+            windows: windows, issues: issues, durationSeconds: 12))
+
+        // Assert — 13–16 sits a quarter into the 12s span, not off the bar
+        XCTAssertEqual(model.segments.count, 1)
+        let segment = try XCTUnwrap(model.segments.first)
+        XCTAssertEqual(segment.startFraction, 0.25, accuracy: 1e-9)
+        XCTAssertEqual(segment.endFraction, 0.50, accuracy: 1e-9)
+        // Seek stays ABSOLUTE — it drives the real player timeline
+        XCTAssertEqual(segment.seekTime, 13, accuracy: 1e-9)
+        XCTAssertEqual(try XCTUnwrap(model.seekTime(atFraction: 0.3)),
+                       13, accuracy: 1e-9)
+    }
+
+    func testLateDetectionBeyondDurationStillRendersStrip() throws {
+        // Arrange — detection starts at 20s and spans 10s. Clamping to
+        // [0, duration] collapsed every window to zero width and hid the
+        // whole strip; anchoring to the origin keeps it.
+        let windows = [window(start: 20, end: 23, probs: [6: 0.9]),
+                       window(start: 25, end: 28, probs: [6: 0.1])]
+        let issues = [issue("body_sag", .major)]
+
+        // Act
+        let model = try XCTUnwrap(IssueTimelineModel.make(
+            windows: windows, issues: issues, durationSeconds: 10))
+
+        // Assert — 20–23 is the first 30% of the detected span
+        XCTAssertEqual(model.segments.count, 1)
+        let segment = try XCTUnwrap(model.segments.first)
+        XCTAssertEqual(segment.startFraction, 0, accuracy: 1e-9)
+        XCTAssertEqual(segment.endFraction, 0.3, accuracy: 1e-9)
+        XCTAssertEqual(segment.seekTime, 20, accuracy: 1e-9)
+    }
+
+    func testZeroOriginGeometryIsUnchanged() throws {
+        // Arrange — regression guard: clips detected from t=0 must produce
+        // exactly the pre-fix segments, asserted segment-for-segment
+        let windows = [window(start: 0, end: 3, probs: [6: 0.9]),
+                       window(start: 2, end: 5, probs: [8: 0.8])]
+        let issues = [issue("body_sag", .major),
+                      issue("low_kick_rate", .minor)]
+
+        // Act
+        let model = try XCTUnwrap(IssueTimelineModel.make(
+            windows: windows, issues: issues, durationSeconds: 10))
+
+        // Assert
+        XCTAssertEqual(model.segments, [
+            IssueTimelineModel.Segment(startFraction: 0.0, endFraction: 0.3,
+                                       severity: .major, seekTime: 0),
+            IssueTimelineModel.Segment(startFraction: 0.3, endFraction: 0.5,
+                                       severity: .minor, seekTime: 2)
+        ])
+        XCTAssertEqual(model.durationSeconds, 10, accuracy: 1e-9)
     }
 
     // MARK: - Overlap across issues
@@ -187,8 +256,10 @@ final class IssueTimelineModelTests: XCTestCase {
     }
 
     func testHiddenWhenAllWindowsFallOutsideClip() {
-        // Arrange — window entirely past the reported duration
-        let windows = [window(start: 12, end: 15, probs: [6: 0.9])]
+        // Arrange — detection opens at 0, so the detected span is 0–10; the
+        // only flagged window sits entirely past the end of that span
+        let windows = [window(start: 0, end: 3, probs: [6: 0.1]),
+                       window(start: 12, end: 15, probs: [6: 0.9])]
 
         // Act
         let model = IssueTimelineModel.make(windows: windows,
@@ -202,8 +273,10 @@ final class IssueTimelineModelTests: XCTestCase {
     // MARK: - Clamping & fallback
 
     func testWindowOverhangingClipEndIsClamped() throws {
-        // Arrange — last sliding window overruns the clip by rounding
-        let windows = [window(start: 8, end: 14, probs: [6: 0.9])]
+        // Arrange — detection opens at 0; the last sliding window overruns
+        // the clip by rounding
+        let windows = [window(start: 0, end: 3, probs: [6: 0.1]),
+                       window(start: 8, end: 14, probs: [6: 0.9])]
 
         // Act
         let model = try XCTUnwrap(IssueTimelineModel.make(
