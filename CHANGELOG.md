@@ -3,6 +3,18 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.43.0] — 2026-08-04 — "Tempo"
+
+### Added
+- **Stroke mechanics trend** in History: a two-series chart of stroke
+  rate and kick rate across the swimmer-scoped session sequence, sharing
+  the score chart's session axis. Sessions missing a metric break the
+  line instead of plotting a false zero, and the panel appears once a
+  series has two plottable sessions.
+- Clip duration is now stored on each session, so stroke rate is derived
+  from cheap stored values instead of decoding every result blob.
+  Existing sessions migrate losslessly and read as gaps until re-analyzed.
+
 ## [1.42.1] — 2026-08-03
 
 ### Changed
