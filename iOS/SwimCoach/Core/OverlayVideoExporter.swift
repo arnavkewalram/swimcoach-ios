@@ -32,6 +32,42 @@ enum OverlayVideoExporter {
         }
     }
 
+    /// Whole-percent bucket for a progress fraction, clamped to 0...100.
+    /// Pure — unit-tested.
+    static func percentStep(_ fraction: Double) -> Int {
+        Int(min(max(fraction, 0), 1) * 100)
+    }
+
+    /// Gate for `export`'s progress callback: report only when the whole
+    /// percent advances. The encode pump runs once per decoded source frame,
+    /// and the caller hops to the main actor on every report — reporting each
+    /// raw frame spawned a task per frame (~1800 on a 60s clip) and re-ran the
+    /// whole Results body each time, the same trap `PoseAnalyzer` guards with
+    /// its sample-rate check. Caps any clip at 101 reports (0...100).
+    /// Pure — unit-tested.
+    static func shouldReport(fraction: Double, lastReported: Int) -> Bool {
+        percentStep(fraction) > lastReported
+    }
+
+    /// Stateful side of the whole-percent throttle. The pump block is
+    /// `@Sendable`, so the running percent cannot be a captured `var`; it runs
+    /// on a single queue but the lock keeps that assumption from being load-bearing.
+    final class ProgressThrottle: @unchecked Sendable {
+        private let lock = NSLock()
+        private var lastReported = -1
+
+        /// True — and advances the gate — when `fraction` crosses into a whole
+        /// percent not yet reported. Starts below zero so 0.0 always reports.
+        func admit(_ fraction: Double) -> Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            guard OverlayVideoExporter.shouldReport(fraction: fraction,
+                                                    lastReported: lastReported) else { return false }
+            lastReported = OverlayVideoExporter.percentStep(fraction)
+            return true
+        }
+    }
+
     static func export(
         videoURL: URL,
         frames: [KeypointFrame],
@@ -81,6 +117,7 @@ enum OverlayVideoExporter {
 
         let accent = UIColor(red: 0.043, green: 0.322, blue: 0.863, alpha: 0.9)
         let cancelled = CancelFlag()
+        let throttle = ProgressThrottle()
         let queue = DispatchQueue(label: "com.swimcoach.overlay-export")
 
         // Canonical AVAssetWriter pump: requestMediaDataWhenReady drives the
@@ -98,6 +135,11 @@ enum OverlayVideoExporter {
                             return
                         }
                         guard let sample = readerOutput.copyNextSampleBuffer() else {
+                            // Source drained. The last frame's PTS stops a
+                            // frame-interval short of the asset duration, so
+                            // the throttle would otherwise strand the caller
+                            // below 100% — report the terminal value here.
+                            if throttle.admit(1.0) { progress(1.0) }
                             writerInput.markAsFinished()
                             writer.finishWriting {
                                 if writer.status == .completed {
@@ -132,7 +174,10 @@ enum OverlayVideoExporter {
                         CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
                         adaptor.append(pixelBuffer, withPresentationTime: pts)
-                        if duration > 0 { progress(min(pts.seconds / duration, 1.0)) }
+                        if duration > 0 {
+                            let fraction = min(pts.seconds / duration, 1.0)
+                            if throttle.admit(fraction) { progress(fraction) }
+                        }
                     }
                 }
             }
