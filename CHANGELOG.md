@@ -3,6 +3,18 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.43.4] — 2026-08-04
+
+### Changed
+- History's Common Issues chart no longer decodes every session's full
+  analysis blob — including its pose keypoints — on every keystroke and
+  filter tap. It now reads the fault names already stored on each
+  session, decoding only legacy rows saved before those names existed,
+  and recomputes only when the sessions themselves change.
+- Tied faults in that chart now sort in a stable, catalog-defined order
+  instead of depending on dictionary hashing, so the bar order is
+  reproducible between launches.
+
 ## [1.43.3] — 2026-08-04
 
 ### Fixed

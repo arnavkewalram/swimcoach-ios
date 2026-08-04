@@ -12,6 +12,10 @@ struct HistoryView: View {
     @State private var searchQuery = ""
     @State private var gradeFilter: Set<String> = []
     @State private var swimmerFilter: Set<String> = []
+    /// COMMON ISSUES rollup, hoisted out of `body` and refreshed only when
+    /// the swimmer-scoped session set changes — search keystrokes and
+    /// filter-chip taps re-render the chart without rebuilding it.
+    @State private var commonIssues: [IssueFrequency.Item] = []
 
     /// Charts and stats follow the swimmer filter (an identity scope) but
     /// deliberately ignore grade/search — those only narrow the list.
@@ -55,6 +59,22 @@ struct HistoryView: View {
         return order.filter { present.contains($0) }
     }
 
+    /// Chronological (oldest first) fault names per scoped session, read
+    /// from the denormalized `issueNames` column — no result-blob decode.
+    /// Sessions saved before that column existed migrate in empty, so those
+    /// rows alone fall back to the blob; that cost is bounded to legacy rows
+    /// and drops to zero as the library turns over. An unreadable legacy
+    /// blob drops the session from the timeline, exactly as the old
+    /// decode-everything pass did.
+    private var chronologicalIssueNames: [[String]] {
+        swimmerScopedSessions.reversed().compactMap { session in
+            guard session.issueNames.isEmpty, session.issueCount > 0 else {
+                return session.issueNames
+            }
+            return session.decoded()?.issues.map(\.name)
+        }
+    }
+
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
@@ -93,8 +113,10 @@ struct HistoryView: View {
                                 StrokeMechanicsChart(sessions: chronologicalSessions)
                             }
 
-                            if swimmerScopedSessions.count >= 2 {
-                                IssueFrequencyChart(sessions: swimmerScopedSessions)
+                            if swimmerScopedSessions.count >= 2 && !commonIssues.isEmpty {
+                                IssueFrequencyChart(
+                                    sessionCount: swimmerScopedSessions.count,
+                                    issues: commonIssues)
                             }
 
                             SectionHeader(title: "Sessions")
@@ -159,6 +181,11 @@ struct HistoryView: View {
         }
         .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .automatic),
                     prompt: "Name, notes, or date")
+        // Keyed on the scoped session identities: analyzing, deleting, or
+        // re-scoping rebuilds the rollup; typing and filtering do not.
+        .task(id: swimmerScopedSessions.map(\.id)) {
+            commonIssues = IssueFrequency.top(chronological: chronologicalIssueNames)
+        }
         .sheet(item: $sessionToRename) { session in
             EditSessionSheet(session: session)
         }
@@ -651,102 +678,128 @@ private struct StrokeMechanicsChart: View {
     }
 }
 
-// MARK: - Issue frequency chart
+// MARK: - Issue frequency rollup
 
-private struct IssueFrequencyChart: View {
-    let sessions: [SwimSession]
+/// Fault-frequency rollup behind History's COMMON ISSUES chart. Pure —
+/// unit-tested. Input is chronological (oldest first) raw fault names, one
+/// entry per session; output is the top faults by how many of those
+/// sessions contained them.
+enum IssueFrequency {
 
-    private struct IssueFreqItem {
+    /// Bars the chart shows at most.
+    static let maxBars = 5
+
+    struct Item: Equatable {
+        /// Raw catalog name — callers map it to a display label.
         let name: String
         let count: Int
         let trend: IssueTrend
     }
 
-    private var topIssues: [IssueFreqItem] {
-        // One decode pass: chronological presence flags per fault
-        let decoded = sessions.reversed().compactMap { $0.decoded() }   // oldest first
+    static func top(chronological sessionIssueNames: [[String]]) -> [Item] {
+        // Presence flags per fault, one flag per session, chronological.
+        // Faults first seen mid-history get leading falses from the
+        // `repeating:count:` default, so every array stays session-aligned.
         var presence: [String: [Bool]] = [:]
-        for result in decoded {
-            let names = Set(result.issues.map(\.displayName))
-            let priorCount = presence.values.first?.count ?? 0
-            for name in Set(presence.keys).union(names) {
-                presence[name, default: [Bool](repeating: false, count: priorCount)]
-                    .append(names.contains(name))
+        for (index, names) in sessionIssueNames.enumerated() {
+            let present = Set(names)
+            for name in Set(presence.keys).union(present) {
+                presence[name, default: [Bool](repeating: false, count: index)]
+                    .append(present.contains(name))
             }
         }
-        // Backfill: faults first seen mid-history need leading falses
-        let total = decoded.count
-        for (name, flags) in presence where flags.count < total {
-            presence[name] = [Bool](repeating: false, count: total - flags.count) + flags
-        }
         return presence
-            .map { (name: $0.key, flags: $0.value) }
-            .map { IssueFreqItem(name: $0.name,
-                                 count: $0.flags.filter { $0 }.count,
-                                 trend: IssueTrend.trend(occurrences: $0.flags)) }
+            .map { Item(name: $0.key,
+                        count: $0.value.filter { $0 }.count,
+                        trend: IssueTrend.trend(occurrences: $0.value)) }
             .filter { $0.count > 0 }
-            .sorted { $0.count > $1.count }
-            .prefix(5)
+            .sorted(by: ranks)
+            .prefix(maxBars)
             .map { $0 }
     }
 
-    var body: some View {
-        let issues = topIssues
-        if !issues.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
-                SectionHeader(title: "Common issues")
-                if sessions.count >= IssueTrend.minSessions {
-                    Text("Arrows compare your recent sessions to earlier ones")
-                        .font(.caption)
-                        .foregroundStyle(DS.inkTertiary)
-                }
+    /// Most frequent first. Equal counts break by catalog (model
+    /// probability) order — the order the rest of the app lists faults in —
+    /// so the chart renders the same bars every launch. Sorting on count
+    /// alone left ties at the mercy of `Dictionary` iteration order.
+    private static func ranks(_ a: Item, _ b: Item) -> Bool {
+        if a.count != b.count { return a.count > b.count }
+        let (rankA, rankB) = (FeedbackEngine.labelIndex(of: a.name) ?? .max,
+                              FeedbackEngine.labelIndex(of: b.name) ?? .max)
+        return rankA == rankB ? a.name < b.name : rankA < rankB
+    }
+}
 
-                Chart(issues, id: \.name) { item in
-                    BarMark(
-                        x: .value("Count", item.count),
-                        y: .value("Issue", item.name)
-                    )
-                    .foregroundStyle(DS.accent.opacity(0.85))
-                    .cornerRadius(3)
-                    .annotation(position: .trailing) {
-                        HStack(spacing: 4) {
-                            Text("\(item.count)")
-                                .font(.grotesk(11, .bold))
-                                .foregroundStyle(DS.inkSecondary)
-                            if item.trend != .flat {
-                                Image(systemName: item.trend == .improving
-                                      ? "arrow.down.right" : "arrow.up.right")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .foregroundStyle(item.trend == .improving
-                                                     ? DS.severityMinor : DS.severityMajor)
-                                    .accessibilityLabel(item.trend == .improving
-                                                        ? "improving" : "worsening")
-                            }
-                        }
-                    }
-                }
-                .chartXAxis(.hidden)
-                .chartYAxis {
-                    AxisMarks { value in
-                        // Full fault names, wrapped to two lines in a capped
-                        // label column — no manual "…" truncation. 112pt fits
-                        // the longest catalog names ("Right Elbow
-                        // Overextension") at caption2; 96pt ellipsized them.
-                        AxisValueLabel {
-                            Text(value.as(String.self) ?? "")
-                                .font(.caption2)
-                                .foregroundStyle(DS.ink)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.trailing)
-                                .frame(maxWidth: 112, alignment: .trailing)
-                        }
-                    }
-                }
-                .frame(height: CGFloat(issues.count) * 34 + 16)
+// MARK: - Issue frequency chart
+
+/// Presentational only — the rollup arrives precomputed from HistoryView,
+/// so nothing here touches SwiftData or decodes a result blob.
+private struct IssueFrequencyChart: View {
+    /// Scoped session count, which gates the trend caption.
+    let sessionCount: Int
+    /// Top faults, highest count first, carrying raw catalog names.
+    let issues: [IssueFrequency.Item]
+
+    /// Raw fault name → catalog label. A table lookup per bar (five at
+    /// most), which is why the rollup can stay on raw names.
+    private func label(for name: String) -> String {
+        FeedbackEngine.displayInfo(for: name)?.display ?? name
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Common issues")
+            if sessionCount >= IssueTrend.minSessions {
+                Text("Arrows compare your recent sessions to earlier ones")
+                    .font(.caption)
+                    .foregroundStyle(DS.inkTertiary)
             }
-            .padding(16)
-            .glassCard()
+
+            Chart(issues, id: \.name) { item in
+                BarMark(
+                    x: .value("Count", item.count),
+                    y: .value("Issue", label(for: item.name))
+                )
+                .foregroundStyle(DS.accent.opacity(0.85))
+                .cornerRadius(3)
+                .annotation(position: .trailing) {
+                    HStack(spacing: 4) {
+                        Text("\(item.count)")
+                            .font(.grotesk(11, .bold))
+                            .foregroundStyle(DS.inkSecondary)
+                        if item.trend != .flat {
+                            Image(systemName: item.trend == .improving
+                                  ? "arrow.down.right" : "arrow.up.right")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(item.trend == .improving
+                                                 ? DS.severityMinor : DS.severityMajor)
+                                .accessibilityLabel(item.trend == .improving
+                                                    ? "improving" : "worsening")
+                        }
+                    }
+                }
+            }
+            .chartXAxis(.hidden)
+            .chartYAxis {
+                AxisMarks { value in
+                    // Full fault names, wrapped to two lines in a capped
+                    // label column — no manual "…" truncation. 112pt fits
+                    // the longest catalog names ("Right Elbow
+                    // Overextension") at caption2; 96pt ellipsized them.
+                    AxisValueLabel {
+                        Text(value.as(String.self) ?? "")
+                            .font(.caption2)
+                            .foregroundStyle(DS.ink)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: 112, alignment: .trailing)
+                    }
+                }
+            }
+            .frame(height: CGFloat(issues.count) * 34 + 16)
         }
+        .padding(16)
+        .glassCard()
     }
 }
 
