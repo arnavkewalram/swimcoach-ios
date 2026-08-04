@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.2] — 2026-08-04
+
+### Changed
+- Every primary button in the app is now the same button. Home's hero
+  treatment had been hand-copied into the review and onboarding screens,
+  so three screens carried their own near-identical version that could
+  drift apart; they now share one component. The What's New and analysis
+  -failure buttons pick up the same treatment, so no screen is the odd
+  one out.
+
 ## [1.45.1] — 2026-08-04
 
 ### Fixed

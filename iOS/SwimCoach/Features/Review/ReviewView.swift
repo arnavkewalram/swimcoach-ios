@@ -161,20 +161,7 @@ struct ReviewView: View {
                 // owns.
                 router.replaceTop(with: .analyzing(clip))
             } label: {
-                HStack {
-                    Text("Use this clip")
-                        .font(.grotesk(18, .medium))
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .font(.body.weight(.semibold))
-                        .accessibilityHidden(true)
-                }
-                .foregroundStyle(DS.onAccent)
-                .padding(.horizontal, 22)
-                .frame(maxWidth: .infinity)
-                .frame(height: 60)
-                .background(DS.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                PrimaryButtonLabel(title: "Use this clip")
             }
             .buttonStyle(ScaleButtonStyle())
             .accessibilityLabel("Analyze this clip")

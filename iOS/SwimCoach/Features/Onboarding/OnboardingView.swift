@@ -68,20 +68,7 @@ struct OnboardingView: View {
             Button {
                 if currentPage < 2 { advance() } else { finish() }
             } label: {
-                HStack {
-                    Text(ctaTitle)
-                        .font(.grotesk(18, .medium))
-                    Spacer()
-                    Image(systemName: "arrow.right")
-                        .font(.body.weight(.semibold))
-                        .accessibilityHidden(true)
-                }
-                .foregroundStyle(DS.onAccent)
-                .padding(.horizontal, 22)
-                .frame(maxWidth: .infinity)
-                .frame(height: 60)
-                .background(DS.accent)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                PrimaryButtonLabel(title: ctaTitle)
             }
             .buttonStyle(ScaleButtonStyle())
 
