@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.8] — 2026-08-04
+
+### Changed
+- Preparing a CSV or JSON export no longer freezes the app while it
+  works. Both used to be built and written on the main thread from the
+  button tap; they now run in the background with the button showing its
+  progress, and the other export stays usable meanwhile. The exported
+  bytes are unchanged.
+
 ## [1.45.7] — 2026-08-04
 
 ### Changed
