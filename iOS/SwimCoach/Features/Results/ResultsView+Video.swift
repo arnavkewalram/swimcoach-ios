@@ -8,10 +8,6 @@ import AVKit
 
 extension ResultsView {
 
-    enum VideoExportState: Equatable {
-        case idle, exporting(Double), ready(URL), failed
-    }
-
     // MARK: - Session video
 
     func videoSection(url: URL) -> some View {
@@ -123,63 +119,17 @@ extension ResultsView {
         }
     }
 
+    /// A child view rather than inline markup, deliberately: the export state
+    /// it renders ticks once per whole percent, and only a view with its own
+    /// body can absorb those ticks without dragging the rest of Results along.
+    /// Reading `exportModel.state` here would put the dependency straight back
+    /// on `ResultsView.body` — pass the box, never unwrap it.
     @ViewBuilder
     var exportControl: some View {
-        switch exportState {
-        case .idle, .failed:
-            Button {
-                startExport()
-            } label: {
-                Text(exportState == .failed ? "RETRY EXPORT" : "EXPORT")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.inkSecondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.border, lineWidth: 1))
-            }
-            .accessibilityLabel("Export video with skeleton overlay")
-        case .exporting(let p):
-            Text("\(Int(p * 100))%")
-                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                .tracking(1.2)
-                .foregroundStyle(DS.accent)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 5)
-                .overlay(RoundedRectangle(cornerRadius: 5).stroke(DS.accent.opacity(0.4), lineWidth: 1))
-                .accessibilityLabel("Exporting video, \(Int(p * 100)) percent")
-        case .ready(let url):
-            ShareLink(item: url) {
-                Text("SHARE VIDEO")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.onAccent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(DS.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: 5))
-            }
-            .accessibilityLabel("Share exported video")
-        }
-    }
-
-    func startExport() {
-        guard let url = result.videoURL, let frames = result.keypointFrames else { return }
-        exportState = .exporting(0)
-        exportTask = Task {
-            do {
-                let out = try await OverlayVideoExporter.export(videoURL: url, frames: frames) { p in
-                    Task { @MainActor in
-                        if case .exporting = exportState { exportState = .exporting(p) }
-                    }
-                }
-                await MainActor.run { exportState = .ready(out) }
-            } catch is CancellationError {
-                await MainActor.run { exportState = .idle }
-            } catch {
-                AppLog.storage.error("Overlay export failed: \(error.localizedDescription)")
-                await MainActor.run { exportState = .failed }
-            }
+        // `videoControls` only reaches here when `hasSkeletonData`, so both are
+        // non-nil in practice; the unwrap just keeps the child's inputs total.
+        if let url = result.videoURL, let frames = result.keypointFrames {
+            OverlayExportControl(model: exportModel, videoURL: url, frames: frames)
         }
     }
 }

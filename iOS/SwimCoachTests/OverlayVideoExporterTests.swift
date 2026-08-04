@@ -25,59 +25,8 @@ final class OverlayVideoExporterTests: XCTestCase {
         XCTAssertNotNil(points[1])
     }
 
-    // MARK: - Progress throttle
-
-    func testShouldReportGatesOnWholePercentChange() {
-        // Fresh gate starts below zero so the opening 0.0 always reports.
-        XCTAssertTrue(OverlayVideoExporter.shouldReport(fraction: 0, lastReported: -1))
-        XCTAssertFalse(OverlayVideoExporter.shouldReport(fraction: 0.0049, lastReported: 0))
-        XCTAssertTrue(OverlayVideoExporter.shouldReport(fraction: 0.0149, lastReported: 0))
-        XCTAssertFalse(OverlayVideoExporter.shouldReport(fraction: 0.994, lastReported: 99))
-        XCTAssertTrue(OverlayVideoExporter.shouldReport(fraction: 1.0, lastReported: 99))
-        XCTAssertFalse(OverlayVideoExporter.shouldReport(fraction: 1.0, lastReported: 100))
-    }
-
-    func testPercentStepClampsOutOfRangeFractions() {
-        XCTAssertEqual(OverlayVideoExporter.percentStep(-0.5), 0)
-        XCTAssertEqual(OverlayVideoExporter.percentStep(0), 0)
-        XCTAssertEqual(OverlayVideoExporter.percentStep(0.5), 50)
-        XCTAssertEqual(OverlayVideoExporter.percentStep(1.0), 100)
-        XCTAssertEqual(OverlayVideoExporter.percentStep(1.7), 100)
-    }
-
-    func testThrottleReportsBothEndpoints() {
-        let throttle = OverlayVideoExporter.ProgressThrottle()
-        XCTAssertTrue(throttle.admit(0))
-        XCTAssertTrue(throttle.admit(1.0))
-        XCTAssertFalse(throttle.admit(1.0), "100% reports at most once")
-    }
-
-    func testThrottleAdmitsCompletionAfterShortFinalFrame() {
-        // A clip whose last decoded frame lands at 99.4% must still be able to
-        // report the exporter's terminal 1.0.
-        let throttle = OverlayVideoExporter.ProgressThrottle()
-        XCTAssertTrue(throttle.admit(0.994))
-        XCTAssertTrue(throttle.admit(1.0))
-    }
-
-    func testThrottleStepsMonotonicallyAndCapsLongRun() {
-        // 60 s at 30 fps — 1800 unthrottled pump iterations.
-        let frameCount = 1800
-        let throttle = OverlayVideoExporter.ProgressThrottle()
-        var reported = [Double]()
-        for i in 0..<frameCount {
-            let fraction = Double(i) / Double(frameCount - 1)
-            if throttle.admit(fraction) { reported.append(fraction) }
-        }
-
-        XCTAssertLessThanOrEqual(reported.count, 101)
-        XCTAssertEqual(reported.first ?? -1, 0, accuracy: 1e-9)
-        XCTAssertEqual(reported.last ?? -1, 1.0, accuracy: 1e-9)
-
-        let percents = reported.map { OverlayVideoExporter.percentStep($0) }
-        XCTAssertEqual(percents, percents.sorted(), "reports must step monotonically")
-        XCTAssertEqual(Set(percents).count, percents.count, "each whole percent reports once")
-    }
+    // Throttle unit coverage lives with the shared seam in
+    // ProgressThrottleTests.swift; what belongs here is the exporter honouring it.
 
     func testFullExportProducesPlayableVideo() async throws {
         guard let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") else {

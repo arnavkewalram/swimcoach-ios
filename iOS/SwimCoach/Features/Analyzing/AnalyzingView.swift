@@ -36,6 +36,22 @@ struct AnalyzingView: View {
 
     private let steps = ["Pose", "AI Model", "Metrics", "Report", "Tips"]
 
+    /// The slice of the bar that pose extraction fills. Every later stage sets
+    /// `progress` directly (see `runAnalysis`), so this is the only phase whose
+    /// value is computed from an external fraction.
+    ///
+    /// `nonisolated`: `View` carries main-actor isolation onto its members, but
+    /// this pair is pure arithmetic evaluated inside PoseAnalyzer's progress
+    /// closure — which runs on its decode queue, off the main actor.
+    nonisolated static let poseProgressShare = 0.60
+
+    /// Bar value for a pose-extraction fraction. The throttle gates on this
+    /// composite rather than on the raw phase fraction, so it steps in the same
+    /// units the bar renders — 0…60%, not 0…100% of a phase.
+    nonisolated static func poseProgress(for fraction: Double) -> Double {
+        fraction * poseProgressShare
+    }
+
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
@@ -378,9 +394,27 @@ struct AnalyzingView: View {
     private func runAnalysis() async {
         do {
             // 1 — Pose extraction (0 → 60%)
+            //
+            // PoseAnalyzer reports once per sampled frame — 600 times on a 60 s
+            // clip — and each report hopped to the main actor to write `progress`,
+            // re-running this whole body. Gate on the whole percent of the value
+            // the bar actually shows, so the 61 distinct readings this phase can
+            // produce cost 61 main-actor writes instead of 600. Local to the run,
+            // so "Try again" gets a fresh gate that reports 0% again.
+            //
+            // The gate only thins this phase's stream; it cannot strand the bar,
+            // because every later stage sets `progress` outright rather than
+            // scaling a fraction. PoseAnalyzer's last sampled frame lands a frame
+            // short of the end anyway, so the 60% mark was never its to deliver —
+            // stage 2's unconditional `update(progress: 0.65)` closes the phase on
+            // the success path, and on a rejection the bar is meant to freeze
+            // where the run died (`runLog` reads `currentStep` off it).
+            let poseProgress = ProgressThrottle()
             let (timedObservations, fps, sampledFrames) = try await PoseAnalyzer.analyze(videoURL: videoURL) { p in
+                let fraction = Self.poseProgress(for: p)
+                guard poseProgress.admit(fraction) else { return }
                 Task { @MainActor in
-                    self.progress = p * 0.60
+                    self.progress = fraction
                 }
             }
 
