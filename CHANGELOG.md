@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.44.3] — 2026-08-04
+
+### Fixed
+- The video-rotation tests now build their own fixture instead of
+  depending on a clip that was never actually committed — the repo's
+  `*.mp4` ignore rule had silently swallowed it, so those tests failed
+  in any fresh clone that had OpenCV installed, while CI skipped them
+  and never noticed.
+
 ## [1.44.2] — 2026-08-04
 
 ### Changed
