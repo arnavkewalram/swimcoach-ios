@@ -101,7 +101,11 @@ struct CameraView: View {
         }
         .onChange(of: camera.recordedVideoURL) { _, url in
             guard let url else { return }
-            router.push(.analyzing(url))
+            // Adopt before navigating: the capture is written to the temp
+            // directory and that is the only copy, so it moves into the
+            // session store the instant recording stops — not after a
+            // successful analysis. Review then decides keep or retake.
+            router.push(.review(SessionVideoStore.adopt(url)))
         }
     }
 

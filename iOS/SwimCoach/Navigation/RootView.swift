@@ -13,8 +13,10 @@ struct RootView: View {
                     switch dest {
                     case .camera:
                         CameraView()
-                    case .analyzing(let url):
-                        AnalyzingView(videoURL: url)
+                    case .review(let clip):
+                        ReviewView(clip: clip)
+                    case .analyzing(let clip):
+                        AnalyzingView(clip: clip)
                     case .results(let result):
                         ResultsView(result: result)
                     case .history:
@@ -37,6 +39,16 @@ struct RootView: View {
                 }
         }
         .environment(router)
+        // Storage hygiene, deliberately off the launch path. This used to run
+        // inside `SwimCoachApp.init()` — before any Scene existed — and
+        // decoded every session's externally-stored result blob (a disk read
+        // plus a full JSON pass over ~¼ MB of keypoint frames each) purely to
+        // read one file name. It now runs once per launch, after first paint,
+        // on the cooperative pool with its own ModelContext, and derives the
+        // referenced set from the cheap stored `id` column instead.
+        .task(priority: .background) {
+            await SessionVideoStore.pruneOrphans(in: modelContext.container)
+        }
         // Weekly goal reminder copy embeds the live session count, which a
         // calendar trigger can't know — refresh the pending request every
         // time the app comes to the foreground (initial launch included).

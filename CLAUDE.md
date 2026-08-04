@@ -62,7 +62,8 @@ cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
   Simulator testing uses DEBUG launch args and the unit/parity tests.
   Launch args: `-demoResults` (unsaved demo Results), `-demoResultsSaved`
   (seeds the store, opens a saved session — label/compare/NEW BEST rows),
-  `-demoCompare`, `-demoReport`, `-openHistory`, `-openDrills [issue]`,
+  `-demoCompare`, `-demoReport`, `-demoReview` (post-recording clip review,
+  otherwise only reachable by recording), `-openHistory`, `-openDrills [issue]`,
   `-openAbout`, `-seedTrainingLog` (deterministic 3-week fixture; wipes
   the store), `-analyzeDocs <file>` (file from the app's Documents dir).
 - `iOS/SwimCoach/Resources/swim_test.mp4` is a synthetic cartoon — it

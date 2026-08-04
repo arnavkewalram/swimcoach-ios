@@ -258,7 +258,9 @@ struct HomeView: View {
                 defer { isImporting = false; photoItem = nil }
                 do {
                     if let video = try await item.loadTransferable(type: ImportedVideo.self) {
-                        router.push(.analyzing(video.url))
+                        // External source: analysis copies it into the store
+                        // on success, under the id minted here.
+                        router.push(.analyzing(PendingClip(external: video.url)))
                     }
                 } catch {
                     AppLog.storage.error("Photo import failed: \(error.localizedDescription)")
@@ -321,6 +323,14 @@ struct HomeView: View {
                 } else if args.contains("-demoCompare") {
                     router.push(.compare(earlier: AnalysisResult.demoEarlier,
                                          later: AnalysisResult.demo))
+                } else if args.contains("-demoReview") {
+                    // The review screen is only reachable by recording, which
+                    // the simulator can't do — open it directly on the bundled
+                    // clip. Passed as an external clip so Retake can't delete
+                    // a bundle resource.
+                    if let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
+                        router.push(.review(PendingClip(external: url)))
+                    }
                 } else if args.contains("-openHistory") {
                     router.push(.history)
                 } else if args.contains("-openAbout") {
@@ -334,7 +344,7 @@ struct HomeView: View {
                               for: .documentDirectory, in: .userDomainMask).first {
                     let url = docsDir.appendingPathComponent(args[i + 1])
                     if FileManager.default.fileExists(atPath: url.path) {
-                        router.push(.analyzing(url))
+                        router.push(.analyzing(PendingClip(external: url)))
                     }
                 }
             }
@@ -433,7 +443,7 @@ struct HomeView: View {
             HStack(spacing: 10) {
                 Button {
                     if let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
-                        router.push(.analyzing(url))
+                        router.push(.analyzing(PendingClip(external: url)))
                     } else {
                         router.push(.results(AnalysisResult.demo))
                     }
@@ -447,7 +457,7 @@ struct HomeView: View {
                 }
                 if let mp4 = docsVideoURL {
                     Button {
-                        router.push(.analyzing(mp4))
+                        router.push(.analyzing(PendingClip(external: mp4)))
                     } label: {
                         devButton(mp4.lastPathComponent, icon: "play.circle")
                     }
@@ -465,7 +475,7 @@ struct HomeView: View {
                     .appendingPathComponent(url.lastPathComponent)
                 try? FileManager.default.copyItem(at: url, to: tmp)
                 if accessed { url.stopAccessingSecurityScopedResource() }
-                router.push(.analyzing(tmp))
+                router.push(.analyzing(PendingClip(external: tmp)))
             }
         }
     }
