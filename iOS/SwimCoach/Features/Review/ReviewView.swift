@@ -156,10 +156,7 @@ struct ReviewView: View {
 
             Button {
                 Haptics.tap()
-                // replaceTop, not push: Back out of Analyzing must land on the
-                // camera, not on a review screen whose clip analysis already
-                // owns.
-                router.replaceTop(with: .analyzing(clip))
+                Self.routeToAnalysis(router, clip: clip)
             } label: {
                 PrimaryButtonLabel(title: "Use this clip")
             }
@@ -172,7 +169,7 @@ struct ReviewView: View {
                 // The take is being rejected — drop the adopted file now
                 // rather than leaving it for the next launch's sweep.
                 SessionVideoStore.discard(clip)
-                router.replaceTop(with: .camera)
+                Self.routeToRetake(router)
             } label: {
                 SecondaryButtonLabel(title: "Retake", icon: "arrow.counterclockwise")
             }
@@ -183,6 +180,38 @@ struct ReviewView: View {
         .padding(.top, 8)
         .padding(.bottom, 12)
         .background(DS.background)
+    }
+
+    // MARK: - Navigation
+    //
+    // Both exits leave the stack instead of pushing onto it, and both are
+    // factored out of the buttons so `AppRouterTests` can pin the resulting
+    // stack shape — `NavigationPath` is type-erased, so a wrong shape is
+    // otherwise invisible until it shows up as a duplicated screen.
+
+    /// Hand the clip to analysis. `replaceTop`, not `push`: Back out of
+    /// Analyzing must land on the camera, not on a review screen whose clip
+    /// analysis already owns.
+    ///
+    /// Safe here — the entry below Review is `.camera` (recording) or nothing
+    /// (the DEBUG `-demoReview` route), never `.analyzing`, so this swap
+    /// cannot duplicate the destination it appends.
+    static func routeToAnalysis(_ router: AppRouter, clip: PendingClip) {
+        router.replaceTop(with: .analyzing(clip))
+    }
+
+    /// Go back to the camera for another take.
+    ///
+    /// popToRoot + push, never `replaceTop`: `CameraView` pushes `.review`
+    /// when recording stops, so the live stack is `[camera, review]` and
+    /// `replaceTop(with: .camera)` would drop `review` and append a *second*
+    /// camera — with every further record→retake cycle stacking another.
+    /// This is also correct from the DEBUG `-demoReview` route, where the
+    /// stack is just `[review]` and Home is already the root. Same reasoning
+    /// as `AnalyzingView`'s `.recordAgain`.
+    static func routeToRetake(_ router: AppRouter) {
+        router.popToRoot()
+        router.push(.camera)
     }
 
     // MARK: - Loading

@@ -116,6 +116,7 @@
 		F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */; };
 		FC8EAEA27AFEDD75D67BAFF4 /* IssueRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F58D5D4BC3109B966FB868 /* IssueRow.swift */; };
 		FC96EE91786A0787DA95D962 /* ColorContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D6DF69F49EAF8628F75E555 /* ColorContrastTests.swift */; };
+		FFC673A15E8E97F5E2F63F0E /* AppRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9239C95E6F2C8209E85BAC27 /* AppRouterTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -199,6 +200,7 @@
 		8F51D64597390CD17D508EC3 /* SessionExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExport.swift; sourceTree = "<group>"; };
 		908FA417393AB2779977A505 /* UnfinishedTakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfinishedTakes.swift; sourceTree = "<group>"; };
 		922BFBCE441ACF46CC6C1D94 /* SessionCSVTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCSVTests.swift; sourceTree = "<group>"; };
+		9239C95E6F2C8209E85BAC27 /* AppRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouterTests.swift; sourceTree = "<group>"; };
 		9739E338795485459CA3A319 /* OverlayVideoExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayVideoExporterTests.swift; sourceTree = "<group>"; };
 		98186D217795042F6E6B7D7A /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		983DF83A1982B648EA414060 /* OverlayVideoExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayVideoExporter.swift; sourceTree = "<group>"; };
@@ -361,6 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				0520482723D4FB751E39E56A /* AnalysisFailureTests.swift */,
+				9239C95E6F2C8209E85BAC27 /* AppRouterTests.swift */,
 				9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */,
 				3D6DF69F49EAF8628F75E555 /* ColorContrastTests.swift */,
 				B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */,
@@ -692,6 +695,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD7936B6108954854D04C008 /* AnalysisFailureTests.swift in Sources */,
+				FFC673A15E8E97F5E2F63F0E /* AppRouterTests.swift in Sources */,
 				09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */,
 				FC96EE91786A0787DA95D962 /* ColorContrastTests.swift in Sources */,
 				76DA86DFB3778BE9E0ED8025 /* DrillCatalogTests.swift in Sources */,
