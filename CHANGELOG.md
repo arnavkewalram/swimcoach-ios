@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.43.2] — 2026-08-04
+
+### Fixed
+- Frames are no longer thrown away when a bystander outranks the
+  swimmer. Pose candidates are now filtered for horizontal orientation
+  *before* one is chosen, instead of picking a single candidate and then
+  rejecting it — which discarded the whole frame while the real swimmer
+  was still available. This mattered most when the swimmer's hips were
+  occluded (common in side-view pool footage), since that made them sort
+  worse than an upright person standing on the deck.
+
 ## [1.43.1] — 2026-08-04
 
 ### Fixed

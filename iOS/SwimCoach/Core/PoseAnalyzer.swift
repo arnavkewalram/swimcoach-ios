@@ -114,23 +114,17 @@ struct PoseAnalyzer {
                 if let results = request.results, !results.isEmpty {
                     // Use shoulder confidence as primary filter — shoulders are reliably detected
                     // even for horizontal swimmers where hip landmarks often fall below threshold.
-                    let candidates = results.filter { obs in
-                        (try? obs.recognizedPoint(.leftShoulder))?.confidence ?? 0 > 0.3 ||
-                        (try? obs.recognizedPoint(.rightShoulder))?.confidence ?? 0 > 0.3
-                    }
-                    if let best = candidates.min(by: { a, b in
-                        swimmerLikelihood(a) < swimmerLikelihood(b)
-                    }) {
-                        // When hip data is available we check body orientation to reject upright
-                        // poolside spectators. When hips aren't detected we assume the shoulder
-                        // detection belongs to the swimmer (the only person in a practice video).
-                        if isHorizontalSwimmerOrUnknown(best) {
-                            let pts = CMSampleBufferGetPresentationTimeStamp(sample)
-                            observations.append(TimedObservation(
-                                observation: best,
-                                seconds: pts.isValid ? CMTimeGetSeconds(pts) : Double(frameIndex) / Double(max(nominalFPS, 1))
-                            ))
-                        }
+                    let candidates = results.filter { maxShoulderConfidence($0) > minShoulderConfidence }
+                    // Orientation is judged per candidate BEFORE ranking: upright poolside
+                    // spectators are discarded first, so a spectator can never outrank — and
+                    // thereby discard — a swimmer whose hips are occluded.
+                    if let index = bestCandidateIndex(candidates.map(poseCandidate)) {
+                        let best = candidates[index]
+                        let pts = CMSampleBufferGetPresentationTimeStamp(sample)
+                        observations.append(TimedObservation(
+                            observation: best,
+                            seconds: pts.isValid ? CMTimeGetSeconds(pts) : Double(frameIndex) / Double(max(nominalFPS, 1))
+                        ))
                     }
                 }
             } catch {
@@ -149,19 +143,70 @@ struct PoseAnalyzer {
         return (observations, Double(nominalFPS), sampledFrameCount)
     }
 
-    // Returns the minimum angular distance from horizontal (0=flat, 90=vertical, nil=unknown).
-    // nil means hip landmarks weren't detectable — caller should treat as "probably horizontal".
-    private static func swimmerLikelihood(_ obs: VNHumanBodyPoseObservation) -> Float {
-        guard let a = bodyAlignAngle(obs) else { return 90 }  // unknown → treat as vertical for sorting
+    // MARK: - Candidate selection (pure, unit-tested)
+
+    /// The only two values that decide which detected person a frame keeps.
+    /// Lifted out of `VNHumanBodyPoseObservation` — which cannot be constructed
+    /// with chosen joint confidences — so the selection rule stays testable.
+    struct PoseCandidate {
+        /// Torso angle from horizontal, or nil when hip landmarks were undetectable.
+        let alignAngle: Float?
+        /// Best of the two shoulder confidences; used only to break ranking ties.
+        let shoulderConfidence: Float
+    }
+
+    private static let minShoulderConfidence: Float = 0.3
+
+    /// Index of the candidate most likely to be the swimmer, or nil when every
+    /// candidate is clearly upright (the frame is then dropped).
+    ///
+    /// Filter, then rank: only horizontal-or-unknown candidates are considered,
+    /// the flattest of those wins, and equal likelihoods (notably the
+    /// unknown-angle sentinel tying with itself) are broken toward the highest
+    /// shoulder confidence so the result never depends on Vision's ordering.
+    static func bestCandidateIndex(_ candidates: [PoseCandidate]) -> Int? {
+        var best: Int?
+        for (index, candidate) in candidates.enumerated()
+        where isHorizontalOrUnknown(candidate.alignAngle) {
+            guard let incumbent = best else { best = index; continue }
+            if ranksAhead(candidate, of: candidates[incumbent]) { best = index }
+        }
+        return best
+    }
+
+    private static func ranksAhead(_ lhs: PoseCandidate, of rhs: PoseCandidate) -> Bool {
+        let lhsLikelihood = swimmerLikelihood(lhs.alignAngle)
+        let rhsLikelihood = swimmerLikelihood(rhs.alignAngle)
+        guard lhsLikelihood == rhsLikelihood else { return lhsLikelihood < rhsLikelihood }
+        return lhs.shoulderConfidence > rhs.shoulderConfidence
+    }
+
+    // Returns the minimum angular distance from horizontal (0=flat, 90=vertical).
+    // An unknown angle sorts as vertical so any measurably horizontal body wins.
+    private static func swimmerLikelihood(_ alignAngle: Float?) -> Float {
+        guard let a = alignAngle else { return 90 }
         return min(a, abs(180 - a))
     }
 
     // Accepts clearly horizontal bodies AND bodies whose orientation can't be determined
     // (no reliable hip landmarks). The second case covers practice footage where the swimmer
     // is the only person visible, so there are no spectators to reject.
-    private static func isHorizontalSwimmerOrUnknown(_ obs: VNHumanBodyPoseObservation) -> Bool {
-        guard let a = bodyAlignAngle(obs) else { return true }  // no hip data → accept
+    private static func isHorizontalOrUnknown(_ alignAngle: Float?) -> Bool {
+        guard let a = alignAngle else { return true }  // no hip data → accept
         return a < 55 || a > 125
+    }
+
+    // MARK: - Vision landmark reads
+
+    private static func poseCandidate(_ obs: VNHumanBodyPoseObservation) -> PoseCandidate {
+        PoseCandidate(alignAngle: bodyAlignAngle(obs),
+                      shoulderConfidence: maxShoulderConfidence(obs))
+    }
+
+    private static func maxShoulderConfidence(_ obs: VNHumanBodyPoseObservation) -> Float {
+        let left  = (try? obs.recognizedPoint(.leftShoulder))?.confidence ?? 0
+        let right = (try? obs.recognizedPoint(.rightShoulder))?.confidence ?? 0
+        return max(left, right)
     }
 
     // Returns the torso angle from horizontal (0° = flat swimmer, 90° = standing person).
