@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.1] — 2026-08-04
+
+### Fixed
+- The app now applies the same swimmer-size check the command-line
+  pipeline has always used, so a distant bystander on the far side of
+  the pool is no longer treated as a candidate swimmer. The two sides
+  were silently disagreeing about which bodies count; a parity test now
+  pins the bounds together so they can't drift again.
+
 ## [1.45.0] — 2026-08-04 — "Salvage"
 
 ### Added
