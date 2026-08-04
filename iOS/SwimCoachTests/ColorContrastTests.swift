@@ -44,7 +44,12 @@ final class ColorContrastTests: XCTestCase {
             .init(token: "DS.ink", color: DS.ink,
                   grounds: [paperOrSlate, stockOrRaised], required: 4.5),
             // Ink hierarchy is held to the house 5:1 bar in BOTH appearances.
+            // All three tiers carry text — tertiary sets unfinished-take
+            // dates, scrubber timecodes, waiting counts and retention lines —
+            // so none of them gets a decorative exemption.
             .init(token: "DS.inkSecondary", color: DS.inkSecondary,
+                  grounds: [paperOrSlate, stockOrRaised], required: 5.0),
+            .init(token: "DS.inkTertiary", color: DS.inkTertiary,
                   grounds: [paperOrSlate, stockOrRaised], required: 5.0),
             .init(token: "DS.accent", color: DS.accent,
                   grounds: [paperOrSlate, stockOrRaised], required: 4.5),
@@ -108,23 +113,51 @@ final class ColorContrastTests: XCTestCase {
         }
     }
 
-    /// KNOWN GAP — not a claim of compliance.
+    /// Clearing AA is not the same as having a hierarchy.
     ///
-    /// `DS.inkTertiary` light composites to ~2.50:1 on paper: it fails AA for
-    /// the captions and unit labels it tints, while the dark step clears 5:1.
-    /// Closing it means re-spacing the whole light ink ladder (tertiary would
-    /// land on top of secondary), which is a design decision, not a token
-    /// tweak. Until then this pins the current value as a floor so the gap
-    /// cannot widen unnoticed, and holds dark to the 5:1 bar it was raised to.
-    func testInkTertiaryHoldsItsFloor() {
-        assertContrast(DS.inkTertiary, on: paperOrSlate, style: .light,
-                       atLeast: 2.45, token: "DS.inkTertiary (KNOWN AA GAP)")
-        assertContrast(DS.inkTertiary, on: stockOrRaised, style: .light,
-                       atLeast: 2.45, token: "DS.inkTertiary (KNOWN AA GAP)")
-        assertContrast(DS.inkTertiary, on: paperOrSlate, style: .dark,
-                       atLeast: 5.0, token: "DS.inkTertiary")
-        assertContrast(DS.inkTertiary, on: stockOrRaised, style: .dark,
-                       atLeast: 5.0, token: "DS.inkTertiary")
+    /// Light tertiary used to measure 2.50:1 on paper. Lifting it to the 5:1
+    /// bar alone would have parked it almost on top of secondary, so the
+    /// whole light ladder re-spaced to @100 / @82 / @64 — which seats three
+    /// tiers inside the ~36 L* band between ink and the 5:1 contour on paper.
+    /// That band is tight enough that a later "soften the captions" tweak
+    /// could flatten the tiers into one grey while every assertion above
+    /// still passes. So the spacing is pinned as well as the contrast.
+    ///
+    /// Metric is each tier's CIE L* distance from the ground it sits on,
+    /// which must shrink monotonically down the ladder in both appearances.
+    /// Light is held to a 12-point minimum step (it runs 18.6 / 16.8). Dark
+    /// is held to order only: its lower two tiers sit 3.2 apart because
+    /// raising tertiary to @58 for contrast on slate pushed it up under
+    /// secondary. That compression is dark's own — the point of this test is
+    /// that light must not be flattened to match it.
+    func testInkLadderStaysPerceptiblyStepped() {
+        let tiers = [("DS.ink", DS.ink),
+                     ("DS.inkSecondary", DS.inkSecondary),
+                     ("DS.inkTertiary", DS.inkTertiary)]
+
+        for (style, minimumStep) in [(UIUserInterfaceStyle.light, 12.0), (.dark, 0.5)] {
+            let appearance = style == .dark ? "DARK" : "LIGHT"
+            let ground = resolve(DS.background, style)
+            let groundLightness = lightness(ground)
+
+            // Tonal separation from the ground, brightest-carrying tier first.
+            let separations = tiers.map { name, color -> (String, Double) in
+                (name, abs(groundLightness - lightness(composite(resolve(color, style), over: ground))))
+            }
+
+            for (above, below) in zip(separations, separations.dropFirst()) {
+                XCTAssertGreaterThanOrEqual(
+                    above.1 - below.1, minimumStep,
+                    """
+                    \(appearance) ink ladder is flat between \(above.0) and \(below.0).
+                      \(above.0) sits \(String(format: "%.1f", above.1)) L* off DS.background
+                      \(below.0) sits \(String(format: "%.1f", below.1)) L* off DS.background
+                      step \(String(format: "%.1f", above.1 - below.1)) — required \(String(format: "%.1f", minimumStep))
+                    Two tiers this close read as one grey: the ladder passes contrast \
+                    but no longer expresses a hierarchy.
+                    """)
+            }
+        }
     }
 
     /// Sanity: if `UIColor(Color)` ever stopped round-tripping the dynamic
@@ -193,6 +226,14 @@ final class ColorContrastTests: XCTestCase {
             channel <= 0.03928 ? channel / 12.92 : pow((channel + 0.055) / 1.055, 2.4)
         }
         return 0.2126 * linear(c.r) + 0.7152 * linear(c.g) + 0.0722 * linear(c.b)
+    }
+
+    /// CIE L* — perceptual lightness, 0 (black) to 100 (white). Contrast
+    /// ratio answers "is this legible"; L* answers "does this read as a
+    /// different tone", which is the question the ladder spacing asks.
+    private func lightness(_ c: RGBA) -> Double {
+        let y = relativeLuminance(c)
+        return y > 0.008856 ? 116 * pow(y, 1.0 / 3.0) - 16 : 903.3 * y
     }
 
     private func contrastRatio(_ a: RGBA, _ b: RGBA) -> Double {

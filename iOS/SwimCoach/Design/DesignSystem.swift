@@ -43,26 +43,58 @@ enum DS {
     static let surface2 = Color(
         light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.05),
         dark:  UIColor(red: 0.863, green: 0.906, blue: 0.941, alpha: 0.07))
-    /// Ink navy / chalk white. Secondary and tertiary steps derive by
-    /// opacity so the tonal hierarchy is identical in both appearances.
+    /// Ink navy / chalk white. The secondary and tertiary steps derive by
+    /// opacity off this base in both appearances; the two ladders carry
+    /// different alphas because their grounds are not mirror images — paper
+    /// is L* 96.6, slate only L* 8.0 — so equal alphas would not produce
+    /// equal contrast. See the ladder note below.
     static let ink = Color(
         light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 1),  // #111923
         dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 1))  // #E2E9F0
-    /// Secondary step. Dark keeps the chalk @62% derivation raised in
-    /// v1.40.2 (5.9–6.2:1 on slate); light was still the original ink @62%,
-    /// which composites to only 4.82:1 on paper — passing AA but sitting
-    /// under the ≥5:1 bar dark was deliberately held to, i.e. the parity gap
-    /// ran the wrong way. Light deepens to @68% → 5.88:1 on paper /
-    /// 6.10:1 on white stock, matching dark step for step.
+
+    // ── The ink ladder ──────────────────────────────────────────────────
+    //
+    // All three tiers carry text — tertiary is not decorative, it sets the
+    // unfinished-take date that IS the row's identifier, the scrubber
+    // timecode, the waiting count and the retention line — so all three
+    // must clear WCAG AA (4.5:1), and the house bar for this hierarchy is
+    // 5:1 on both appearances.
+    //
+    // That bar fixes the ladder's lightest end. On paper the 5:1 contour
+    // sits at ink @63% (L* 44.6); with ink itself at L* 8.4 the whole
+    // legal band is only ~36 L* wide and has to seat three tiers. So the
+    // light steps are set on an even 18-point alpha cadence — @100 / @82 /
+    // @64 — which lands them 18.6 and 16.8 L* apart on paper, a
+    // near-constant ~1.8× contrast factor per step:
+    //
+    //   tier         light   ground / surface     dark    ground / surface
+    //   ink        #111923   16.24 / 17.70     #E2E9F0   14.57 / 13.10
+    //   secondary  #3A4148    9.53 / 10.10     #939AA1    6.24 /  5.88
+    //   tertiary   #64686C    5.15 /  5.31     #8B9199    5.62 /  5.32
+    //
+    // Secondary moved DOWN from @68 (5.88:1) only to make room. Light
+    // tertiary was @40, a measured 2.50:1 on paper — a clear AA failure
+    // under load-bearing text, and the same wrong-way parity gap the
+    // secondary tier had already been caught on, one tier further up.
+    // Lifting it alone would have parked it almost on top of secondary,
+    // and a ladder that passes while reading as one flat grey is its own
+    // failure, so the light ladder re-spaced as a whole.
+    //
+    // Dark is deliberately untouched: it already clears the bar. Its two
+    // lower tiers sit just 3.2 L* apart because the chalk ladder is
+    // compressed from the other end — raising tertiary to @58 for contrast
+    // on the dark ground pushed it up under secondary. Light does not
+    // inherit that compression and should not be flattened to match it.
+    // ────────────────────────────────────────────────────────────────────
+
+    /// Secondary step — ink @82% on paper, chalk @62% on slate.
     static let inkSecondary = Color(
-        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.68),  // ink @ 68%
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.82),  // ink @ 82%
         dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 0.62))  // ink @ 62%
-    /// Tertiary stays an opacity derivation of `ink`, but the dark step is
-    /// raised: chalk @40% composites to ~3.3:1 on the slate ground (fails
-    /// AA at caption sizes); @58% it holds ≥5:1 on both ground and surface.
-    /// Light keeps the original 40% paper derivation.
+    /// Tertiary step — ink @64% on paper, chalk @58% on slate. The quietest
+    /// tier that is still text, so it sits ON the 5:1 bar, not under it.
     static let inkTertiary = Color(
-        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.40),  // ink @ 40%
+        light: UIColor(red: 0.066, green: 0.098, blue: 0.137, alpha: 0.64),  // ink @ 64%
         dark:  UIColor(red: 0.886, green: 0.914, blue: 0.941, alpha: 0.58))  // ink @ 58%
     /// Hairlines: ink rules on paper / pale chlorine-blue lane lines on slate.
     static let border = Color(
