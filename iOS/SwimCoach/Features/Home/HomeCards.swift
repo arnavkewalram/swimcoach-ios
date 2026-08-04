@@ -25,6 +25,89 @@ struct FirstRunCard: View {
     }
 }
 
+// MARK: - Unfinished takes strip
+
+/// The way back to clips the app filmed but never scored.
+///
+/// Deliberately the quietest actionable thing on the page: a lane-ruled
+/// annotation in the data register, no fill and no card, so the one filled
+/// button on Home stays "Analyze a swim". It is placed under that hero rather
+/// than beside it because recovering a take is a correction, not the main
+/// move — but it carries the ochre count stamp the failure screen uses for a
+/// swim that did not count, because a lap the user actually filmed going
+/// missing is the whole reason this exists.
+///
+/// Absent entirely at zero takes: the caller does not render it, so there is
+/// no empty state to clutter the sheet.
+struct UnfinishedTakesStrip: View {
+    let takes: [UnfinishedTakes.Take]
+    let onOpen: () -> Void
+
+    private var retentionDays: Int {
+        Int((UnfinishedTakes.retention / 86_400).rounded())
+    }
+
+    private var headline: String {
+        takes.count == 1
+            ? "1 clip filmed but never analyzed"
+            : "\(takes.count) clips filmed but never analyzed"
+    }
+
+    private var provenance: String {
+        guard let newest = takes.first?.capturedAt else { return "" }
+        return "Newest \(newest.formatted(.dateTime.day().month(.abbreviated))) · kept \(retentionDays) days"
+    }
+
+    var body: some View {
+        Button(action: onOpen) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Text("UNFINISHED TAKES")
+                        .font(.sectionLabel)
+                        .tracking(1.6)
+                        .foregroundStyle(DS.inkSecondary)
+                        .fixedSize()
+                    LaneRule()
+                    Text("\(takes.count)")
+                        .font(.grotesk(12, .bold))
+                        .foregroundStyle(DS.severityModerate)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .overlay(RoundedRectangle(cornerRadius: 4)
+                            .stroke(DS.severityModerate.opacity(0.55), lineWidth: 1))
+                }
+
+                Text(headline)
+                    .font(.grotesk(15, .medium))
+                    .foregroundStyle(DS.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(provenance)
+                    .font(.caption)
+                    .foregroundStyle(DS.inkTertiary)
+
+                HStack(spacing: 5) {
+                    Text("RECOVER THEM")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                        .tracking(1.2)
+                    Image(systemName: "arrow.right")
+                        .font(.caption2.weight(.semibold))
+                        .accessibilityHidden(true)
+                }
+                .foregroundStyle(DS.accent)
+                .padding(.top, 2)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(headline). \(provenance). Opens unfinished takes.")
+        // The label carries a live date, so route tests address the strip by
+        // identifier rather than pinning today's copy.
+        .accessibilityIdentifier("unfinishedTakesStrip")
+    }
+}
+
 // MARK: - Record strip (session count · best · average)
 
 struct RecordStrip: View {

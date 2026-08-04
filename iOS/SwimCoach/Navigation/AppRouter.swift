@@ -32,5 +32,8 @@ enum AppDestination: Hashable {
     case compare(earlier: AnalysisResult, later: AnalysisResult)
     case report(AnalysisResult)
     case drills(highlightIssue: String?)
+    /// Clips adopted into the store that no session ever claimed, still inside
+    /// their retention window.
+    case unfinishedTakes
     case about
 }

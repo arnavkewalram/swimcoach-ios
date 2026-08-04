@@ -24,9 +24,6 @@ struct AnalyzingView: View {
     /// a bare `Task { await runAnalysis() }` would outlive the screen and could
     /// still insert a session and navigate from an already-popped view.
     @State private var attempt = 0
-    /// Set once a session owns this clip. Until then every way off this
-    /// screen is a discard, and the adopted file has to be cleaned up.
-    @State private var claimed = false
 
     // Step tracking: 0=pose, 1=ai, 2=metrics, 3=report, 4=tips
     private var currentStep: Int {
@@ -69,8 +66,9 @@ struct AnalyzingView: View {
                 Spacer()
                 Button {
                     // Popping cancels the .task; PoseAnalyzer unwinds via
-                    // its cancellation flag.
-                    discardClipIfUnclaimed()
+                    // its cancellation flag. The adopted clip stays put:
+                    // cancelling an analysis is not a verdict on the footage,
+                    // and the take is waiting on Home afterwards.
                     router.popToRoot()
                 } label: {
                     Text("CANCEL")
@@ -339,9 +337,16 @@ struct AnalyzingView: View {
     }
 
     private func perform(_ action: AnalysisFailureAction) {
-        // "Try again" re-runs against the same file, so only the two exits
-        // give the clip up.
-        if action != .tryAgain { discardClipIfUnclaimed() }
+        // No exit from here deletes the clip. A failed analysis is precisely
+        // the case the retention window exists for: the user filmed a real
+        // lap, the app could not read it, and destroying the footage on the
+        // way out means they filmed it for nothing. The take stays in the
+        // store, Home surfaces it as unfinished, and the only immediate
+        // deletions are the two places the user actually says no — Retake on
+        // the review screen, and Delete on the recovery screen.
+        //
+        // Clips the store does not own (photo imports) are unaffected either
+        // way: the original is still in the library the user picked it from.
         switch action {
         case .recordAgain:
             // popToRoot + push, never replaceTop: arriving from the camera
@@ -361,15 +366,6 @@ struct AnalyzingView: View {
             failure = nil
             attempt += 1
         }
-    }
-
-    /// Leaving without a saved session means the clip is rubbish to the app:
-    /// drop the adopted file now instead of waiting for the next launch's
-    /// orphan sweep. A no-op for clips the store doesn't own (photo imports,
-    /// the bundled demo).
-    private func discardClipIfUnclaimed() {
-        guard !claimed else { return }
-        SessionVideoStore.discard(clip)
     }
 
     // MARK: - Pipeline
@@ -488,9 +484,10 @@ struct AnalyzingView: View {
                 modelContext.insert(session)
                 do {
                     try modelContext.save()
-                    // The session now owns the stored clip — leaving this
-                    // screen must no longer delete it.
-                    claimed = true
+                    // The session now owns the stored clip: its id matches the
+                    // file's name, so the sweeper reads it as claimed and the
+                    // take drops off the unfinished list. A failed save leaves
+                    // it unclaimed — and therefore recoverable — instead.
                     // A new session changes this week's count — refresh the
                     // goal reminder copy (and skip the week if now met).
                     GoalReminder.reschedule(context: modelContext)
@@ -614,7 +611,6 @@ struct AnalyzingView: View {
                 modelContext.insert(session)
             do {
                 try modelContext.save()
-                claimed = true
                 GoalReminder.reschedule(context: modelContext)
             } catch {
                 AppLog.analysis.error("Demo session save failed: \(error.localizedDescription)")

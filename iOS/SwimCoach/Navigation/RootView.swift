@@ -25,6 +25,8 @@ struct RootView: View {
                         CompareView(earlier: earlier, later: later)
                     case .drills(let highlightIssue):
                         DrillsView(highlightIssue: highlightIssue)
+                    case .unfinishedTakes:
+                        UnfinishedTakesView()
                     case .about:
                         AboutView()
                     case .report(let result):
@@ -46,6 +48,10 @@ struct RootView: View {
         // read one file name. It now runs once per launch, after first paint,
         // on the cooperative pool with its own ModelContext, and derives the
         // referenced set from the cheap stored `id` column instead.
+        //
+        // It also no longer deletes every unclaimed clip on sight: an
+        // unfinished take is held for `UnfinishedTakes.retention` and offered
+        // back on Home, and only an expired one is swept here.
         .task(priority: .background) {
             await SessionVideoStore.pruneOrphans(in: modelContext.container)
         }

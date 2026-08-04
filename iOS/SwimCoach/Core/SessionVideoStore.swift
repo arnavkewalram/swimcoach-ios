@@ -37,9 +37,13 @@ struct PendingClip: Hashable {
 // reclaims, so the store takes ownership as early as it can: a capture is
 // *adopted* (moved out of temp) the moment recording stops, before the user
 // has even decided to keep it. From then on the file is named after the id
-// its analysis will produce, and `pruneOrphans` is the single garbage
-// collector — a clip the user retakes or abandons is either discarded
-// explicitly or swept at the next launch.
+// its analysis will produce.
+//
+// A clip that never reaches a saved session is NOT garbage on sight. The
+// sweeper defers to `UnfinishedTakes`: an unclaimed clip is held for a
+// retention window and offered back on Home, and only a genuinely expired one
+// is deleted. The single explicit "no" is `discard` — Retake — which still
+// removes the file immediately.
 //
 // Bundled demo videos are resolved from the app bundle instead of being
 // copied, so they never appear in `directory` and the sweeper never sees them.
@@ -76,9 +80,11 @@ enum SessionVideoStore {
         }
     }
 
-    /// Drop a clip the user rejected (Retake) or walked away from without a
-    /// saved session. Only ever removes files inside the session store, so
-    /// calling it on a bundled or photo-library clip is a no-op.
+    /// Drop a clip the user explicitly rejected — Retake, or Delete on the
+    /// unfinished-takes screen. This is the only immediate deletion: every
+    /// other way of leaving a clip behind hands it to the retention window
+    /// instead. Only ever removes files inside the session store, so calling
+    /// it on a bundled or photo-library clip is a no-op.
     static func discard(_ clip: PendingClip) {
         guard isStored(clip.url) else { return }
         try? FileManager.default.removeItem(at: clip.url)
@@ -137,6 +143,10 @@ enum SessionVideoStore {
 
     /// Which of `fileNames` no longer belong to a saved session.
     ///
+    /// Membership only — being unclaimed is no longer a licence to delete.
+    /// `UnfinishedTakes.classify` takes this set and splits it by age; a
+    /// claimed file never reaches that split at all.
+    ///
     /// Membership is decided on the file's basename against session ids —
     /// never by decoding `SwimSession.resultData`, whose externally-stored
     /// keypoint blob costs a disk read plus a full JSON pass per session and
@@ -146,22 +156,23 @@ enum SessionVideoStore {
         fileNames.filter { !referencedIDs.contains(($0 as NSString).deletingPathExtension) }
     }
 
-    /// Delete stored videos no session references any more — keeps the
-    /// session store from growing unbounded when a clip is abandoned mid-flow
-    /// or a deletion misses its file.
+    /// Delete stored videos that are neither referenced by a session nor still
+    /// inside their retention window — keeps the store from growing unbounded
+    /// without destroying a lap the user filmed an hour ago.
     ///
-    /// Runs once per launch (see `RootView`), which is the only window where
-    /// no clip can be mid-flight: a clip adopted during this launch is still
-    /// unreferenced until its session saves, and sweeping then would delete
-    /// the video out from under a running analysis.
-    static func pruneOrphans(referencedIDs: Set<String>) {
-        guard let files = try? FileManager.default.contentsOfDirectory(
-            at: directory, includingPropertiesForKeys: nil) else { return }
-        let orphans = orphanedFileNames(among: files.map(\.lastPathComponent),
-                                        referencedIDs: referencedIDs)
-        for name in orphans {
+    /// Runs once per launch (see `RootView`). That schedule used to be
+    /// load-bearing for correctness: a clip adopted during this launch is
+    /// unreferenced until its session saves, so a mid-session sweep would have
+    /// deleted the video out from under a running analysis. Retention now
+    /// makes that impossible — a fresh file is never expired — but the sweep
+    /// stays off the hot path anyway.
+    static func pruneOrphans(referencedIDs: Set<String>, now: Date = Date()) {
+        let expired = UnfinishedTakes.classify(files: storedFiles(),
+                                               referencedIDs: referencedIDs,
+                                               now: now).expired
+        for name in expired {
             try? FileManager.default.removeItem(at: directory.appendingPathComponent(name))
-            AppLog.storage.info("Pruned orphan session video: \(name)")
+            AppLog.storage.info("Pruned expired session video: \(name)")
         }
     }
 
@@ -174,7 +185,56 @@ enum SessionVideoStore {
         pruneOrphans(referencedIDs: Set(sessions.map(\.id.uuidString)))
     }
 
+    // MARK: - Unfinished takes
+
+    /// Clips the store adopted that no session ever claimed, still inside
+    /// their retention window — newest first. What Home counts and the
+    /// recovery screen lists.
+    static func unfinishedTakes(referencedIDs: Set<String>,
+                                now: Date = Date()) -> [UnfinishedTakes.Take] {
+        UnfinishedTakes.classify(files: storedFiles(),
+                                 referencedIDs: referencedIDs,
+                                 now: now).takes
+    }
+
+    /// Hand a recovered take back to analysis.
+    ///
+    /// Reusing `take.id` rather than minting a fresh one is what keeps the
+    /// `<result-id>.<ext>` invariant intact across the second pass: the file
+    /// is already in the store under this name, so `persist` recognises it and
+    /// skips the copy, and the session the analysis saves carries the same id
+    /// the file is named after. A fresh id would copy the clip to a second
+    /// name and leave the original looking like an orphan.
+    static func pendingClip(for take: UnfinishedTakes.Take) -> PendingClip {
+        PendingClip(id: take.id, url: directory.appendingPathComponent(take.fileName))
+    }
+
+    /// The user said no to this take — delete it now rather than waiting out
+    /// the window.
+    static func delete(_ take: UnfinishedTakes.Take) {
+        delete(fileName: take.fileName)
+        AppLog.storage.info("Deleted unfinished take: \(take.fileName)")
+    }
+
     // MARK: - Helpers
+
+    /// The store's contents as the retention decision wants them: name, age
+    /// and size, read in one directory pass.
+    private static func storedFiles() -> [UnfinishedTakes.StoredFile] {
+        let keys: [URLResourceKey] = [.contentModificationDateKey, .fileSizeKey]
+        guard let urls = try? FileManager.default.contentsOfDirectory(
+            at: directory, includingPropertiesForKeys: keys) else { return [] }
+        return urls.map { url in
+            let values = try? url.resourceValues(forKeys: Set(keys))
+            return UnfinishedTakes.StoredFile(
+                name: url.lastPathComponent,
+                // No timestamp means the filesystem cannot vouch for the
+                // clip's age. `.distantPast` expires it rather than pinning an
+                // unaccountable file in the recovery list forever.
+                modifiedAt: values?.contentModificationDate ?? .distantPast,
+                byteCount: Int64(values?.fileSize ?? 0))
+        }
+    }
 
     /// Is this URL a file the store itself owns?
     private static func isStored(_ url: URL) -> Bool {
