@@ -3,6 +3,22 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.0] — 2026-08-04 — "Salvage"
+
+### Added
+- **Unfinished takes are recoverable.** If an analysis failed or you
+  backed out, the clip you filmed used to be deleted at the next
+  launch — you'd filmed a lap for nothing. Takes are now kept for seven
+  days, surfaced on Home when any are waiting, and can be analyzed
+  again or deleted from a recovery screen. The surface disappears
+  entirely when there's nothing waiting.
+
+### Changed
+- Leaving the analysis screen no longer throws the clip away. Only an
+  explicit choice deletes a take: Retake during review, or Delete on
+  the recovery screen. A video belonging to a saved session is never
+  eligible for cleanup, at any age.
+
 ## [1.44.3] — 2026-08-04
 
 ### Fixed
