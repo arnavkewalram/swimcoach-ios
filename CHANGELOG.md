@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.6] — 2026-08-04
+
+### Fixed
+- The video-export progress bar now reaches 100%. It stopped just short
+  of the end on every export, because the last frame of a clip sits one
+  frame before the clip's stated length.
+
+### Changed
+- Exporting a video no longer redraws the whole Results screen for every
+  frame it encodes. Progress is reported at most once per percent, so a
+  minute-long clip does about a hundred updates instead of eighteen
+  hundred.
+
 ## [1.45.5] — 2026-08-04
 
 ### Changed
