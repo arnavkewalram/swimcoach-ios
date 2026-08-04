@@ -56,9 +56,12 @@ struct ResultsView: View {
     @State private var sessionToEdit: SwimSession? = nil
     @State private var celebratedBest = false
 
-    // VideoExportState is declared in ResultsView+Video.swift.
-    @State var exportState: VideoExportState = .idle
-    @State var exportTask: Task<Void, Never>? = nil
+    // Export progress is deliberately NOT `@State` on this view: it ticks up to
+    // 101 times per export, and state here invalidates the whole body. It lives
+    // in an `@Observable` box that only `OverlayExportControl` reads — see
+    // OverlayExportControl.swift. Nothing in this body reads `exportModel.state`,
+    // so this view registers no dependency on it.
+    @State var exportModel = OverlayExportModel()
     let videoSectionID = "session-video"
 
     private var canSeekIssues: Bool {
@@ -326,7 +329,7 @@ struct ResultsView: View {
         }
         .onDisappear {
             player?.pause()
-            exportTask?.cancel()
+            exportModel.cancel()
         }
         .sheet(item: $sessionToEdit) { session in
             EditSessionSheet(session: session)

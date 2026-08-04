@@ -32,42 +32,6 @@ enum OverlayVideoExporter {
         }
     }
 
-    /// Whole-percent bucket for a progress fraction, clamped to 0...100.
-    /// Pure — unit-tested.
-    static func percentStep(_ fraction: Double) -> Int {
-        Int(min(max(fraction, 0), 1) * 100)
-    }
-
-    /// Gate for `export`'s progress callback: report only when the whole
-    /// percent advances. The encode pump runs once per decoded source frame,
-    /// and the caller hops to the main actor on every report — reporting each
-    /// raw frame spawned a task per frame (~1800 on a 60s clip) and re-ran the
-    /// whole Results body each time, the same trap `PoseAnalyzer` guards with
-    /// its sample-rate check. Caps any clip at 101 reports (0...100).
-    /// Pure — unit-tested.
-    static func shouldReport(fraction: Double, lastReported: Int) -> Bool {
-        percentStep(fraction) > lastReported
-    }
-
-    /// Stateful side of the whole-percent throttle. The pump block is
-    /// `@Sendable`, so the running percent cannot be a captured `var`; it runs
-    /// on a single queue but the lock keeps that assumption from being load-bearing.
-    final class ProgressThrottle: @unchecked Sendable {
-        private let lock = NSLock()
-        private var lastReported = -1
-
-        /// True — and advances the gate — when `fraction` crosses into a whole
-        /// percent not yet reported. Starts below zero so 0.0 always reports.
-        func admit(_ fraction: Double) -> Bool {
-            lock.lock()
-            defer { lock.unlock() }
-            guard OverlayVideoExporter.shouldReport(fraction: fraction,
-                                                    lastReported: lastReported) else { return false }
-            lastReported = OverlayVideoExporter.percentStep(fraction)
-            return true
-        }
-    }
-
     static func export(
         videoURL: URL,
         frames: [KeypointFrame],
@@ -117,6 +81,9 @@ enum OverlayVideoExporter {
 
         let accent = UIColor(red: 0.043, green: 0.322, blue: 0.863, alpha: 0.9)
         let cancelled = CancelFlag()
+        // The pump runs once per decoded source frame and the caller hops to
+        // the main actor on every report — see `ProgressThrottle`. Fresh per
+        // export, so a retry starts from 0 again.
         let throttle = ProgressThrottle()
         let queue = DispatchQueue(label: "com.swimcoach.overlay-export")
 
