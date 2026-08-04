@@ -90,6 +90,10 @@ struct HistoryView: View {
                             }
 
                             if swimmerScopedSessions.count >= 2 {
+                                StrokeMechanicsChart(sessions: chronologicalSessions)
+                            }
+
+                            if swimmerScopedSessions.count >= 2 {
                                 IssueFrequencyChart(sessions: swimmerScopedSessions)
                             }
 
@@ -527,6 +531,123 @@ private struct ScoreTrendChart: View {
         }
         .padding(16)
         .glassCard()
+    }
+}
+
+// MARK: - Stroke mechanics chart
+
+/// Stroke rate + kick rate across the swimmer-scoped session sequence.
+/// Series data comes from stored SwimSession scalars only (stroke rate =
+/// stored strokeCount / stored durationSeconds) — never from decoding
+/// resultData per row. Sessions missing a metric are gaps, and the panel
+/// hides itself until some series has two plottable sessions.
+private struct StrokeMechanicsChart: View {
+    /// Chronological, oldest first — same sequence as ScoreTrendChart.
+    let sessions: [SwimSession]
+
+    private var trend: MetricTrend {
+        MetricTrend.build(entries: sessions.map { session in
+            MetricTrend.Entry(date: session.analyzedAt,
+                              strokeCount: session.strokeCount,
+                              durationSeconds: session.durationSeconds,
+                              kickRatePerMin: session.kickRatePerMin)
+        })
+    }
+
+    var body: some View {
+        let trend = trend
+        if trend.isPlottable {
+            VStack(alignment: .leading, spacing: 12) {
+                SectionHeader(title: "Stroke mechanics")
+
+                HStack(spacing: 14) {
+                    legendSwatch(color: DS.accent, label: "STROKE RATE / MIN")
+                    legendSwatch(color: DS.severityMinor, label: "KICK RATE / MIN")
+                    Spacer()
+                }
+                .accessibilityHidden(true)
+
+                if let caption = trend.caption {
+                    Text(caption)
+                        .font(.caption)
+                        .foregroundStyle(DS.inkTertiary)
+                }
+
+                chart(for: trend)
+            }
+            .padding(16)
+            .glassCard()
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilitySummary(for: trend))
+        }
+    }
+
+    private func chart(for trend: MetricTrend) -> some View {
+        Chart {
+            seriesMarks(trend.strokeRate, name: "Stroke rate", color: DS.accent)
+            seriesMarks(trend.kickRate, name: "Kick rate", color: DS.severityMinor)
+        }
+        // Same pinned integer domain as the score trend — .automatic
+        // invents negative "sessions" when the plot gets narrow.
+        .chartXScale(domain: 0.5...(Double(trend.sessionCount) + 0.5))
+        .chartXAxis {
+            AxisMarks(values: Array(stride(
+                from: 1, through: trend.sessionCount,
+                by: max(1, trend.sessionCount / 5)))) { _ in
+                AxisGridLine().foregroundStyle(DS.border.opacity(0.6))
+                AxisTick().foregroundStyle(Color.clear)
+                AxisValueLabel()
+                    .foregroundStyle(DS.inkTertiary)
+                    .font(.caption2)
+            }
+        }
+        .chartYAxis {
+            AxisMarks { _ in
+                AxisGridLine().foregroundStyle(DS.border.opacity(0.6))
+                AxisValueLabel()
+                    .foregroundStyle(DS.inkTertiary)
+                    .font(.caption2)
+            }
+        }
+        .frame(height: 150)
+    }
+
+    /// One gapped series: separate `series:` keys per contiguity run so
+    /// the line breaks where sessions are missing the metric.
+    @ChartContentBuilder
+    private func seriesMarks(_ series: MetricTrend.Series,
+                             name: String, color: Color) -> some ChartContent {
+        ForEach(Array(series.points.enumerated()), id: \.offset) { _, point in
+            LineMark(
+                x: .value("Session", point.index),
+                y: .value(name, point.value),
+                series: .value("Series", "\(name) \(point.run)")
+            )
+            .foregroundStyle(color)
+
+            PointMark(
+                x: .value("Session", point.index),
+                y: .value(name, point.value)
+            )
+            .foregroundStyle(color)
+            .symbolSize(30)
+        }
+    }
+
+    private func legendSwatch(color: Color, label: String) -> some View {
+        HStack(spacing: 5) {
+            Circle().fill(color).frame(width: 6, height: 6)
+            Text(label)
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                .tracking(1.0)
+                .foregroundStyle(DS.inkTertiary)
+        }
+    }
+
+    private func accessibilitySummary(for trend: MetricTrend) -> String {
+        var label = "Stroke mechanics trend across \(trend.sessionCount) sessions."
+        if let caption = trend.caption { label += " \(caption)." }
+        return label
     }
 }
 
