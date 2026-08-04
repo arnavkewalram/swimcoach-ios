@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.5] — 2026-08-04
+
+### Changed
+- Exporting a CSV no longer reads every session's full stored analysis —
+  keypoints and all — just to learn how long each swim was. It uses the
+  duration recorded on the session, falling back to the old path only
+  for sessions saved before that was stored, so nothing exports blank
+  that used to export a number.
+
 ## [1.45.4] — 2026-08-04
 
 ### Fixed

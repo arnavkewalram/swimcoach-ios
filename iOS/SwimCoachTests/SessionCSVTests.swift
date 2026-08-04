@@ -153,4 +153,40 @@ final class SessionCSVTests: XCTestCase {
         // Assert — kick rate then a trailing empty duration field
         XCTAssertTrue(row.hasSuffix(",48,52,"), "expected empty duration in: \(row)")
     }
+
+    func testStoredDurationExportsWithoutDecodingTheResultBlob() {
+        // Arrange — stored scalars intact, result blob deliberately corrupt.
+        // Export cost per session must stay O(1) scalar reads: no
+        // external-storage load, no JSON pass over the keypoint frames.
+        let session = makeSession(name: "Threshold", swimmer: "Maya",
+                                  analyzedAt: Date(timeIntervalSince1970: 1_700_000_000),
+                                  durationSeconds: 62.5)
+        session.resultData = Data("{ not json".utf8)
+        XCTAssertNil(session.decoded(),
+                     "blob must be undecodable, otherwise this test proves nothing")
+
+        // Act
+        let row = String(SessionCSV.csv(from: [session]).split(separator: "\n")[1])
+
+        // Assert — byte-identical to the intact-blob row, duration included
+        XCTAssertEqual(row,
+            "2023-11-14T22:13:20Z,Threshold,Maya,72,C," +
+            "body_sag; left_elbow_collapse; low_kick_rate,48,52,62.5")
+    }
+
+    func testLegacyRowRecoversDurationFromBlobWhenColumnIsUnset() {
+        // Arrange — the pre-v1.43.0 shape: the denormalized column migrated
+        // in at its 0 sentinel while the blob still carries the real value.
+        let session = makeSession(name: "Legacy", durationSeconds: 62.5)
+        session.durationSeconds = 0
+        XCTAssertEqual(session.decoded()?.durationSeconds, 62.5,
+                       "blob must still hold the duration, otherwise this test proves nothing")
+
+        // Act
+        let row = String(SessionCSV.csv(from: [session]).split(separator: "\n")[1])
+
+        // Assert — an export never drops a value we still hold
+        XCTAssertTrue(row.hasSuffix(",48,52,62.5"),
+                      "expected duration recovered from the blob in: \(row)")
+    }
 }
