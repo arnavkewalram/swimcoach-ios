@@ -7,12 +7,9 @@ struct SwimCoachApp: App {
 
     init() {
         container = try! ModelContainer(for: SwimSession.self, DrillPracticeEvent.self)
-        // Storage hygiene: drop session videos whose session no longer exists.
-        let context = ModelContext(container)
-        if let sessions = try? context.fetch(FetchDescriptor<SwimSession>()) {
-            let referenced = Set(sessions.compactMap { $0.decoded()?.videoFileName })
-            SessionVideoStore.pruneOrphans(referencedFileNames: referenced)
-        }
+        // Nothing else belongs here: `init()` runs before the first Scene is
+        // built, so any work it does is time the user spends on a blank
+        // screen. Storage hygiene moved to a background task on RootView.
     }
 
     var body: some Scene {

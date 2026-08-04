@@ -3,6 +3,26 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.44.0] — 2026-08-04 — "Take"
+
+### Added
+- **Review your take before analyzing it.** Recording used to jump
+  straight into analysis with no way to see what you'd captured. There
+  is now a review step: the clip plays on a lane-rule scrubber with a
+  checklist of what the model needs, and you either use that take or
+  retake it.
+
+### Changed
+- Recordings are claimed into the app's own storage the moment you stop
+  filming, instead of only after an analysis succeeds — so a take is no
+  longer left in a temporary folder the system can reclaim while you're
+  reviewing or retrying it.
+- Launching the app no longer decodes every saved session on the main
+  thread. The startup cleanup used to read every stored analysis —
+  keypoints and all — just to learn one filename per session; it now
+  derives that from the session's own identifier and runs in the
+  background after launch.
+
 ## [1.43.5] — 2026-08-04
 
 ### Fixed

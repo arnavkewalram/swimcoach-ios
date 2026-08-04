@@ -23,7 +23,10 @@ final class AppRouter {
 
 enum AppDestination: Hashable {
     case camera
-    case analyzing(URL)
+    /// Keep-or-retake preview of a just-recorded clip, between camera and
+    /// analysis. Carries the adopted clip so the id survives the decision.
+    case review(PendingClip)
+    case analyzing(PendingClip)
     case results(AnalysisResult)
     case history
     case compare(earlier: AnalysisResult, later: AnalysisResult)

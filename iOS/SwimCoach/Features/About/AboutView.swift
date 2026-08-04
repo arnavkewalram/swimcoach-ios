@@ -210,12 +210,12 @@ struct AboutView: View {
 
     private func eraseAll() {
         for session in sessions {
-            SessionVideoStore.delete(fileName: session.decoded()?.videoFileName)
             modelContext.delete(session)
         }
-        // Belt and braces: a session whose blob fails to decode above would
-        // leak its video until the next-launch prune — sweep now instead.
-        SessionVideoStore.pruneOrphans(referencedFileNames: [])
+        // Sweeping against an empty reference set clears every stored video
+        // in one pass — no per-session blob decode, and nothing left behind
+        // by a session whose blob would have failed to decode.
+        SessionVideoStore.pruneOrphans(referencedIDs: [])
         for event in practiceEvents { modelContext.delete(event) }
         exportURL = nil
         csvExportURL = nil

@@ -2,7 +2,13 @@ import SwiftUI
 import SwiftData
 
 struct AnalyzingView: View {
-    let videoURL: URL
+    /// The clip plus the id its result must carry. `SessionVideoStore` names
+    /// stored files after that id and the orphan sweeper matches file names
+    /// against `SwimSession.id`, so minting a fresh id here would leave a
+    /// camera clip — already adopted into the store at review time — looking
+    /// like an orphan the moment it was saved.
+    let clip: PendingClip
+    private var videoURL: URL { clip.url }
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
     @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
@@ -17,6 +23,9 @@ struct AnalyzingView: View {
     /// a bare `Task { await runAnalysis() }` would outlive the screen and could
     /// still insert a session and navigate from an already-popped view.
     @State private var attempt = 0
+    /// Set once a session owns this clip. Until then every way off this
+    /// screen is a discard, and the adopted file has to be cleaned up.
+    @State private var claimed = false
 
     // Step tracking: 0=pose, 1=ai, 2=metrics, 3=report, 4=tips
     private var currentStep: Int {
@@ -60,6 +69,7 @@ struct AnalyzingView: View {
                 Button {
                     // Popping cancels the .task; PoseAnalyzer unwinds via
                     // its cancellation flag.
+                    discardClipIfUnclaimed()
                     router.popToRoot()
                 } label: {
                     Text("CANCEL")
@@ -190,6 +200,9 @@ struct AnalyzingView: View {
     }
 
     private func perform(_ action: AnalysisFailureAction) {
+        // "Try again" re-runs against the same file, so only the two exits
+        // give the clip up.
+        if action != .tryAgain { discardClipIfUnclaimed() }
         switch action {
         case .recordAgain:
             // popToRoot + push, never replaceTop: arriving from the camera
@@ -209,6 +222,15 @@ struct AnalyzingView: View {
             failed = false
             attempt += 1
         }
+    }
+
+    /// Leaving without a saved session means the clip is rubbish to the app:
+    /// drop the adopted file now instead of waiting for the next launch's
+    /// orphan sweep. A no-op for clips the store doesn't own (photo imports,
+    /// the bundled demo).
+    private func discardClipIfUnclaimed() {
+        guard !claimed else { return }
+        SessionVideoStore.discard(clip)
     }
 
     // MARK: - Pipeline
@@ -274,7 +296,11 @@ struct AnalyzingView: View {
             let score = BiomechanicsEngine.score(from: issues)
             let grade = BiomechanicsEngine.grade(from: score)
             let sortedIssues = issues.sorted { $0.severity > $1.severity }
-            let resultID = UUID()
+            // The id was fixed when the clip was created, not here — see
+            // `clip`. A camera clip already sits in the store under this
+            // name, so `persist` recognises it and skips the copy; photo and
+            // bundle sources still get copied, under the same id.
+            let resultID = clip.id
             let videoName = SessionVideoStore.persist(videoURL, for: resultID)
             let keypointFrames = KeypointFrame.frames(from: timedObservations)
 
@@ -324,6 +350,9 @@ struct AnalyzingView: View {
                 modelContext.insert(session)
                 do {
                     try modelContext.save()
+                    // The session now owns the stored clip — leaving this
+                    // screen must no longer delete it.
+                    claimed = true
                     // A new session changes this week's count — refresh the
                     // goal reminder copy (and skip the week if now met).
                     GoalReminder.reschedule(context: modelContext)
@@ -408,7 +437,7 @@ struct AnalyzingView: View {
         let sorted = issues.sorted { $0.severity > $1.severity }
 
         var result = AnalysisResult(
-            id: UUID(),
+            id: clip.id,
             score: score,
             grade: grade,
             strokeCount: 16,
@@ -447,6 +476,7 @@ struct AnalyzingView: View {
                 modelContext.insert(session)
             do {
                 try modelContext.save()
+                claimed = true
                 GoalReminder.reschedule(context: modelContext)
             } catch {
                 AppLog.analysis.error("Demo session save failed: \(error.localizedDescription)")
