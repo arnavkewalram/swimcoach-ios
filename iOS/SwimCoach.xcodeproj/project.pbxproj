@@ -101,7 +101,9 @@
 		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
 		F0F97C28AA69CA36A4D27AE9 /* GoalReminderStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76625762B5B154274C37AB05 /* GoalReminderStoreTests.swift */; };
+		F2D3E90213E8B69E7AFED91C /* MetricTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C9940C7B28F0914F98911F /* MetricTrend.swift */; };
 		F67D8DEE93408306AFDA49A6 /* GoalReminderPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A99D38012E98930A2AC466 /* GoalReminderPlanner.swift */; };
+		F7456E3C5A1A5D754FEEAC04 /* MetricTrendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4169F43C5AAA45F113184C03 /* MetricTrendTests.swift */; };
 		F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */; };
 		FC8EAEA27AFEDD75D67BAFF4 /* IssueRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F58D5D4BC3109B966FB868 /* IssueRow.swift */; };
 /* End PBXBuildFile section */
@@ -147,9 +149,11 @@
 		3A9CE282550C08C6A515A0E9 /* SpaceGrotesk-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Medium.ttf"; sourceTree = "<group>"; };
 		3C44F6B61F32A5775579A74C /* ResultsView+Sections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ResultsView+Sections.swift"; sourceTree = "<group>"; };
 		40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunnerTests.swift; sourceTree = "<group>"; };
+		4169F43C5AAA45F113184C03 /* MetricTrendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricTrendTests.swift; sourceTree = "<group>"; };
 		440FD098C083BE63E4C44154 /* FocusFault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusFault.swift; sourceTree = "<group>"; };
 		4452B7724E049C1FA68E9025 /* SwimTCNRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunner.swift; sourceTree = "<group>"; };
 		50E3FF3C10BF299B700EBF8A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		51C9940C7B28F0914F98911F /* MetricTrend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricTrend.swift; sourceTree = "<group>"; };
 		52C6D30A519EEDA7A9575174 /* SwimSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimSession.swift; sourceTree = "<group>"; };
 		5321399BE9F3645B9111A95C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		55B42BDC1F60A78BB7C517EB /* LevelMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelMathTests.swift; sourceTree = "<group>"; };
@@ -339,6 +343,7 @@
 				AD161114DD1D2892C9515515 /* IssueWindowTests.swift */,
 				DEA8FF9E13F542537501D049 /* KeypointFrameTests.swift */,
 				55B42BDC1F60A78BB7C517EB /* LevelMathTests.swift */,
+				4169F43C5AAA45F113184C03 /* MetricTrendTests.swift */,
 				9739E338795485459CA3A319 /* OverlayVideoExporterTests.swift */,
 				38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */,
 				F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */,
@@ -397,6 +402,7 @@
 				D7994303E7AA3F1A682B4A9E /* IssueTrend.swift */,
 				B9D9E931537A6F52120C9319 /* IssueWindow.swift */,
 				EB41DA1B0CADFE8AF96B3B07 /* KeypointFrame.swift */,
+				51C9940C7B28F0914F98911F /* MetricTrend.swift */,
 				6CF341904BDF6F1F4F63756E /* SessionComparison.swift */,
 				6ACBA14CC321BCA9704CD8F8 /* SessionCSV.swift */,
 				8F51D64597390CD17D508EC3 /* SessionExport.swift */,
@@ -651,6 +657,7 @@
 				A25AF3BF4A7B97D169314265 /* IssueWindowTests.swift in Sources */,
 				D07EC9D31F44F64DDB0BB8AE /* KeypointFrameTests.swift in Sources */,
 				52704D0C93B4B8D1A0D50CAA /* LevelMathTests.swift in Sources */,
+				F7456E3C5A1A5D754FEEAC04 /* MetricTrendTests.swift in Sources */,
 				CBCE9E2F7EDC6AEA156B6890 /* OverlayVideoExporterTests.swift in Sources */,
 				EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */,
 				D4FC40C9EB68313869E54CDF /* RealFootageParityTests.swift in Sources */,
@@ -712,6 +719,7 @@
 				B03EF14770A341DB035E8D42 /* IssueWindow.swift in Sources */,
 				587186C09D23A6475D1168D5 /* KeypointFrame.swift in Sources */,
 				1F6B827E4FD8ECD28321D4FA /* LevelMonitor.swift in Sources */,
+				F2D3E90213E8B69E7AFED91C /* MetricTrend.swift in Sources */,
 				2EA493A3727277DC9B2B956D /* OnboardingPages.swift in Sources */,
 				39A0758B17361B3A08098E43 /* OnboardingView.swift in Sources */,
 				14B05EEA799271B4798D90B7 /* OverlayVideoExporter.swift in Sources */,
@@ -796,7 +804,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -810,7 +818,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.42.1;
+				MARKETING_VERSION = 1.43.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -962,7 +970,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -982,7 +990,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.42.1;
+				MARKETING_VERSION = 1.43.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
