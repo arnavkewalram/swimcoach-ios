@@ -3,6 +3,15 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.7] — 2026-08-04
+
+### Changed
+- Progress updates no longer redraw whole screens. Exporting a video used
+  to rebuild the entire Results page on every tick; it now updates only
+  the export button. Analysing a swim reports progress at most once per
+  percent instead of on every sampled frame — roughly 600 fewer main-thread
+  hops on a minute-long clip.
+
 ## [1.45.6] — 2026-08-04
 
 ### Fixed
