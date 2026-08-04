@@ -98,6 +98,7 @@
 		D793450460E9BCA2A098D248 /* TrainingLogPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581473BB2D471E034BCE8FC8 /* TrainingLogPanel.swift */; };
 		DB05C6679E2D249A3FD1BCBF /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5F95B5EFDE86670DAE8840 /* Haptics.swift */; };
 		DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF341904BDF6F1F4F63756E /* SessionComparison.swift */; };
+		DD7936B6108954854D04C008 /* AnalysisFailureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0520482723D4FB751E39E56A /* AnalysisFailureTests.swift */; };
 		E81536F228A32D51B4F9E3C1 /* IssueTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7994303E7AA3F1A682B4A9E /* IssueTrend.swift */; };
 		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
@@ -127,6 +128,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0520482723D4FB751E39E56A /* AnalysisFailureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisFailureTests.swift; sourceTree = "<group>"; };
 		058CDD9AB205E722F6E0442B /* LevelMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelMonitor.swift; sourceTree = "<group>"; };
 		0A49C168A6001543BF9CD78C /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		0C9AF84062ACF5A998A19DC6 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
@@ -333,6 +335,7 @@
 		5E925C04E56CF821FEBF46A5 /* SwimCoachTests */ = {
 			isa = PBXGroup;
 			children = (
+				0520482723D4FB751E39E56A /* AnalysisFailureTests.swift */,
 				9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */,
 				B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */,
 				A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */,
@@ -648,6 +651,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD7936B6108954854D04C008 /* AnalysisFailureTests.swift in Sources */,
 				09F316FEB844DADD7BB56FA0 /* BiomechanicsEngineTests.swift in Sources */,
 				76DA86DFB3778BE9E0ED8025 /* DrillCatalogTests.swift in Sources */,
 				AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */,
