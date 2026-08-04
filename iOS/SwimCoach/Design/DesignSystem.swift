@@ -292,26 +292,39 @@ struct ScaleButtonStyle: ButtonStyle {
     }
 }
 
-/// Primary action: solid lane-blue, grotesk label. No gradient, no glow.
+/// Primary action — the ONE primary treatment in the app.
+///
+/// The meet-sheet hero: solid lane-blue, label set left on the grid, and a
+/// single affordance parked in the far trailing slot. No gradient, no glow.
+/// Home, Review and Onboarding each hand-rolled this inline before it lived
+/// here; every primary CTA now renders through this type, so the tier moves
+/// in one place.
+///
+/// `icon` defaults to `arrow.right` because a primary action almost always
+/// moves the user forward. Pass a different symbol where the action names
+/// itself rather than pointing onward (`AnalyzingView`'s recovery buttons),
+/// or `nil` for a bare label.
 struct PrimaryButtonLabel: View {
     let title: String
-    var icon: String? = nil
+    var icon: String? = "arrow.right"
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack {
+            Text(title)
+                .font(.grotesk(18, .medium))
+            Spacer()
             if let icon {
                 Image(systemName: icon)
-                    .font(.callout.weight(.semibold))
+                    .font(.body.weight(.semibold))
                     .accessibilityHidden(true)
             }
-            Text(title)
-                .font(.grotesk(17, .medium))
         }
         .foregroundStyle(DS.onAccent)
+        .padding(.horizontal, 22)
         .frame(maxWidth: .infinity)
-        .frame(height: 56)
+        .frame(height: 60)
         .background(DS.accent)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 

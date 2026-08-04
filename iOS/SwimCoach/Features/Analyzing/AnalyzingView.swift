@@ -310,6 +310,11 @@ struct AnalyzingView: View {
                 } label: {
                     switch failure.kind.tier(for: action) {
                     case .primary:
+                        // The only primary in the app that overrides the
+                        // default `arrow.right`: recovery actions name
+                        // themselves (re-film, retry) rather than pointing at
+                        // a next screen, so the action's own glyph earns the
+                        // trailing slot.
                         PrimaryButtonLabel(title: action.title, icon: action.icon)
                     case .secondary:
                         SecondaryButtonLabel(title: action.title, icon: action.icon)
