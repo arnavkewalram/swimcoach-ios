@@ -2,8 +2,14 @@ import Foundation
 
 /// Spreadsheet-friendly view of the training log — one header row plus one
 /// row per session, newest first (matching the History list). Pure string
-/// building — unit-tested. Heavyweight payloads (keypoints, windows) stay
-/// out; only durationSeconds needs the stored result blob.
+/// building — unit-tested. Columns read denormalized `SwimSession` scalars,
+/// so a modern row costs no result-blob decode; only rows saved before
+/// `durationSeconds` was denormalized (v1.43.0) fall back to the blob, for
+/// that one field. That cost is bounded to legacy rows and drops to zero as
+/// the library turns over — the same shape as History's common-issues
+/// fallback. Unlike a chart, where a missing metric is a meaningful gap,
+/// an export is the user's data leaving the app: it never drops a value
+/// we demonstrably still hold.
 enum SessionCSV {
 
     static let header =
@@ -18,8 +24,7 @@ enum SessionCSV {
     }
 
     private static func row(for session: SwimSession) -> String {
-        // Legacy sessions (pre-stroke-rate) have no duration — empty field.
-        let duration = session.decoded()?.durationSeconds
+        let duration = duration(for: session)
         return [
             session.analyzedAt.formatted(.iso8601),
             escapeUserText(session.name),
@@ -31,6 +36,18 @@ enum SessionCSV {
             number(session.kickRatePerMin),
             duration.map { number($0) } ?? "",
         ].joined(separator: ",")
+    }
+
+    /// Clip length for the duration column. Reads the denormalized scalar;
+    /// 0 is its "unknown" sentinel (`SwimSession.swift`), which pre-v1.43.0
+    /// rows migrated in with — those alone decode the blob to recover the
+    /// duration they still hold. `nil` (empty field) only when neither
+    /// source has a real positive length, which also collapses NaN and
+    /// negative junk, matching `AnalysisResult.durationText`.
+    private static func duration(for session: SwimSession) -> Double? {
+        if session.durationSeconds > 0 { return session.durationSeconds }
+        guard let legacy = session.decoded()?.durationSeconds, legacy > 0 else { return nil }
+        return legacy
     }
 
     /// RFC 4180 field escaping: quote a field containing a comma, quote,
