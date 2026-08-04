@@ -11,6 +11,12 @@ struct AnalyzingView: View {
     @State private var statusText = "Extracting pose keypoints…"
     @State private var failed = false
     @State private var failureMessage = ""
+    @State private var failureKind: AnalysisFailureKind = .footageRejected
+    /// Bumped by "Try again". Drives `.task(id:)` so the retry runs inside the
+    /// view's own structured task and is cancelled when the view goes away —
+    /// a bare `Task { await runAnalysis() }` would outlive the screen and could
+    /// still insert a session and navigate from an already-popped view.
+    @State private var attempt = 0
 
     // Step tracking: 0=pose, 1=ai, 2=metrics, 3=report, 4=tips
     private var currentStep: Int {
@@ -34,7 +40,7 @@ struct AnalyzingView: View {
             }
         }
         .navigationBarHidden(true)
-        .task {
+        .task(id: attempt) {
             // Bundle-identity check, not filename match — a user file that
             // happens to be named swim_test.mp4 must get real analysis.
             if videoURL == Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
@@ -146,7 +152,7 @@ struct AnalyzingView: View {
                 .foregroundStyle(DS.severityModerate)
                 .padding(.bottom, 8)
 
-            Text("Couldn't read\nthis footage")
+            Text(failureKind.headline)
                 .font(.grotesk(30, .bold))
                 .foregroundStyle(DS.ink)
                 .padding(.bottom, 14)
@@ -158,17 +164,51 @@ struct AnalyzingView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.bottom, 32)
 
-            Button {
-                failed = false
-                Task { await runAnalysis() }
-            } label: {
-                PrimaryButtonLabel(title: "Try again")
+            // The failure copy tells the user to re-film, so the screen has to
+            // be able to reach the camera. `.navigationBarHidden(true)` removes
+            // the system Back button and CANCEL only exists while analyzing —
+            // without this stack the screen is a dead end.
+            VStack(spacing: 12) {
+                ForEach(Array(failureKind.actions.enumerated()), id: \.element) { index, action in
+                    Button {
+                        perform(action)
+                    } label: {
+                        if index == 0 {
+                            PrimaryButtonLabel(title: action.title, icon: action.icon)
+                        } else {
+                            SecondaryButtonLabel(title: action.title, icon: action.icon)
+                        }
+                    }
+                    .buttonStyle(ScaleButtonStyle())
+                    .accessibilityLabel(action.accessibilityLabel)
+                }
             }
-            .buttonStyle(ScaleButtonStyle())
 
             Spacer()
         }
         .padding(.horizontal, 28)
+    }
+
+    private func perform(_ action: AnalysisFailureAction) {
+        switch action {
+        case .recordAgain:
+            // popToRoot + push, never replaceTop: arriving from the camera
+            // leaves [camera, analyzing], so replaceTop would swap Analyzing
+            // for a second Camera and stack two of them. NavigationPath is
+            // type-erased and cannot be inspected, so this is the only move
+            // that is correct from BOTH entry points (Camera and Home's
+            // photo picker).
+            router.popToRoot()
+            router.push(.camera)
+        case .backToHome:
+            router.popToRoot()
+        case .tryAgain:
+            // Restart the view's own `.task` rather than spawning a detached
+            // one, so leaving mid-retry cancels the work (see `attempt`).
+            progress = 0
+            failed = false
+            attempt += 1
+        }
     }
 
     // MARK: - Pipeline
@@ -185,21 +225,12 @@ struct AnalyzingView: View {
 
             let observations = timedObservations.map(\.observation)
             guard !observations.isEmpty else {
-                failWith(
-                    "No horizontal swimmer detected. " +
-                    "Film from the pool deck at water level with the swimmer's full body in frame. " +
-                    "The swimmer must be actively stroking above the water line — avoid underwater angles."
-                )
+                failWith(.noSwimmerDetected)
                 return
             }
 
             guard observations.count >= 10 else {
-                failWith(
-                    "Too few swimmer frames detected (\(observations.count)). " +
-                    "Film from pool deck height at water level, side-on to the swimmer, " +
-                    "with the full body visible above the waterline. " +
-                    "Stay within 3–6 m of the swimmer."
-                )
+                failWith(.tooFewFrames(observations.count))
                 return
             }
 
@@ -210,10 +241,7 @@ struct AnalyzingView: View {
             guard let tensors = FeatureExtractor.extractWindows(
                 from: timedObservations, effectiveFPS: effectiveFPS
             ) else {
-                failWith(
-                    "Could not prepare the detected poses for analysis. " +
-                    "Try re-recording with the swimmer's full body clearly visible."
-                )
+                failWith(.unusablePoses)
                 return
             }
 
@@ -316,7 +344,10 @@ struct AnalyzingView: View {
         } catch is CancellationError {
             return  // user left the screen — no failure UI, no side effects
         } catch {
-            failWith(error.localizedDescription)
+            // Thrown mid-run rather than rejected upfront: this one may well
+            // succeed on a second pass, so it is the only branch that keeps
+            // "Try again".
+            failWith(.unexpected(error))
         }
     }
 
@@ -435,11 +466,112 @@ struct AnalyzingView: View {
         statusText = s
     }
 
-    private func failWith(_ message: String) {
-        Task { @MainActor in
-            failureMessage = message
-            failed = true
+    /// Called straight from the analysis task instead of being fired into a
+    /// detached `Task`, so a screen the user already left cannot flash a
+    /// failure state after the fact.
+    @MainActor private func failWith(_ failure: AnalysisFailure) {
+        failureMessage = failure.message
+        failureKind = failure.kind
+        failed = true
+    }
+}
+
+// MARK: - Failure kinds & recovery actions
+
+/// A way out of the analysis-failure screen.
+enum AnalysisFailureAction: Hashable {
+    case tryAgain
+    case recordAgain
+    case backToHome
+
+    var title: String {
+        switch self {
+        case .tryAgain: return "Try again"
+        case .recordAgain: return "Record again"
+        case .backToHome: return "Back to Home"
         }
+    }
+
+    var icon: String? {
+        switch self {
+        case .tryAgain: return "arrow.clockwise"
+        case .recordAgain: return "video"
+        case .backToHome: return "house"
+        }
+    }
+
+    var accessibilityLabel: String {
+        switch self {
+        case .tryAgain: return "Try analyzing this video again"
+        case .recordAgain: return "Record a new video"
+        case .backToHome: return "Go back to Home"
+        }
+    }
+}
+
+/// Why an analysis stopped — decides which recovery actions are honest to offer.
+enum AnalysisFailureKind: Hashable {
+    /// The clip itself was rejected: no swimmer, too few frames, unusable
+    /// poses. `videoURL` is immutable, so re-running is deterministic — the
+    /// same file fails the same way every time.
+    case footageRejected
+    /// Something threw mid-run. A second pass may succeed.
+    case transient
+
+    var headline: String {
+        switch self {
+        case .footageRejected: return "Couldn't read\nthis footage"
+        case .transient: return "Analysis\nstopped short"
+        }
+    }
+
+    /// First entry renders as the primary button.
+    ///
+    /// A footage rejection deliberately offers NO "Try again": the copy tells
+    /// the user to re-film, and retrying the same clip can only reproduce the
+    /// same failure.
+    var actions: [AnalysisFailureAction] {
+        switch self {
+        case .footageRejected: return [.recordAgain, .backToHome]
+        case .transient: return [.tryAgain, .recordAgain, .backToHome]
+        }
+    }
+}
+
+/// A failure message paired with the kind that decides its recovery actions.
+/// Constructed only through the named cases below so no failure site can ship
+/// a message without classifying it.
+struct AnalysisFailure: Equatable {
+    let kind: AnalysisFailureKind
+    let message: String
+
+    var actions: [AnalysisFailureAction] { kind.actions }
+
+    static let noSwimmerDetected = AnalysisFailure(
+        kind: .footageRejected,
+        message: "No horizontal swimmer detected. " +
+            "Film from the pool deck at water level with the swimmer's full body in frame. " +
+            "The swimmer must be actively stroking above the water line — avoid underwater angles."
+    )
+
+    static func tooFewFrames(_ count: Int) -> AnalysisFailure {
+        AnalysisFailure(
+            kind: .footageRejected,
+            message: "Too few swimmer frames detected (\(count)). " +
+                "Film from pool deck height at water level, side-on to the swimmer, " +
+                "with the full body visible above the waterline. " +
+                "Stay within 3–6 m of the swimmer."
+        )
+    }
+
+    static let unusablePoses = AnalysisFailure(
+        kind: .footageRejected,
+        message: "Could not prepare the detected poses for analysis. " +
+            "Try re-recording with the swimmer's full body clearly visible."
+    )
+
+    static func unexpected(_ error: Error) -> AnalysisFailure {
+        AnalysisFailure(kind: .transient, message: error.localizedDescription)
     }
 }
 
