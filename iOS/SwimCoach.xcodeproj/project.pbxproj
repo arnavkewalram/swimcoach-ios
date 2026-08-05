@@ -58,6 +58,7 @@
 		5F70E097B8060C71DD9CD8B5 /* ClipPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EA4B9A16BE25B98D80F14C /* ClipPlayer.swift */; };
 		5F86F0DA01048214F3837B6A /* HomeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */; };
 		65258AE9AAB861535BCE1B82 /* swim_test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 5A2F9DB942BC722144C7D4CC /* swim_test.mp4 */; };
+		658313FA882C0F6FD0ACC073 /* TrainingLogWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16E3AD8AA153449FF4ECD1F /* TrainingLogWriter.swift */; };
 		672EC66C3ADDBBAC9CE60AD8 /* ImportedVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869DD420BA54EE808DAA8590 /* ImportedVideo.swift */; };
 		678E061D81D839A6BCEA547E /* SessionCSV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ACBA14CC321BCA9704CD8F8 /* SessionCSV.swift */; };
 		6A30222979ABC9E8A0AA011F /* IssueTimelineModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3C80A3129C457B744C1848 /* IssueTimelineModelTests.swift */; };
@@ -78,6 +79,7 @@
 		8D44D7ABE00975B59F50A23F /* IssueTrendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F22E293B4BD707148F41A19 /* IssueTrendTests.swift */; };
 		8E63C7E172052CBF8F545FA7 /* ResultsView+Sections.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C44F6B61F32A5775579A74C /* ResultsView+Sections.swift */; };
 		8F38F1552A60BB542F5D70C8 /* GoalReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E2F36A6EB134177F18709 /* GoalReminderStore.swift */; };
+		8FDBC07A67FA36F1CFE2A942 /* SessionSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF776670DF260AC441209589 /* SessionSnapshotTests.swift */; };
 		9218F72AEEE007F639B4C60D /* IssueFrequencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCE08AFBBC4F870CCD6A97 /* IssueFrequencyTests.swift */; };
 		944F046C848F3370BA9966DA /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5321399BE9F3645B9111A95C /* RootView.swift */; };
 		96333E9BF629DC3E167FC3C7 /* Sparkline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A59A49638F1335B4DE0B04D /* Sparkline.swift */; };
@@ -110,6 +112,7 @@
 		DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF341904BDF6F1F4F63756E /* SessionComparison.swift */; };
 		DD7936B6108954854D04C008 /* AnalysisFailureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0520482723D4FB751E39E56A /* AnalysisFailureTests.swift */; };
 		DE39FC1DD32C7CB3062F93EE /* OverlayExportControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9963785A23CAAB343778FC6 /* OverlayExportControl.swift */; };
+		E131130A0A0C883482859522 /* SessionSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F87BFCC6B9153D26622D871 /* SessionSnapshot.swift */; };
 		E81536F228A32D51B4F9E3C1 /* IssueTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7994303E7AA3F1A682B4A9E /* IssueTrend.swift */; };
 		EAE106B664BE5C00D6C46588 /* RealFootageFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BEC6AD1A4C6B1F05ABD75F /* RealFootageFixtures.swift */; };
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
@@ -216,9 +219,11 @@
 		99AB87293A2C7FE01697E04D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9A3C80A3129C457B744C1848 /* IssueTimelineModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueTimelineModelTests.swift; sourceTree = "<group>"; };
 		9A59A49638F1335B4DE0B04D /* Sparkline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sparkline.swift; sourceTree = "<group>"; };
+		9F87BFCC6B9153D26622D871 /* SessionSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSnapshot.swift; sourceTree = "<group>"; };
 		9FBB61D8C741E63DC489648A /* BiomechanicsEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomechanicsEngineTests.swift; sourceTree = "<group>"; };
 		A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillPracticeEvent.swift; sourceTree = "<group>"; };
 		A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCards.swift; sourceTree = "<group>"; };
+		A16E3AD8AA153449FF4ECD1F /* TrainingLogWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogWriter.swift; sourceTree = "<group>"; };
 		A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogTests.swift; sourceTree = "<group>"; };
 		A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportCardTests.swift; sourceTree = "<group>"; };
 		A3F58D5D4BC3109B966FB868 /* IssueRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueRow.swift; sourceTree = "<group>"; };
@@ -236,6 +241,7 @@
 		BC7AC16B5947422B2E7E9FC0 /* PoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseAnalyzer.swift; sourceTree = "<group>"; };
 		BD8DA362379A458CAEB869E6 /* OnboardingPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPages.swift; sourceTree = "<group>"; };
 		BF160B57121C03F223A88C6F /* GoalReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalReminderScheduler.swift; sourceTree = "<group>"; };
+		BF776670DF260AC441209589 /* SessionSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSnapshotTests.swift; sourceTree = "<group>"; };
 		C5253D1FE2BD2528D422DC30 /* SmokeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeUITests.swift; sourceTree = "<group>"; };
 		C7D6284EFA98D98613D01E19 /* ShareCardModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardModel.swift; sourceTree = "<group>"; };
 		C8A6A673F69034FEFA430F32 /* WeeklyGoalStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyGoalStoreTests.swift; sourceTree = "<group>"; };
@@ -400,6 +406,7 @@
 				922BFBCE441ACF46CC6C1D94 /* SessionCSVTests.swift */,
 				6868AD80A9E69F4E03AFBC3D /* SessionExportTests.swift */,
 				7B732C3B50E0D87F181B63E4 /* SessionFilterTests.swift */,
+				BF776670DF260AC441209589 /* SessionSnapshotTests.swift */,
 				187BD78D38E89E0FC81A9482 /* SessionVideoStoreTests.swift */,
 				21275839471B91C916E5080F /* ShareCardModelTests.swift */,
 				B06C0AA352DE7728EADB818C /* SwimSessionTests.swift */,
@@ -457,10 +464,12 @@
 				6ACBA14CC321BCA9704CD8F8 /* SessionCSV.swift */,
 				8F51D64597390CD17D508EC3 /* SessionExport.swift */,
 				CA67BB92F29577B965B6D2E4 /* SessionFilter.swift */,
+				9F87BFCC6B9153D26622D871 /* SessionSnapshot.swift */,
 				C7D6284EFA98D98613D01E19 /* ShareCardModel.swift */,
 				52C6D30A519EEDA7A9575174 /* SwimSession.swift */,
 				228631A15A23306938ED17ED /* TechniqueIssue.swift */,
 				2D334215248B1046E54DC5BF /* TrainingLog.swift */,
+				A16E3AD8AA153449FF4ECD1F /* TrainingLogWriter.swift */,
 				908FA417393AB2779977A505 /* UnfinishedTakes.swift */,
 				B8E0029634940BDE3DF69116 /* WeeklyGoalStore.swift */,
 				667FF8EEE7913666DD9CA4FD /* WhatsNew.swift */,
@@ -734,6 +743,7 @@
 				48AB4C100E6842402B6589CF /* SessionComparisonTests.swift in Sources */,
 				3765FE3260482B50917F927A /* SessionExportTests.swift in Sources */,
 				859AD7AE16F22FD47E69B08B /* SessionFilterTests.swift in Sources */,
+				8FDBC07A67FA36F1CFE2A942 /* SessionSnapshotTests.swift in Sources */,
 				1DD9037AF63D50AD9A6527AD /* SessionVideoStoreTests.swift in Sources */,
 				25FAD71BD81D4AF998B3E86B /* ShareCardModelTests.swift in Sources */,
 				13D90FB0157D9328BCD236C2 /* SwimSessionTests.swift in Sources */,
@@ -807,6 +817,7 @@
 				DB8F20BAB9A95732C7862ABE /* SessionComparison.swift in Sources */,
 				CBA6A54F8729E3AA33031F4E /* SessionExport.swift in Sources */,
 				1F9FB56A83609471F8D87697 /* SessionFilter.swift in Sources */,
+				E131130A0A0C883482859522 /* SessionSnapshot.swift in Sources */,
 				2C037FB55C31ECC528152394 /* SessionVideoStore.swift in Sources */,
 				8BC635EA9FFA31A72BF86F3E /* ShareCardModel.swift in Sources */,
 				6A91B2528BE6FB2C53715EC0 /* ShareCardView.swift in Sources */,
@@ -818,6 +829,7 @@
 				891CF910DEBA723A864C953E /* TechniqueIssue.swift in Sources */,
 				4769E21B8981C4D77BF4D01B /* TrainingLog.swift in Sources */,
 				D793450460E9BCA2A098D248 /* TrainingLogPanel.swift in Sources */,
+				658313FA882C0F6FD0ACC073 /* TrainingLogWriter.swift in Sources */,
 				42F6FE1C6849D21E7DE0EB18 /* UnfinishedTakes.swift in Sources */,
 				2F39DA60A66B0248B1C6E907 /* UnfinishedTakesView.swift in Sources */,
 				B21693A6CF7528E594204809 /* VideoTransform.swift in Sources */,
@@ -880,7 +892,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 82;
+				CURRENT_PROJECT_VERSION = 83;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -894,7 +906,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.45.7;
+				MARKETING_VERSION = 1.45.8;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1046,7 +1058,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 82;
+				CURRENT_PROJECT_VERSION = 83;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 4VH58A4KM6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1066,7 +1078,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.45.7;
+				MARKETING_VERSION = 1.45.8;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
