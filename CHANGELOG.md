@@ -3,6 +3,17 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.9] — 2026-08-04
+
+### Fixed
+- Light mode's quieter text is readable again. The faintest tier —
+  carrying real information like a take's date, timecodes and chart
+  labels — sat at 2.5:1 against the paper, well under the accessibility
+  minimum, while the same tier in dark mode was more than twice as
+  legible. The whole light hierarchy was re-spaced on an even cadence,
+  so all three tiers now clear the bar and stay clearly distinct from
+  one another. Dark mode is unchanged.
+
 ## [1.45.8] — 2026-08-04
 
 ### Changed
