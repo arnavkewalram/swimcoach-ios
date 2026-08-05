@@ -131,4 +131,64 @@ final class SmokeUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["EARLIER"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["LATER"].exists)
     }
+
+    /// Review's clip band is a `ZStack` of `Color.black` and a
+    /// `UIViewRepresentable`, neither of which is an accessibility element —
+    /// so its `.accessibilityLabel` reads like a label with nothing to
+    /// attach to once the player replaces the loading spinner. This test was
+    /// written to catch that and does not: it passes against the pre-fix code
+    /// as well, because SwiftUI synthesises an element for a labelled view
+    /// that has no accessible children. Kept as the regression pin the
+    /// reasoning deserved — the band must stay reachable however it is built.
+    func testReviewClipBandIsReachableByVoiceOver() {
+        let app = launch(["-demoReview"])
+        XCTAssertTrue(app.staticTexts["Check the\nframing"].waitForExistence(timeout: 10)
+                      || app.descendants(matching: .any)
+                          .matching(NSPredicate(format: "label CONTAINS 'Check the framing'"))
+                          .firstMatch.waitForExistence(timeout: 10))
+
+        let band = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label == %@", "Preview of the clip you just recorded")
+        ).firstMatch
+        XCTAssertTrue(band.waitForExistence(timeout: 10),
+                      "The clip band must publish an accessibility element of its own")
+
+        // The scrubber's own element is the precedent the band now follows.
+        XCTAssertTrue(app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Clip position"))
+            .firstMatch.exists)
+    }
+
+    /// All three framing rules have to be on screen at rest at the largest
+    /// type size the app allows — the checklist is the reason this screen
+    /// exists, and it used to slide under the action bar with item 02 sliced
+    /// mid-glyph. Fails against the pre-fix build ("not on screen at rest:
+    /// One lap at a normal pace").
+    func testReviewChecklistSurvivesAccessibilityType() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-hasSeenOnboarding", "YES", "-suppressWhatsNew", "-demoReview"]
+        app.launchEnvironment["UIPreferredContentSizeCategoryName"] =
+            "UICTContentSizeCategoryAccessibilityM"
+        app.launch()
+
+        let rules = ["Side-on, camera at water level",
+                     "Full body above the waterline",
+                     "One lap at a normal pace"]
+        for rule in rules {
+            XCTAssertTrue(app.staticTexts[rule].waitForExistence(timeout: 10),
+                          "missing from the accessibility tree: \(rule)")
+        }
+
+        // 844pt is the shortest body the above-the-fold layout is budgeted
+        // for. An SE or a mini cannot hold three wrapped rules plus the
+        // masthead at this type size whatever the band does, and correctly
+        // scrolls instead — there "at rest" is not a meaningful assertion.
+        let height = app.windows.firstMatch.frame.height
+        try XCTSkipUnless(height >= 844, "screen is \(height)pt; scrolling layout")
+
+        for rule in rules {
+            XCTAssertTrue(app.staticTexts[rule].isHittable,
+                          "not on screen at rest: \(rule)")
+        }
+    }
 }
