@@ -3,6 +3,22 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.45.10] — 2026-08-04
+
+### Fixed
+- The clip review screen now works at large text sizes. Its filming
+  checklist used to be cut off — the third item pushed off-screen and
+  the second one's number sliced in half — because the video area was
+  sized to fit at exactly one text size. The video now yields space as
+  text grows, and the checklist itself scales with it instead of
+  staying fixed while the numbers beside it grew.
+- The play button and scrub track on that screen meet the minimum touch
+  target size.
+
+### Changed
+- The checklist gained a lane column, so it reads as a heat sheet rather
+  than a generic numbered list.
+
 ## [1.45.9] — 2026-08-04
 
 ### Fixed

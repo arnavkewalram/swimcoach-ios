@@ -54,6 +54,20 @@ struct ClipScrubber: View {
     @State private var isScrubbing = false
     @State private var timeObserver: Any?
 
+    /// Both marks here are deliberately small — a play mark and a lane rule,
+    /// not a knob and a slider — and play/pause is the only playback control
+    /// on the screen. The drawn marks stay small; the *targets* around them
+    /// are the HIG minimum.
+    static let hitTarget: CGFloat = 44
+
+    /// The drawn ring grows with type, then stops at the target it sits
+    /// inside — past that it would only crowd the track.
+    @ScaledMetric(relativeTo: .footnote) private var ringDiameter: CGFloat = 34
+    private var ring: CGFloat { min(ringDiameter, Self.hitTarget) }
+    /// Glyph derived from the ring so the mark keeps its proportions at every
+    /// size (13pt inside 34pt at the default).
+    private var glyph: CGFloat { (ring * 13.0 / 34.0).rounded() }
+
     private var fraction: Double {
         guard duration > 0 else { return 0 }
         return min(1, max(0, currentTime / duration))
@@ -65,18 +79,20 @@ struct ClipScrubber: View {
                 togglePlayback()
             } label: {
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: glyph, weight: .semibold))
                     .foregroundStyle(DS.accent)
-                    .frame(width: 34, height: 34)
+                    .frame(width: ring, height: ring)
                     .overlay(Circle().stroke(DS.accent.opacity(0.45), lineWidth: 1))
-                    .contentShape(Circle())
+                    .frame(width: Self.hitTarget, height: Self.hitTarget)
+                    .contentShape(Rectangle())
             }
             .accessibilityLabel(isPlaying ? "Pause clip" : "Play clip")
 
             track
 
             Text("\(ClipTime.code(currentTime)) / \(ClipTime.code(duration))")
-                .font(.custom(GroteskWeight.medium.postScriptName, size: 11))
+                .font(.custom(GroteskWeight.medium.postScriptName,
+                              size: 11, relativeTo: .caption2))
                 .monospacedDigit()
                 .tracking(0.6)
                 .foregroundStyle(DS.inkTertiary)
@@ -126,7 +142,9 @@ struct ClipScrubber: View {
                     }
             )
         }
-        .frame(height: 34)
+        // The drawn track is a 3pt rule with a 16pt playhead, centred inside
+        // a full-height drag target.
+        .frame(height: Self.hitTarget)
         .accessibilityElement()
         .accessibilityLabel("Clip position")
         .accessibilityValue("\(ClipTime.code(currentTime)) of \(ClipTime.code(duration))")
