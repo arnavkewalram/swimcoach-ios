@@ -9,6 +9,13 @@ struct DrillsView: View {
     var highlightIssue: String? = nil
     @Environment(\.modelContext) private var modelContext
     @Query private var practiceEvents: [DrillPracticeEvent]
+    @Query private var sessions: [SwimSession]
+    @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
+    /// Swims reduced to (date, faults, swimmer) for the "is it working?"
+    /// read-out. Hoisted into state and refreshed on appearance because
+    /// resolving legacy rows can decode result blobs — nothing behind this
+    /// screen writes a session, so once per visit is enough.
+    @State private var swims: [DrillEffect.Swim] = []
 
     private var highlightedIDs: Set<String> {
         guard let issue = highlightIssue else { return [] }
@@ -24,6 +31,36 @@ struct DrillsView: View {
             events: practiceEvents)
     }
 
+    /// Stored swims in `DrillEffect`'s vocabulary. Sessions saved before
+    /// the `issueNames` column existed migrate in empty, so those rows
+    /// alone fall back to the result blob; ones that will not decode are
+    /// DROPPED rather than read as fault-free — a swim counted clean
+    /// because its blob is unreadable would invent an improvement.
+    private func refreshSwims() {
+        swims = sessions.compactMap { session in
+            guard DrillEffect.isLegacyRow(issueNames: session.issueNames,
+                                          issueCount: session.issueCount) else {
+                return DrillEffect.Swim(date: session.analyzedAt,
+                                        issueNames: session.issueNames,
+                                        swimmer: session.swimmer)
+            }
+            guard let names = session.decoded()?.issues.map(\.name) else { return nil }
+            return DrillEffect.Swim(date: session.analyzedAt,
+                                    issueNames: names,
+                                    swimmer: session.swimmer)
+        }
+    }
+
+    private func effect(for drill: Drill) -> DrillEffect.Result {
+        DrillEffect.result(
+            fixes: drill.fixes,
+            practiceDates: practiceEvents.compactMap {
+                $0.drillID == drill.id ? $0.date : nil
+            },
+            swims: swims,
+            activeSwimmer: activeSwimmer)
+    }
+
     var body: some View {
         ZStack {
             DS.background.ignoresSafeArea()
@@ -31,7 +68,7 @@ struct DrillsView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("Every fault the analysis can detect maps to a drill here. Fold two or three into each warm-up.")
+                        Text("Every fault the analysis can detect maps to a drill here. Fold two or three into each warm-up. Once a drill is marked done, its card tracks how often the faults it targets showed up before and since.")
                             .font(.footnote)
                             .lineSpacing(3)
                             .foregroundStyle(DS.inkSecondary)
@@ -49,6 +86,7 @@ struct DrillsView: View {
                                     isStartHere: drill.id == startHereID,
                                     practice: DrillPractice.summary(
                                         for: drill.id, events: practiceEvents),
+                                    effect: effect(for: drill),
                                     onMarkDone: {
                                         modelContext.insert(
                                             DrillPracticeEvent(drillID: drill.id))
@@ -62,6 +100,7 @@ struct DrillsView: View {
                     .padding(.bottom, 32)
                 }
                 .onAppear {
+                    refreshSwims()
                     if let target = startHereID
                         ?? DrillCatalog.all.first(where: { highlightedIDs.contains($0.id) })?.id {
                         withAnimation { proxy.scrollTo(target, anchor: .top) }
@@ -95,6 +134,7 @@ private struct DrillCard: View {
     let isHighlighted: Bool
     var isStartHere: Bool = false
     let practice: DrillPractice.Summary
+    let effect: DrillEffect.Result
     let onMarkDone: () -> Void
 
     var body: some View {
@@ -156,6 +196,8 @@ private struct DrillCard: View {
                 }
             }
 
+            DrillEffectRow(effect: effect)
+
             HStack {
                 if practice.count > 0, let last = practice.lastDate {
                     Text("PRACTICED \(practice.count)× · LAST \(last.formatted(.dateTime.day().month()).uppercased())")
@@ -191,5 +233,120 @@ private struct DrillCard: View {
         .padding(16)
         .glassCard(borderColor: isHighlighted ? DS.accent : DS.border)
         .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - "Is it working?" read-out
+//
+// The loop-closer: how often this drill's targeted faults appeared before
+// the swimmer first marked it done versus since. Presentational only — the
+// rule, the sample gates and every word of copy live in `DrillEffect`, so
+// this file cannot quietly turn a correlation into a claim.
+//
+// Verdict marks reuse the History chart's vocabulary: a green down-arrow
+// for a fault receding, a red up-arrow for one advancing, and no mark at
+// all when nothing moved.
+private struct DrillEffectRow: View {
+    let effect: DrillEffect.Result
+
+    private var headline: String {
+        switch effect {
+        case .notEnough(let missing): return missing.headline
+        case .measured(let readout):  return readout.headline
+        }
+    }
+
+    private var detail: String {
+        switch effect {
+        case .notEnough(let missing): return missing.detail
+        case .measured(let readout):  return readout.detail
+        }
+    }
+
+    private var caveat: String? {
+        guard case .measured(let readout) = effect else { return nil }
+        return readout.caveat
+    }
+
+    /// Direction mark, or nil where there is no movement to point at.
+    private var arrow: String? {
+        guard case .measured(let readout) = effect else { return nil }
+        switch readout.verdict {
+        case .lessOften: return "arrow.down.right"
+        case .moreOften: return "arrow.up.right"
+        case .unchanged: return nil
+        }
+    }
+
+    private var tint: Color {
+        guard case .measured(let readout) = effect else { return DS.inkSecondary }
+        switch readout.verdict {
+        case .lessOften: return DS.severityMinor
+        case .moreOften: return DS.severityMajor
+        case .unchanged: return DS.inkSecondary
+        }
+    }
+
+    var body: some View {
+        // A drill never marked done has nothing to compare, so it gets one
+        // quiet inviting line instead of an empty scoreboard — otherwise a
+        // first-run library would be ten identical blank read-outs.
+        if case .notEnough(.neverPractised) = effect {
+            Text(DrillEffect.Missing.neverPractised.detail)
+                .font(.caption2)
+                .foregroundStyle(DS.inkTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            VStack(alignment: .leading, spacing: 6) {
+                Rectangle().fill(DS.border).frame(height: 1)
+                    .accessibilityHidden(true)
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        label
+                        Spacer(minLength: 10)
+                        status
+                    }
+                    VStack(alignment: .leading, spacing: 5) {
+                        label
+                        status
+                    }
+                }
+                Text(detail)
+                    .font(.footnote)
+                    .lineSpacing(2)
+                    .foregroundStyle(DS.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let caveat {
+                    Text(caveat)
+                        .font(.caption2)
+                        .foregroundStyle(DS.inkTertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.top, 2)
+        }
+    }
+
+    private var label: some View {
+        Text("IS IT WORKING?")
+            .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+            .tracking(1.2)
+            .foregroundStyle(DS.inkTertiary)
+            .fixedSize()
+    }
+
+    private var status: some View {
+        HStack(spacing: 4) {
+            if let arrow {
+                Image(systemName: arrow)
+                    .font(.system(size: 8, weight: .bold))
+                    .accessibilityHidden(true)
+            }
+            Text(headline.uppercased())
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+                .tracking(1.2)
+        }
+        .foregroundStyle(tint)
+        .fixedSize()
     }
 }
