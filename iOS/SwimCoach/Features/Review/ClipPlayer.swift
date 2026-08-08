@@ -7,7 +7,9 @@ import Combine
 /// Results uses `VideoPlayer`, whose system HUD is the right call there
 /// (share, AirPlay, full screen). Review is a decision screen: it wants a
 /// clean frame and a scrubber drawn in the meet-sheet language, so it drives
-/// the layer directly and supplies its own transport below the band.
+/// the layer directly and supplies its own transport below the band. Compare
+/// needs the same bare surface twice — a system HUD per pane would put two
+/// competing transports on one screen.
 struct ClipPlayerSurface: UIViewRepresentable {
     let player: AVPlayer
 
@@ -37,27 +39,43 @@ enum ClipTime {
         let total = Int(seconds.isFinite ? max(0, seconds.rounded()) : 0)
         return String(format: "%d:%02d", total / 60, total % 60)
     }
+
+    /// The paired form under a pane and beside a transport: `0:07 / 0:20`.
+    static func code(_ seconds: Double, of duration: Double) -> String {
+        "\(code(seconds)) / \(code(duration))"
+    }
 }
 
-/// Transport for the review clip: a play/pause mark, a lane-rule track with a
-/// lane-blue fill and a playhead marker, and monospaced time codes. Dragging
-/// anywhere on the track seeks.
-struct ClipScrubber: View {
-    let player: AVPlayer
-    /// Clip length in seconds. Zero until the asset loads — the track then
-    /// renders empty rather than dividing by zero.
-    let duration: Double
+// MARK: - Transport marks
 
-    @State private var currentTime: Double = 0
-    @State private var isPlaying = true
-    /// While dragging, the periodic observer must not fight the finger.
-    @State private var isScrubbing = false
-    @State private var timeObserver: Any?
+/// The transport itself — a play/pause mark, a lane-rule track with a
+/// lane-blue fill and a playhead marker, and a monospaced time code — with no
+/// opinion about what is playing.
+///
+/// Review binds it to one `AVPlayer` (see `ClipScrubber`); Compare binds it to
+/// a synced pair. Everything here is a function of `position`, so a driver of
+/// any shape can hold up the same marks rather than a second transport being
+/// drawn in a different dialect.
+struct ClipTransportBar: View {
+    /// 0…1 through whatever is being played.
+    let position: Double
+    let isPlaying: Bool
+    /// Right-hand code, already formatted (`0:07 / 0:20`).
+    let timeCode: String
+    /// Spoken value for the track, e.g. "0:07 of 0:20".
+    let spokenPosition: String
+    /// How far one VoiceOver increment moves, as a fraction of the whole.
+    let adjustStep: Double
+    let onToggle: () -> Void
+    /// Called continuously while the finger is down — the driver holds the
+    /// playhead against its own clock for the duration.
+    let onScrub: (Double) -> Void
+    /// Called once on release, and by VoiceOver's adjustable action.
+    let onScrubEnd: (Double) -> Void
 
     /// Both marks here are deliberately small — a play mark and a lane rule,
-    /// not a knob and a slider — and play/pause is the only playback control
-    /// on the screen. The drawn marks stay small; the *targets* around them
-    /// are the HIG minimum.
+    /// not a knob and a slider. The drawn marks stay small; the *targets*
+    /// around them are the HIG minimum.
     static let hitTarget: CGFloat = 44
 
     /// The drawn ring grows with type, then stops at the target it sits
@@ -69,15 +87,13 @@ struct ClipScrubber: View {
     private var glyph: CGFloat { (ring * 13.0 / 34.0).rounded() }
 
     private var fraction: Double {
-        guard duration > 0 else { return 0 }
-        return min(1, max(0, currentTime / duration))
+        guard position.isFinite else { return 0 }
+        return min(1, max(0, position))
     }
 
     var body: some View {
         HStack(spacing: 14) {
-            Button {
-                togglePlayback()
-            } label: {
+            Button(action: onToggle) {
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: glyph, weight: .semibold))
                     .foregroundStyle(DS.accent)
@@ -90,7 +106,7 @@ struct ClipScrubber: View {
 
             track
 
-            Text("\(ClipTime.code(currentTime)) / \(ClipTime.code(duration))")
+            Text(timeCode)
                 .font(.custom(GroteskWeight.medium.postScriptName,
                               size: 11, relativeTo: .caption2))
                 .monospacedDigit()
@@ -99,18 +115,7 @@ struct ClipScrubber: View {
                 .fixedSize()
                 .accessibilityHidden(true)
         }
-        .onAppear(perform: startObserving)
-        .onDisappear(perform: stopObserving)
-        // Loop: a review clip is a few seconds long and the user is judging
-        // framing, so it replays instead of freezing on the last frame.
-        .onReceive(NotificationCenter.default.publisher(
-            for: AVPlayerItem.didPlayToEndTimeNotification)) { _ in
-            player.seek(to: .zero)
-            if isPlaying { player.play() }
-        }
     }
-
-    // MARK: - Track
 
     private var track: some View {
         GeometryReader { geo in
@@ -132,14 +137,8 @@ struct ClipScrubber: View {
             .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        isScrubbing = true
-                        seek(toFraction: value.location.x / max(width, 1))
-                    }
-                    .onEnded { value in
-                        seek(toFraction: value.location.x / max(width, 1))
-                        isScrubbing = false
-                    }
+                    .onChanged { onScrub($0.location.x / max(width, 1)) }
+                    .onEnded { onScrubEnd($0.location.x / max(width, 1)) }
             )
         }
         // The drawn track is a 3pt rule with a 16pt playhead, centred inside
@@ -147,10 +146,63 @@ struct ClipScrubber: View {
         .frame(height: Self.hitTarget)
         .accessibilityElement()
         .accessibilityLabel("Clip position")
-        .accessibilityValue("\(ClipTime.code(currentTime)) of \(ClipTime.code(duration))")
+        .accessibilityValue(spokenPosition)
         .accessibilityAdjustableAction { direction in
-            let step = 1.0 / max(duration, 1)
-            seek(toFraction: fraction + (direction == .increment ? step : -step))
+            onScrubEnd(fraction + (direction == .increment ? adjustStep : -adjustStep))
+        }
+    }
+}
+
+// MARK: - Single-clip transport
+
+/// `ClipTransportBar` bound to one player: Review's transport. Dragging
+/// anywhere on the track seeks.
+struct ClipScrubber: View {
+    let player: AVPlayer
+    /// Clip length in seconds. Zero until the asset loads — the track then
+    /// renders empty rather than dividing by zero.
+    let duration: Double
+
+    @State private var currentTime: Double = 0
+    @State private var isPlaying = true
+    /// While dragging, the periodic observer must not fight the finger.
+    @State private var isScrubbing = false
+    @State private var timeObserver: Any?
+
+    /// Kept here because callers and `ReviewLayoutTests` name the target
+    /// through the scrubber; the marks themselves live on the bar.
+    static let hitTarget: CGFloat = ClipTransportBar.hitTarget
+
+    private var fraction: Double {
+        guard duration > 0 else { return 0 }
+        return min(1, max(0, currentTime / duration))
+    }
+
+    var body: some View {
+        ClipTransportBar(
+            position: fraction,
+            isPlaying: isPlaying,
+            timeCode: ClipTime.code(currentTime, of: duration),
+            spokenPosition: "\(ClipTime.code(currentTime)) of \(ClipTime.code(duration))",
+            adjustStep: 1.0 / max(duration, 1),
+            onToggle: togglePlayback,
+            onScrub: { f in
+                isScrubbing = true
+                seek(toFraction: f)
+            },
+            onScrubEnd: { f in
+                seek(toFraction: f)
+                isScrubbing = false
+            }
+        )
+        .onAppear(perform: startObserving)
+        .onDisappear(perform: stopObserving)
+        // Loop: a review clip is a few seconds long and the user is judging
+        // framing, so it replays instead of freezing on the last frame.
+        .onReceive(NotificationCenter.default.publisher(
+            for: AVPlayerItem.didPlayToEndTimeNotification)) { _ in
+            player.seek(to: .zero)
+            if isPlaying { player.play() }
         }
     }
 

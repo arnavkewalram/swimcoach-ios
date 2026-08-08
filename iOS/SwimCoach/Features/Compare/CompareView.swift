@@ -1,6 +1,12 @@
 import SwiftUI
 
 /// Side-by-side progress view between an earlier and a later session.
+///
+/// Two answers, in this order: the swims, then the numbers. The score
+/// head-to-head stays on top because it names which session is which and
+/// dates them; the footage follows immediately, because "what changed in my
+/// stroke" is a question no delta table answers. Everything below the band is
+/// unchanged, and a pair with no stored footage still gets all of it.
 struct CompareView: View {
     let earlier: AnalysisResult
     let later: AnalysisResult
@@ -10,6 +16,18 @@ struct CompareView: View {
     }
 
     private var scoreDelta: Int { later.score - earlier.score }
+
+    /// Which clips survive, decided when the screen is built rather than per
+    /// body pass — `videoURL` touches the filesystem, and the band, its pane
+    /// labels and its shortfall copy must all be answering the same question.
+    private let clips: CompareClipAvailability
+
+    init(earlier: AnalysisResult, later: AnalysisResult) {
+        self.earlier = earlier
+        self.later = later
+        self.clips = CompareClipAvailability.resolve(earlier: earlier.videoURL,
+                                                     later: later.videoURL)
+    }
 
     var body: some View {
         ZStack {
@@ -41,6 +59,11 @@ struct CompareView: View {
                                      scoreDelta < 0 ? DS.severityModerate : DS.inkSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
+
+                    // ── The swims themselves ──────────────────────────────
+                    CompareVideoBand(earlier: earlier, later: later,
+                                     availability: clips)
+                        .padding(.bottom, 24)
 
                     // ── Metrics ───────────────────────────────────────────
                     SectionHeader(title: "Metrics")
