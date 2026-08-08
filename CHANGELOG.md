@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.47.0] — 2026-08-08 — "Side by Side"
+
+### Added
+- **Compare now plays both swims, not just their numbers.** The two clips
+  run together under one transport — play, scrub, and step a frame at a
+  time — so you can watch the same point of the stroke in each.
+- They stay in step by position in the lap rather than by the clock, since
+  two seconds into a short lap and a long one are different strokes. The
+  shorter clip is slowed to finish alongside the longer one, never sped
+  up, and the screen says when it has been.
+- If a swim has no clip stored, its side says so plainly and the other
+  keeps playing — the numbers are unchanged either way.
+
 ## [1.46.0] — 2026-08-08 — "Evidence"
 
 ### Added
