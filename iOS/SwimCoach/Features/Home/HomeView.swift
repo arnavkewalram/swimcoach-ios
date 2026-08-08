@@ -2,6 +2,9 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 import UniformTypeIdentifiers
+#if DEBUG
+import AVFoundation
+#endif
 
 struct HomeView: View {
     @Environment(AppRouter.self) private var router
@@ -329,9 +332,10 @@ struct HomeView: View {
                     router.push(.results(AnalysisResult.demo))
                 } else if args.contains("-demoReport") {
                     router.push(.report(AnalysisResult.demo))
-                } else if args.contains("-demoCompare") {
-                    router.push(.compare(earlier: AnalysisResult.demoEarlier,
-                                         later: AnalysisResult.demo))
+                } else if let i = args.firstIndex(of: "-demoCompare") {
+                    let mode = i + 1 < args.count && !args[i + 1].hasPrefix("-")
+                        ? args[i + 1] : ""
+                    openCompareDemo(mode: mode)
                 } else if args.contains("-demoReview") {
                     // The review screen is only reachable by recording, which
                     // the simulator can't do — open it directly on the bundled
@@ -535,6 +539,60 @@ struct HomeView: View {
     private func probabilities(for faults: [String]) -> [Float] {
         let present = Set(faults)
         return FeedbackEngine.issueNames.map { present.contains($0) ? 0.62 : 0.05 }
+    }
+
+    /// Open Compare in one of its three footage states — the simulator can't
+    /// record, so the only way to see the side-by-side band is to hand it
+    /// clips here.
+    ///
+    /// `""` (bare `-demoCompare`) keeps the original fixture, which is also
+    /// the one-clip-missing case: `demoEarlier` has no video. `both` attaches
+    /// clips to both sides, and `none` strips them.
+    private func openCompareDemo(mode: String) {
+        var earlier = AnalysisResult.demoEarlier
+        var later = AnalysisResult.demo
+        switch mode {
+        case "none":
+            later.videoFileName = nil
+            router.push(.compare(earlier: earlier, later: later))
+        case "both":
+            // Deliberately NOT the same file twice: proportional sync is
+            // invisible on two clips of equal length. The earlier swim gets a
+            // 5-second cut of the 8-second bundled clip, so the band has a
+            // real length mismatch to hold together.
+            Task {
+                earlier.videoFileName = await Self.trimmedDemoClip(
+                    id: earlier.id, seconds: 5)
+                router.push(.compare(earlier: earlier, later: later))
+            }
+        default:
+            router.push(.compare(earlier: earlier, later: later))
+        }
+    }
+
+    /// A shortened copy of the bundled cartoon, written into the session store
+    /// under `id` so it resolves like any other session video. Nil below
+    /// iOS 18, where the non-deprecated export API does not exist — the demo
+    /// then falls back to a one-clip pair, which is a state worth seeing too.
+    private static func trimmedDemoClip(id: UUID, seconds: Double) async -> String? {
+        guard #available(iOS 18.0, *),
+              let source = Bundle.main.url(forResource: "swim_test", withExtension: "mp4")
+        else { return nil }
+        let name = "\(id.uuidString).mp4"
+        let dest = SessionVideoStore.directory.appendingPathComponent(name)
+        try? FileManager.default.removeItem(at: dest)
+        guard let export = AVAssetExportSession(asset: AVURLAsset(url: source),
+                                                presetName: AVAssetExportPresetHighestQuality)
+        else { return nil }
+        export.timeRange = CMTimeRange(start: .zero,
+                                       duration: CMTime(seconds: seconds, preferredTimescale: 600))
+        do {
+            try await export.export(to: dest, as: .mp4)
+            return name
+        } catch {
+            AppLog.storage.error("Demo clip trim failed: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     /// Exactly two unfinished takes, for simulator screenshots and route
