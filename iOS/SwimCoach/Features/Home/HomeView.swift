@@ -307,6 +307,9 @@ struct HomeView: View {
             if args.contains("-seedTrainingLog") {
                 seedTrainingLog()
             }
+            if args.contains("-seedDrillPractice") {
+                seedDrillPractice()
+            }
             if args.contains("-seedUnfinishedTakes") {
                 seedUnfinishedTakes()
             }
@@ -451,6 +454,87 @@ struct HomeView: View {
             }
             modelContext.insert(session)
         }
+    }
+
+    /// Deterministic fixture for the drill library's "is it working?"
+    /// read-out: twelve swims plus a practice log arranged so that every
+    /// `DrillEffect` state lands on exactly one card, in catalog order —
+    ///
+    ///   01 Fingertip Drag    not tracked yet   (never marked done)
+    ///   02 Catch-Up          nothing to track  (targets faults never seen)
+    ///   03 Fist Drill        showing up more   (0/6 → 5/6)
+    ///   04 Single-Arm        no baseline       (2 swims predate the tap)
+    ///   05 Superman Glide    about the same    (6/6 → 6/6)
+    ///   06 6-Kick Switch     not enough swims  (first tap is right now)
+    ///   07 Vertical Kicking  nothing to track
+    ///   08 Side Flutter      no baseline       (tap predates every swim)
+    ///   09 2-Beat Timing     showing up less   (6/6 → 0/6)
+    ///   10 Pull-Buoy Pull    not tracked yet
+    ///
+    /// Replaces the store, like `-seedTrainingLog`. Swims are back-dated an
+    /// extra hour so the newest one is strictly older than a tap made at
+    /// seed time — the boundary is an instant, not a day.
+    private func seedDrillPractice() {
+        sessions.forEach { modelContext.delete($0) }
+        try? modelContext.delete(model: DrillPracticeEvent.self)
+        let now = Date()
+
+        // `body_sag` runs through every swim; `low_kick_rate` stops at the
+        // 12-day boundary; `left_elbow_collapse` starts after it.
+        let plan: [(daysAgo: Int, score: Int)] = [
+            (24, 55), (22, 57), (20, 56), (18, 60), (15, 62), (13, 61),
+            (10, 66), (8, 65), (6, 70), (4, 69), (2, 74), (0, 78),
+        ]
+        for item in plan {
+            var faults = ["body_sag"]
+            if item.daysAgo > 12 { faults.append("low_kick_rate") }
+            if item.daysAgo < 10 { faults.append("left_elbow_collapse") }
+            let base = AnalysisResult.demo
+            let result = AnalysisResult(
+                id: UUID(),
+                score: item.score,
+                grade: item.score >= 70 ? "C" : "D",
+                strokeCount: base.strokeCount,
+                kickRatePerMin: base.kickRatePerMin,
+                strokeAsymmetry: base.strokeAsymmetry,
+                frameCount: base.frameCount,
+                sampledFrames: base.sampledFrames,
+                fps: base.fps,
+                issues: FeedbackEngine.decode(probabilities: probabilities(for: faults)),
+                tips: base.tips,
+                analyzedAt: now.addingTimeInterval(-(Double(item.daysAgo) * 86_400 + 3_600)),
+                durationSeconds: base.durationSeconds)
+            let session = SwimSession(result: result)
+            session.swimmer = "Arnav"
+            modelContext.insert(session)
+        }
+
+        // Practice log. The FIRST tap on a drill is its boundary, so only
+        // the earliest entry per drill decides which side a swim lands on.
+        let log: [(drill: String, daysAgo: [Double])] = [
+            ("two-beat-timing", [12, 9, 6, 3]),
+            ("superman-glide", [12, 5]),
+            ("fist-drill", [12]),
+            ("catch-up", [12]),
+            ("vertical-kick", [12]),
+            ("single-arm", [21, 4]),
+            ("side-flutter", [26, 11]),
+            ("six-kick-switch", [0]),
+        ]
+        for entry in log {
+            for daysAgo in entry.daysAgo {
+                modelContext.insert(DrillPracticeEvent(
+                    drillID: entry.drill,
+                    date: now.addingTimeInterval(-daysAgo * 86_400)))
+            }
+        }
+    }
+
+    /// Probability vector that decodes to exactly `faults`, so seeded
+    /// sessions carry real catalog metadata instead of hand-built issues.
+    private func probabilities(for faults: [String]) -> [Float] {
+        let present = Set(faults)
+        return FeedbackEngine.issueNames.map { present.contains($0) ? 0.62 : 0.05 }
     }
 
     /// Exactly two unfinished takes, for simulator screenshots and route

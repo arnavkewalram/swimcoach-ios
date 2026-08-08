@@ -3,6 +3,20 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.46.0] — 2026-08-08 — "Evidence"
+
+### Added
+- **Drills now tell you whether they're working.** The app already knew
+  which drills you practise, which faults each drill targets, and which
+  faults your swims show — but never connected them. Each drill now
+  reports how often its target faults appeared in your swims before you
+  started practising it, versus since.
+- It stays quiet until it has something real to say: three swims either
+  side of your first practice, and enough movement that a single good or
+  bad day can't produce a verdict. Otherwise it tells you what's still
+  missing. The wording never claims the drill caused the change — only
+  that the faults have shown up less, or more, since you began.
+
 ## [1.45.10] — 2026-08-04
 
 ### Fixed
