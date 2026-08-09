@@ -23,6 +23,7 @@
 		1DD9037AF63D50AD9A6527AD /* SessionVideoStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187BD78D38E89E0FC81A9482 /* SessionVideoStoreTests.swift */; };
 		1E33B457C06BD3FCBF26C983 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A49C168A6001543BF9CD78C /* AboutView.swift */; };
 		1E434E4BF11307292CFCF251 /* ReportCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */; };
+		1F3166752191C59DB689DB2B /* SyncedClipPairTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3A9CA9AE55352EF6BCB0D42 /* SyncedClipPairTests.swift */; };
 		1F6B827E4FD8ECD28321D4FA /* LevelMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058CDD9AB205E722F6E0442B /* LevelMonitor.swift */; };
 		1F9FB56A83609471F8D87697 /* SessionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA67BB92F29577B965B6D2E4 /* SessionFilter.swift */; };
 		1FC82D44803A100487309E60 /* SpaceGrotesk-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BF7185FE87172D94D300296 /* SpaceGrotesk-Regular.ttf */; };
@@ -277,6 +278,7 @@
 		ED4E2F36A6EB134177F18709 /* GoalReminderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalReminderStore.swift; sourceTree = "<group>"; };
 		EE9BA827876E8FAE3D764408 /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
 		F27FE30E58D75CC5B9C60737 /* RealFootageParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealFootageParityTests.swift; sourceTree = "<group>"; };
+		F3A9CA9AE55352EF6BCB0D42 /* SyncedClipPairTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncedClipPairTests.swift; sourceTree = "<group>"; };
 		F6FAC2F2642E93C6799E4963 /* DrillEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillEffect.swift; sourceTree = "<group>"; };
 		F9963785A23CAAB343778FC6 /* OverlayExportControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayExportControl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -428,6 +430,7 @@
 				21275839471B91C916E5080F /* ShareCardModelTests.swift */,
 				B06C0AA352DE7728EADB818C /* SwimSessionTests.swift */,
 				40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */,
+				F3A9CA9AE55352EF6BCB0D42 /* SyncedClipPairTests.swift */,
 				A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */,
 				4E294D205FD806A127315C4A /* UnfinishedTakesTests.swift */,
 				6E5C39CD071B8B9A74F6A45B /* VideoTransformTests.swift */,
@@ -772,6 +775,7 @@
 				25FAD71BD81D4AF998B3E86B /* ShareCardModelTests.swift in Sources */,
 				13D90FB0157D9328BCD236C2 /* SwimSessionTests.swift in Sources */,
 				116C5409AA0CEAE92A9B1410 /* SwimTCNRunnerTests.swift in Sources */,
+				1F3166752191C59DB689DB2B /* SyncedClipPairTests.swift in Sources */,
 				A3B1E9443D343FF9B5564F05 /* TrainingLogTests.swift in Sources */,
 				536F7048C8D356EB5DF17023 /* UnfinishedTakesTests.swift in Sources */,
 				2D3FB6852995E34951EDB73E /* VideoTransformTests.swift in Sources */,

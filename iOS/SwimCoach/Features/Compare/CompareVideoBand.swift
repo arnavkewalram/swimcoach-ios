@@ -8,10 +8,11 @@ import SwiftUI
 /// stay exactly as they were, below; this is what the screen leads with when
 /// there is footage to lead with.
 ///
-/// Either clip may be missing (see `CompareClipAvailability`) and the band
-/// degrades in one step: the pane that has no clip is drawn as an empty field
-/// with a stated reason, never as a black rectangle that looks like a player
-/// that failed to start.
+/// Either clip may be missing — or stored and unopenable, which is the same
+/// thing to a screen that has to play it (see `CompareClipAvailability`) — and
+/// the band degrades in one step: the pane that has no clip is drawn as an
+/// empty field with a stated reason, never as a black rectangle that looks
+/// like a player that failed to start.
 struct CompareVideoBand: View {
     let earlier: AnalysisResult
     let later: AnalysisResult
@@ -28,12 +29,29 @@ struct CompareVideoBand: View {
         CompareVideoLayout.paneAspect(ClipSide.allCases.map { pair.displaySizes[$0] })
     }
 
+    /// Does this side have a clip? One question, asked one way.
+    ///
+    /// `SyncedClipPair` builds a player only for a side whose duration loaded,
+    /// so a player is exactly a playable clip — the label tint, the pane, its
+    /// time code and its spoken label all read the same fact and cannot
+    /// contradict each other.
+    private func hasClip(_ side: ClipSide) -> Bool { pair.players[side] != nil }
+
+    /// What the band can actually show, which is not always what the store
+    /// promised: a stored file may exist and still not open (see
+    /// `CompareClipAvailability.limited(toPlayable:)`). Until the pair has
+    /// resolved its clips, the store's answer stands.
+    private var shown: CompareClipAvailability {
+        guard pair.hasResolvedClips else { return availability }
+        return availability.limited(toPlayable: Set(pair.players.keys))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Side by side")
 
-            if availability.hasAnyClip {
-                if case .both = availability { syncNote }
+            if shown.hasAnyClip {
+                if case .both = shown { syncNote }
                 panes
                 transport
                 footnoteRow
@@ -81,7 +99,7 @@ struct CompareVideoBand: View {
             Text(side.label)
                 .font(.sectionLabel)
                 .tracking(1.4)
-                .foregroundStyle(pair.players[side] != nil ? DS.accent : DS.inkTertiary)
+                .foregroundStyle(hasClip(side) ? DS.accent : DS.inkTertiary)
 
             Group {
                 if let player = pair.players[side] {
@@ -165,7 +183,7 @@ struct CompareVideoBand: View {
     private var syncLabel: String {
         let follower = pair.map.referenceSide.other
         let rate = pair.map.rate(for: follower)
-        guard pair.players[follower] != nil, rate > 0, rate < 0.995 else {
+        guard hasClip(follower), rate > 0, rate < 0.995 else {
             return "SYNCED · LAP POSITION"
         }
         return "SYNCED · \(follower.label) ×\(String(format: "%.2f", rate))"
@@ -189,8 +207,8 @@ struct CompareVideoBand: View {
 
     @ViewBuilder
     private var shortfallCard: some View {
-        if let label = availability.shortfallLabel,
-           let detail = availability.shortfallDetail {
+        if let label = shown.shortfallLabel,
+           let detail = shown.shortfallDetail {
             VStack(alignment: .leading, spacing: 6) {
                 Text(label)
                     .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
@@ -222,15 +240,15 @@ struct CompareVideoBand: View {
     /// Each pane carries its own clip's time code, so two different clip
     /// lengths moving under one playhead is visible rather than implied.
     private func paneCode(_ side: ClipSide) -> String {
-        guard pair.players[side] != nil, pair.map.duration(side) > 0 else { return "—" }
+        guard hasClip(side) else { return "—" }
         return ClipTime.code(pair.map.time(atPosition: pair.position, in: side),
                              of: pair.map.duration(side))
     }
 
     private func paneSpoken(_ side: ClipSide) -> String {
         let date = result(side).analyzedAt.formatted(date: .abbreviated, time: .omitted)
-        guard pair.players[side] != nil, pair.map.duration(side) > 0 else {
-            return "\(side.label.capitalized) swim, \(date). No clip stored."
+        guard hasClip(side) else {
+            return "\(side.label.capitalized) swim, \(date). No clip to play."
         }
         return "\(side.label.capitalized) swim, \(date), "
              + "\(ClipTime.code(pair.map.duration(side))) long."

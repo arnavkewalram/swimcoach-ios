@@ -11,7 +11,12 @@ import AVFoundation
 ///
 /// Lifetime rules, all of them load-bearing:
 ///   • Players are built once per appearance, in `load`, and only for sides
-///     that actually have a clip — a missing take costs nothing.
+///     whose clip actually opened — a missing take costs nothing, and neither
+///     does a stored one that will not play.
+///   • Player and duration are adopted together or not at all:
+///     `players[side] != nil` and `map.duration(side) > 0` are one fact, so
+///     the pane, its label, its time code, its spoken label and the shortfall
+///     copy cannot end up describing different screens.
 ///   • The periodic observer is attached to the reference player and removed
 ///     from *that same instance* in `teardown`; `AVPlayer` retains the block,
 ///     so a token removed from the wrong player leaks both the block and the
@@ -35,9 +40,13 @@ final class SyncedClipPair {
     private(set) var position: Double = 0
     private(set) var isPlaying = false
     private(set) var isLoaded = false
+    /// True once `load` has decided which sides play. Until then the store's
+    /// promise stands: degrading a pane before its asset has opened would
+    /// flash "no clip" over footage that is one hop of `await` away.
+    private(set) var hasResolvedClips = false
 
     /// While a finger is on the track the observer must not fight it.
-    private var isScrubbing = false
+    private(set) var isScrubbing = false
     /// The observer and the exact player it was added to.
     private var observation: (player: AVPlayer, token: Any)?
     private var endObserver: NSObjectProtocol?
@@ -65,9 +74,17 @@ final class SyncedClipPair {
 
         for (side, url) in availability.clips {
             let asset = AVURLAsset(url: url)
-            if let seconds = try? await asset.load(.duration).seconds, seconds.isFinite {
-                durations[side] = seconds
-            }
+            // A file that resolves is not a file that plays. `persist` copies
+            // non-atomically and `url(forFileName:)` checks only existence, so
+            // a take truncated by a kill mid-copy hands back a URL whose
+            // duration will not load. Without a duration this side has no
+            // timeline — no rate, no time code, no clock for the transport to
+            // follow — so it is not a clip, and a player built for it would be
+            // a live decoder behind a pane reading "—".
+            guard let seconds = try? await asset.load(.duration).seconds,
+                  ClipSyncMap.isPlayable(seconds) else { continue }
+            durations[side] = seconds
+
             if let track = try? await asset.loadTracks(withMediaType: .video).first,
                let natural = try? await track.load(.naturalSize),
                let transform = try? await track.load(.preferredTransform) {
@@ -93,6 +110,7 @@ final class SyncedClipPair {
         displaySizes = sizes
         map = ClipSyncMap(earlierDuration: durations[.earlier],
                           laterDuration: durations[.later])
+        hasResolvedClips = true
         guard !players.isEmpty else { return }
 
         observeReference()
@@ -228,6 +246,18 @@ final class SyncedClipPair {
             player.replaceCurrentItem(with: nil)
         }
         players = [:]
+        // The map goes with the players it described. Leaving durations behind
+        // would leave the pair claiming clips it no longer holds — the exact
+        // split between "there is a clip" and "there is a player" this class
+        // exists to keep closed.
+        map = ClipSyncMap(earlierDuration: nil, laterDuration: nil)
+        hasResolvedClips = false
+        // A teardown mid-drag would otherwise leave the flag raised for the
+        // next appearance, where it silently pins the playhead: `tick` returns
+        // early forever and the transport never moves. Nothing reaches that
+        // today — Compare is pushed, and a pushed pair is never loaded twice —
+        // but the trap costs one line to remove and a screen redesign to find.
+        isScrubbing = false
         isLoaded = false
     }
 }

@@ -63,6 +63,17 @@ struct ClipSyncMap: Equatable {
         return d
     }
 
+    /// The one test for "is there a clip on this side", exposed because the
+    /// driver has to apply the *same* one before it builds a player.
+    ///
+    /// A length this rejects becomes a zero duration, which the map defines as
+    /// "no usable clip on that side" — so a player built behind it would be a
+    /// live decoder under a pane every other part of the screen calls empty,
+    /// with no clock for the transport to follow.
+    static func isPlayable(_ duration: Double?) -> Bool {
+        sanitised(duration) > 0
+    }
+
     func duration(_ side: ClipSide) -> Double {
         side == .earlier ? earlierDuration : laterDuration
     }
@@ -164,13 +175,26 @@ enum CompareClipAvailability: Equatable {
     /// Is there a band to draw at all?
     var hasAnyClip: Bool { self != .neither }
 
+    /// The same answer, narrowed to the sides whose clip actually opened.
+    ///
+    /// Existing is not the same as playing. `SessionVideoStore.persist` copies
+    /// non-atomically and `url(forFileName:)` asks only whether a file is
+    /// there, so a take truncated by a kill mid-copy still resolves to a URL
+    /// and still has no readable duration. A side like that has nothing to
+    /// show, and "both clips are here" printed over an empty pane explains
+    /// nothing — so it folds into the same shortfall a missing take gets.
+    func limited(toPlayable playable: Set<ClipSide>) -> CompareClipAvailability {
+        .resolve(earlier: playable.contains(.earlier) ? url(.earlier) : nil,
+                 later: playable.contains(.later) ? url(.later) : nil)
+    }
+
     /// Headline for the state, uppercased for the micro-label slot. Nil when
     /// both clips are present and there is nothing to explain.
     var shortfallLabel: String? {
         switch self {
         case .both:               return nil
         case let .only(side, _):  return "\(side.other.label) CLIP MISSING"
-        case .neither:            return "NO CLIPS STORED"
+        case .neither:            return "NO CLIPS TO PLAY"
         }
     }
 
@@ -180,13 +204,13 @@ enum CompareClipAvailability: Equatable {
         case .both:
             return nil
         case let .only(side, _):
-            return "The \(side.other.rawValue) session has no stored clip — it was "
+            return "The \(side.other.rawValue) session has no clip to play — it was "
                  + "analyzed before clips were kept, or its take has since been "
-                 + "removed. The \(side.rawValue) swim plays on its own; the "
-                 + "numbers below compare both."
+                 + "removed or damaged. The \(side.rawValue) swim plays on its own; "
+                 + "the numbers below compare both."
         case .neither:
-            return "Neither session has a stored clip, so there is nothing to play "
-                 + "side by side. The numbers below still compare both swims."
+            return "Neither session has a clip that plays, so there is nothing to "
+                 + "show side by side. The numbers below still compare both swims."
         }
     }
 }

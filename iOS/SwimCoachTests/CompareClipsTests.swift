@@ -118,6 +118,23 @@ final class CompareClipsTests: XCTestCase {
         XCTAssertEqual(map.position(0.4, steppedBy: 3), 0.4)
     }
 
+    /// The map's own test for a usable clip, exposed so the driver applies the
+    /// *same* one before it builds a player. Anything this rejects sanitises
+    /// to a zero duration, which the map defines as "no clip on that side" —
+    /// so a player built behind it is a decoder under an empty pane.
+    func testPlayableIsExactlyWhatTheMapWillDriveAClipWith() {
+        for unusable in [nil, Double.nan, .infinity, 0, -4, -0.0] {
+            XCTAssertFalse(ClipSyncMap.isPlayable(unusable), "\(String(describing: unusable))")
+            XCTAssertEqual(ClipSyncMap(earlierDuration: unusable, laterDuration: 18)
+                .duration(.earlier), 0)
+        }
+        for usable in [0.001, 8, 3600.5] {
+            XCTAssertTrue(ClipSyncMap.isPlayable(usable), "\(usable)")
+            XCTAssertEqual(ClipSyncMap(earlierDuration: usable, laterDuration: 18)
+                .duration(.earlier), usable)
+        }
+    }
+
     func testNonFinitePositionsNeverEscapeTheMap() {
         let map = ClipSyncMap(earlierDuration: 12, laterDuration: 18)
         XCTAssertEqual(map.time(atPosition: .nan, in: .later), 0)
@@ -195,8 +212,46 @@ final class CompareClipsTests: XCTestCase {
         XCTAssertTrue(availability.clips.isEmpty, "no clips means no players at all")
         XCTAssertNil(availability.url(.earlier))
         XCTAssertNil(availability.url(.later))
-        XCTAssertEqual(availability.shortfallLabel, "NO CLIPS STORED")
+        XCTAssertEqual(availability.shortfallLabel, "NO CLIPS TO PLAY")
         XCTAssertEqual(availability.shortfallDetail?.isEmpty, false)
+    }
+
+    /// A file that exists is not a clip that plays: `persist` copies
+    /// non-atomically, so a kill mid-copy leaves a truncated take that still
+    /// resolves to a URL and still will not open. The band asks this once the
+    /// assets have been opened, and a side that failed has to fall into the
+    /// same shortfall a missing take gets — otherwise the screen says "both
+    /// clips are here" over an empty pane and explains nothing.
+    func testAClipThatWillNotOpenIsTreatedAsAMissingOne() {
+        let both = CompareClipAvailability.both(earlier: a, later: b)
+        XCTAssertNil(both.shortfallLabel, "premise: both is silent")
+
+        let laterBroke = both.limited(toPlayable: [.earlier])
+        XCTAssertEqual(laterBroke, .only(.earlier, a))
+        XCTAssertEqual(laterBroke.shortfallLabel, "LATER CLIP MISSING")
+        XCTAssertEqual(laterBroke.shortfallDetail?.contains("later session"), true)
+
+        XCTAssertEqual(both.limited(toPlayable: [.later]), .only(.later, b))
+        XCTAssertEqual(both.limited(toPlayable: []), .neither,
+                       "two unreadable files is the no-clips state, not a silent one")
+        XCTAssertEqual(both.limited(toPlayable: [.earlier, .later]), both)
+    }
+
+    /// The reason names damage as well as absence — a swimmer whose file is
+    /// still on the phone must not be told the clip was never kept.
+    func testTheShortfallReasonCoversADamagedTakeAndAMissingOne() {
+        XCTAssertEqual(CompareClipAvailability.only(.earlier, a)
+            .shortfallDetail?.contains("damaged"), true)
+    }
+
+    /// Narrowing never invents a clip: a side the store never had cannot come
+    /// back because a player was somehow reported for it.
+    func testNarrowingCannotResurrectAClipTheStoreNeverHad() {
+        let earlierOnly = CompareClipAvailability.only(.earlier, a)
+        XCTAssertEqual(earlierOnly.limited(toPlayable: [.earlier, .later]), earlierOnly)
+        XCTAssertEqual(earlierOnly.limited(toPlayable: [.later]), .neither)
+        XCTAssertEqual(CompareClipAvailability.neither
+            .limited(toPlayable: [.earlier, .later]), .neither)
     }
 
     /// Whatever is missing, the numbers are still the screen's floor — every
