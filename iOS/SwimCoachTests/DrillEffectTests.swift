@@ -17,18 +17,42 @@ final class DrillEffectTests: XCTestCase {
                          swimmer: swimmer)
     }
 
+    /// `practices` are untagged taps at those dates; `taps` when a test
+    /// needs to say who made them.
     private func readout(fixes: [String]? = nil,
                          practices: [Date]? = nil,
+                         taps: [DrillEffect.Practice]? = nil,
                          swims: [DrillEffect.Swim],
                          swimmer: String = "") -> DrillEffect.Result {
-        DrillEffect.result(fixes: fixes ?? self.fixes,
-                           practiceDates: practices ?? [start],
-                           swims: swims,
-                           activeSwimmer: swimmer)
+        DrillEffect.result(
+            fixes: fixes ?? self.fixes,
+            practices: taps ?? (practices ?? [start]).map { DrillEffect.Practice(date: $0) },
+            swims: swims,
+            activeSwimmer: swimmer)
+    }
+
+    private func tap(_ days: Double, swimmer: String = "") -> DrillEffect.Practice {
+        DrillEffect.Practice(date: start.addingTimeInterval(days * 86_400),
+                             swimmer: swimmer)
     }
 
     private func hit(_ days: Double) -> DrillEffect.Swim { swim(days, ["low_kick_rate"]) }
     private func clean(_ days: Double) -> DrillEffect.Swim { swim(days, ["body_sag"]) }
+
+    /// Swims of movement a verdict actually costs at the minimum sample:
+    /// the fewest whose rate change clears `threshold`. Derived, so these
+    /// fixtures follow the gate instead of pinning today's numbers.
+    private var swimsForAVerdict: Int {
+        Int((DrillEffect.threshold * Double(DrillEffect.minSwims)).rounded(.up))
+    }
+
+    /// `minSwims` swims either side of the tap: all of the baseline shows
+    /// the fault, and `moved` of the swims since do not.
+    private func minimumSample(moved: Int) -> [DrillEffect.Swim] {
+        let before = (1...DrillEffect.minSwims).map { hit(Double(-$0)) }
+        let after = (1...DrillEffect.minSwims).map { $0 <= moved ? clean(Double($0)) : hit(Double($0)) }
+        return before + after
+    }
 
     // MARK: - Verdicts
 
@@ -77,26 +101,38 @@ final class DrillEffectTests: XCTestCase {
 
     // MARK: - Minimum-sample boundary
 
-    func testExactlyThreeSwimsEachSideIsEnough() {
-        let result = readout(swims: [hit(-3), hit(-2), hit(-1),
-                                     clean(1), clean(2), clean(3)])
-        guard case .measured = result else { return XCTFail("3 a side must be measurable, got \(result)") }
+    func testThresholdOutrunsOneSwimAtTheMinimumSample() {
+        // The coupling `DrillEffect` documents as load-bearing, asserted so
+        // that loosening one constant cannot quietly break the other: at
+        // `minSwims` a single swim moves the rate by 1/minSwims, and that
+        // has to sit BELOW `threshold` or one good or bad day becomes a
+        // verdict. Lowering minSwims to 2 (0.5 ≥ 0.34) fails here first.
+        XCTAssertGreaterThan(
+            DrillEffect.threshold, 1.0 / Double(DrillEffect.minSwims),
+            "one swim at the minimum sample would clear the threshold on its own")
+        XCTAssertGreaterThanOrEqual(
+            swimsForAVerdict, 2,
+            "a verdict must always rest on at least two swims' worth of movement")
+    }
+
+    func testExactlyTheMinimumSampleEachSideIsEnough() {
+        let result = readout(swims: minimumSample(moved: DrillEffect.minSwims))
+        guard case .measured = result else {
+            return XCTFail("\(DrillEffect.minSwims) a side must be measurable, got \(result)")
+        }
     }
 
     func testOneSwimOfMovementAtTheMinimumSampleStaysUnchanged() {
-        // 3/3 → 2/3 is a 33-point move: one swim, below the 34-point bar.
-        // This is the whole point of the gate — a single bad day cannot
-        // produce a verdict.
-        let result = readout(swims: [hit(-3), hit(-2), hit(-1),
-                                     hit(1), hit(2), clean(3)])
+        // One swim of movement, whatever the sample size is set to. This is
+        // the whole point of the gate — a single bad day cannot produce a
+        // verdict — and it holds for exactly as long as the coupling above.
+        let result = readout(swims: minimumSample(moved: 1))
         guard case .measured(let r) = result else { return XCTFail("expected a verdict, got \(result)") }
         XCTAssertEqual(r.verdict, .unchanged)
     }
 
-    func testTwoSwimsOfMovementAtTheMinimumSampleIsAVerdict() {
-        // 3/3 → 1/3 is a 67-point move: two swims, clears the bar.
-        let result = readout(swims: [hit(-3), hit(-2), hit(-1),
-                                     hit(1), clean(2), clean(3)])
+    func testTheSmallestMovementThatEarnsAVerdictIsAVerdict() {
+        let result = readout(swims: minimumSample(moved: swimsForAVerdict))
         guard case .measured(let r) = result else { return XCTFail("expected a verdict, got \(result)") }
         XCTAssertEqual(r.verdict, .lessOften)
     }
@@ -172,7 +208,111 @@ final class DrillEffectTests: XCTestCase {
         XCTAssertEqual(r.afterHits, 1)
     }
 
-    // MARK: - Swimmer scope
+    // MARK: - Swimmer scope: the boundary
+
+    func testAnotherSwimmersTapDoesNotStartTheDrillForYou() {
+        // The v1.46 failure: Maya marks Fist Drill done once, Arnav never
+        // touches it. Splitting his swims on her tap reported "showing up
+        // less … before you started" to a swimmer who never started.
+        let swims = [swim(-9, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(-6, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(-3, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(1, ["body_sag"], swimmer: "Arnav"),
+                     swim(4, ["body_sag"], swimmer: "Arnav"),
+                     swim(7, ["body_sag"], swimmer: "Arnav"),
+                     swim(-2, ["body_sag"], swimmer: "Maya"),
+                     swim(2, ["body_sag"], swimmer: "Maya")]
+        XCTAssertEqual(readout(taps: [tap(0, swimmer: "Maya")],
+                               swims: swims, swimmer: "Arnav"),
+                       .notEnough(.neverPractised))
+        // And with his own tap, the same swims do produce his read-out.
+        guard case .measured = readout(taps: [tap(0, swimmer: "Maya"), tap(0, swimmer: "Arnav")],
+                                       swims: swims, swimmer: "Arnav")
+        else { return XCTFail("Arnav's own tap must still set his boundary") }
+    }
+
+    func testEachSwimmersOwnTapSetsTheirOwnBoundary() {
+        // Maya started five days before Arnav. Each card must split on its
+        // own owner's tap: on the other's, Arnav is short a baseline and
+        // Maya has nothing since.
+        let swims = [swim(-9, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(-6, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(-3, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(1, ["body_sag"], swimmer: "Arnav"),
+                     swim(4, ["body_sag"], swimmer: "Arnav"),
+                     swim(7, ["body_sag"], swimmer: "Arnav"),
+                     swim(-9, ["low_kick_rate"], swimmer: "Maya"),
+                     swim(-8, ["low_kick_rate"], swimmer: "Maya"),
+                     swim(-7, ["low_kick_rate"], swimmer: "Maya"),
+                     swim(-4, ["body_sag"], swimmer: "Maya"),
+                     swim(-3, ["body_sag"], swimmer: "Maya"),
+                     swim(-2, ["body_sag"], swimmer: "Maya")]
+        let taps = [tap(0, swimmer: "Arnav"), tap(-5, swimmer: "Maya")]
+
+        guard case .measured(let arnav) = readout(taps: taps, swims: swims, swimmer: "Arnav")
+        else { return XCTFail("expected a verdict for Arnav") }
+        XCTAssertEqual(arnav.beforeTotal, 3)
+        XCTAssertEqual(arnav.afterTotal, 3)
+        XCTAssertEqual(arnav.verdict, .lessOften)
+
+        guard case .measured(let maya) = readout(taps: taps, swims: swims, swimmer: "Maya")
+        else { return XCTFail("expected a verdict for Maya") }
+        XCTAssertEqual(maya.beforeTotal, 3)
+        XCTAssertEqual(maya.afterTotal, 3)
+        XCTAssertEqual(maya.verdict, .lessOften)
+    }
+
+    func testUntaggedLegacyTapsCountForEveryoneOnly() {
+        // Taps recorded before `DrillPracticeEvent.swimmer` existed migrate
+        // in untagged. A one-swimmer phone reads them under the empty scope
+        // — nothing regresses there. A named swimmer cannot: an untagged
+        // tap has no recoverable owner, and lending it out is exactly the
+        // fabricated "before you started" this fix removes. Silence until
+        // they tap once themselves.
+        let swims = [swim(-3, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(-2, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(-1, ["low_kick_rate"], swimmer: "Arnav"),
+                     swim(1, ["body_sag"], swimmer: "Arnav"),
+                     swim(2, ["body_sag"], swimmer: "Arnav"),
+                     swim(3, ["body_sag"], swimmer: "Arnav"),
+                     swim(-1, ["body_sag"], swimmer: "Maya"),
+                     swim(1, ["body_sag"], swimmer: "Maya")]
+        let legacy = [tap(0)]
+        guard case .measured = readout(taps: legacy, swims: swims)
+        else { return XCTFail("an untagged tap must still count for everyone") }
+        XCTAssertEqual(readout(taps: legacy, swims: swims, swimmer: "Arnav"),
+                       .notEnough(.neverPractised))
+    }
+
+    func testAStaleNameReadsUntaggedTapsAgain() {
+        // Scope resolution mirrors the swims side: a name the library does
+        // not know falls back to everyone, taps included, so a renamed or
+        // deleted swimmer does not blank every card.
+        let swims = [hit(-3), hit(-2), hit(-1), clean(1), clean(2), clean(3)]
+        guard case .measured = readout(taps: [tap(0)], swims: swims, swimmer: "Deleted")
+        else { return XCTFail("expected the fallback to still produce a verdict") }
+    }
+
+    func testPracticeTallyFollowsTheSameScopeAsTheReadout() {
+        // The card's PRACTICED count and START HERE pick run through the
+        // same ownership rule, so no card can count taps it is not allowed
+        // to draw a boundary from.
+        let events = [DrillPracticeEvent(drillID: "fist-drill", date: start, swimmer: "Maya"),
+                      DrillPracticeEvent(drillID: "fist-drill",
+                                         date: start.addingTimeInterval(-86_400),
+                                         swimmer: "Arnav"),
+                      DrillPracticeEvent(drillID: "fist-drill",
+                                         date: start.addingTimeInterval(-2 * 86_400))]
+        func count(_ scope: String) -> Int {
+            DrillPractice.summary(for: "fist-drill",
+                                  events: DrillPractice.scoped(events, to: scope)).count
+        }
+        XCTAssertEqual(count("Arnav"), 1)
+        XCTAssertEqual(count("Maya"), 1)
+        XCTAssertEqual(count(""), 3, "everyone sees every tap, untagged included")
+    }
+
+    // MARK: - Swimmer scope: the statistic
 
     func testOnlyTheActiveSwimmersSwimsCount() {
         let swims = [
@@ -190,18 +330,20 @@ final class DrillEffectTests: XCTestCase {
             swim(2, ["low_kick_rate"], swimmer: "Maya"),
             swim(3, ["low_kick_rate"], swimmer: "Maya"),
         ]
-        guard case .measured(let arnav) = readout(swims: swims, swimmer: "Arnav")
+        // Both marked the drill done the same day, so only the swims differ.
+        let taps = [tap(0, swimmer: "Arnav"), tap(0, swimmer: "Maya")]
+        guard case .measured(let arnav) = readout(taps: taps, swims: swims, swimmer: "Arnav")
         else { return XCTFail("expected a verdict for Arnav") }
         XCTAssertEqual(arnav.verdict, .lessOften)
         XCTAssertEqual(arnav.beforeTotal, 3)
         XCTAssertEqual(arnav.afterTotal, 3)
 
-        guard case .measured(let maya) = readout(swims: swims, swimmer: "Maya")
+        guard case .measured(let maya) = readout(taps: taps, swims: swims, swimmer: "Maya")
         else { return XCTFail("expected a verdict for Maya") }
         XCTAssertEqual(maya.verdict, .moreOften)
 
         // Unscoped, the two cancel to no movement.
-        guard case .measured(let everyone) = readout(swims: swims)
+        guard case .measured(let everyone) = readout(taps: taps, swims: swims)
         else { return XCTFail("expected a verdict for everyone") }
         XCTAssertEqual(everyone.verdict, .unchanged)
         XCTAssertEqual(everyone.beforeTotal, 6)
@@ -218,6 +360,30 @@ final class DrillEffectTests: XCTestCase {
         XCTAssertEqual(DrillEffect.scoped(swims, to: "Deleted").count, 6)
         guard case .measured = readout(swims: swims, swimmer: "Deleted")
         else { return XCTFail("expected the fallback to still produce a verdict") }
+    }
+
+    // MARK: - Not loaded yet
+
+    func testTheReadoutIsWithheldUntilTheSwimsAreLoaded() throws {
+        // `DrillsView.swims` fills in on appearance, which is after the
+        // first body pass. Rendering that pass off an empty array told every
+        // practised drill "No swims on record from before you started" — a
+        // factual claim about the swimmer's history standing in for "not
+        // read yet".
+        let drill = try XCTUnwrap(DrillCatalog.all.first)
+        let tapped = [DrillPracticeEvent(drillID: drill.id, date: start)]
+        XCTAssertNil(DrillsView.readout(for: drill, events: tapped,
+                                        swims: nil, activeSwimmer: ""),
+                     "no row at all until the swims are in")
+        XCTAssertEqual(DrillsView.readout(for: drill, events: tapped,
+                                          swims: [], activeSwimmer: ""),
+                       .notEnough(.tooFewBefore(have: 0)),
+                       "an empty library really does mean no baseline")
+        // Never marked done needs no swims to answer, so the invitation
+        // still renders on the first pass rather than popping in.
+        XCTAssertEqual(DrillsView.readout(for: drill, events: [],
+                                          swims: nil, activeSwimmer: ""),
+                       .notEnough(.neverPractised))
     }
 
     // MARK: - Legacy rows

@@ -3,6 +3,25 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.47.1] — 2026-08-08
+
+### Fixed
+- **A drill read-out now describes one swimmer, start to finish.** Marking
+  a drill done recorded who did it only from now on — before, one person's
+  tap set the "since you started" date on everyone else's card, so a
+  swimmer who had never touched a drill could be shown a confident verdict
+  measured from somebody else's practice. Taps are stamped with the
+  selected swimmer and counted alongside their own swims. Practice counts
+  and START HERE follow the same rule.
+- Taps recorded before this release have no owner, so they count under
+  Everyone. On a phone with one swimmer — where the name chips never
+  appear — nothing changes at all.
+- Drill cards no longer flash "no swims on record from before you started"
+  for a moment on opening. That sentence was about a history the screen
+  had not finished reading; it now waits.
+- The compare demo's trimmed clip no longer lands in the unfinished-takes
+  list, where the app offered back a lap nobody filmed. Debug builds only.
+
 ## [1.47.0] — 2026-08-08 — "Side by Side"
 
 ### Added

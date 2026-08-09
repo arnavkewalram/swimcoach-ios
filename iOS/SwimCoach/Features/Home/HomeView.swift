@@ -24,6 +24,10 @@ struct HomeView: View {
     #if DEBUG
     @State private var showFilePicker = false
     @State private var docsVideoURL: URL? = nil
+    /// File name the compare demo last wrote into the session store, so the
+    /// next visit to Home can take it back out again. See
+    /// `sweepDemoCompareClip`.
+    @AppStorage("debugDemoCompareClipName") private var demoCompareClipName: String = ""
     #endif
 
     /// Sheets presented synchronously in onAppear can silently no-op on
@@ -316,6 +320,9 @@ struct HomeView: View {
             if args.contains("-seedUnfinishedTakes") {
                 seedUnfinishedTakes()
             }
+            // Before the takes list is derived, not after: the demo clip is
+            // not a lap anybody filmed, so it must never reach it.
+            sweepDemoCompareClip()
             refreshUnfinishedTakes()
             if router.path.isEmpty {
                 if args.contains("-demoResultsSaved") {
@@ -527,9 +534,13 @@ struct HomeView: View {
         ]
         for entry in log {
             for daysAgo in entry.daysAgo {
+                // Stamped like a real tap, and with the swimmer the seeded
+                // sessions carry — the fixture has to survive its own
+                // scoping rule, not just the default "everyone" scope.
                 modelContext.insert(DrillPracticeEvent(
                     drillID: entry.drill,
-                    date: now.addingTimeInterval(-daysAgo * 86_400)))
+                    date: now.addingTimeInterval(-daysAgo * 86_400),
+                    swimmer: "Arnav"))
             }
         }
     }
@@ -561,13 +572,31 @@ struct HomeView: View {
             // 5-second cut of the 8-second bundled clip, so the band has a
             // real length mismatch to hold together.
             Task {
-                earlier.videoFileName = await Self.trimmedDemoClip(
-                    id: earlier.id, seconds: 5)
+                sweepDemoCompareClip()
+                let name = await Self.trimmedDemoClip(id: earlier.id, seconds: 5)
+                demoCompareClipName = name ?? ""
+                earlier.videoFileName = name
                 router.push(.compare(earlier: earlier, later: later))
             }
         default:
             router.push(.compare(earlier: earlier, later: later))
         }
+    }
+
+    /// Take the compare demo's clip back out of the session store.
+    ///
+    /// `trimmedDemoClip` writes into the real store under
+    /// `AnalysisResult.demoEarlier.id` — a fresh UUID every launch — and no
+    /// `SwimSession` ever claims it, so `UnfinishedTakes` classified it as a
+    /// recoverable take and Home offered the user back a lap they never
+    /// filmed, one more per `-demoCompare both` launch, each held for a
+    /// week. Sweeping on every Home appearance means the file exists only
+    /// while the demo that needs it is on screen, and the name is remembered
+    /// across launches so a clip written before a crash is still collected.
+    private func sweepDemoCompareClip() {
+        guard !demoCompareClipName.isEmpty else { return }
+        SessionVideoStore.delete(fileName: demoCompareClipName)
+        demoCompareClipName = ""
     }
 
     /// A shortened copy of the bundled cartoon, written into the session store
