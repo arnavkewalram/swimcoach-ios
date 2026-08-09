@@ -6,10 +6,17 @@ import SwiftData
 final class DrillPracticeEvent {
     var drillID: String
     var date: Date
+    /// Who tapped, stamped from `activeSwimmer`. Empty means untagged —
+    /// the same shape and the same meaning as `SwimSession.swimmer`, and
+    /// what every tap recorded before this column existed migrates in as
+    /// (defaulted, so the SwiftData migration is lossless). `DrillEffect`
+    /// owns what an untagged tap counts for; see its doc.
+    var swimmer: String = ""
 
-    init(drillID: String, date: Date = Date()) {
+    init(drillID: String, date: Date = Date(), swimmer: String = "") {
         self.drillID = drillID
         self.date = date
+        self.swimmer = swimmer
     }
 }
 
@@ -18,6 +25,13 @@ enum DrillPractice {
     struct Summary: Equatable {
         let count: Int
         let lastDate: Date?
+    }
+
+    /// The taps that count inside `scope`, by `DrillEffect`'s one ownership
+    /// rule — so the card's PRACTICED tally, its START HERE pick and its
+    /// read-out are all describing the same swimmer's practice.
+    static func scoped(_ events: [DrillPracticeEvent], to scope: String) -> [DrillPracticeEvent] {
+        events.filter { DrillEffect.belongs($0.swimmer, to: scope) }
     }
 
     static func summary(for drillID: String, events: [DrillPracticeEvent]) -> Summary {

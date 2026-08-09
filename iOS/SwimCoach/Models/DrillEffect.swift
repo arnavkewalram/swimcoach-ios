@@ -30,6 +30,29 @@ import Foundation
 /// verdict always takes at least two swims' worth of movement — a single
 /// good or bad day can never produce one. Deliberately conservative: a
 /// swimmer may retune their training off this, so silence beats noise.
+/// The `threshold > 1/minSwims` coupling is load-bearing, so it is pinned
+/// by a test rather than left to this comment.
+///
+/// **Scope — one swimmer's taps against that same swimmer's swims.** The
+/// boundary and the statistic are filtered by ONE rule (`belongs(_:to:)`),
+/// applied inside `result`, so a caller cannot scope one and not the
+/// other: an item counts when the scope is empty — "Everyone", and every
+/// single-swimmer phone, whose chips never appear — or when it carries the
+/// scope's name. A name the swim library does not recognise (a swimmer
+/// renamed away, or whose sessions were deleted) resolves back to
+/// "Everyone" rather than blanking every card.
+///
+/// Untagged taps (`swimmer == ""`) therefore count in the Everyone scope
+/// only. That is what `DrillPracticeEvent.swimmer` migrates in as, so on a
+/// one-swimmer phone nothing changes: the scope is always "" there, and
+/// every legacy tap still counts. On a phone with two swimmers a legacy
+/// tap has no recoverable owner, and lending it to whoever is selected
+/// would put a stranger's "started" date under copy written in the second
+/// person ("before you started"). Those drills read "Not tracked yet" for
+/// a named swimmer until they mark the drill done once — silence, which
+/// this file already prefers to a verdict it cannot stand behind, and it
+/// heals on the next tap. No copy softening is needed as a result: every
+/// boundary a named swimmer is shown is one of their own taps.
 ///
 /// No significance test is run on purpose. Consecutive swims by one
 /// swimmer are not independent draws, so a p-value here would be false
@@ -53,6 +76,19 @@ enum DrillEffect {
         init(date: Date, issueNames: [String], swimmer: String = "") {
             self.date = date
             self.issueNames = issueNames
+            self.swimmer = swimmer
+        }
+    }
+
+    /// One MARK DONE tap, reduced to what the boundary needs.
+    struct Practice: Equatable {
+        let date: Date
+        /// Whoever was the active swimmer when the tap was recorded. Empty
+        /// means untagged, matching `DrillPracticeEvent.swimmer`.
+        let swimmer: String
+
+        init(date: Date, swimmer: String = "") {
+            self.date = date
             self.swimmer = swimmer
         }
     }
@@ -101,19 +137,24 @@ enum DrillEffect {
     ///
     /// - Parameters:
     ///   - fixes: the drill's targeted FeedbackEngine issue names.
-    ///   - practiceDates: every MARK DONE tap on this drill, any order.
+    ///   - practices: every MARK DONE tap on this drill, any order, each
+    ///     carrying whoever recorded it. Pass them UNFILTERED — the scope
+    ///     is applied here, to the taps and the swims together, so the
+    ///     boundary and the statistic cannot drift apart.
     ///   - swims: every stored swim, any order. Callers must DROP legacy
     ///     rows they cannot resolve (see `isLegacyRow`) rather than pass
     ///     them in fault-free.
     ///   - activeSwimmer: identity scope; "" means everyone.
     static func result(fixes: [String],
-                       practiceDates: [Date],
+                       practices: [Practice],
                        swims: [Swim],
                        activeSwimmer: String = "") -> Result {
-        guard let started = practiceDates.min() else {
+        let scope = resolvedScope(activeSwimmer, knownSwimmers: swims.map(\.swimmer))
+        let taps = practices.filter { belongs($0.swimmer, to: scope) }
+        guard let started = taps.map(\.date).min() else {
             return .notEnough(.neverPractised)
         }
-        let scoped = scoped(swims, to: activeSwimmer)
+        let scoped = swims.filter { belongs($0.swimmer, to: scope) }
         let targets = Set(fixes)
         func hits(_ swims: [Swim]) -> Int {
             swims.filter { !targets.isDisjoint(with: $0.issueNames) }.count
@@ -148,15 +189,31 @@ enum DrillEffect {
                                  afterHits: afterHits, afterTotal: after.count))
     }
 
-    /// Swims belonging to the active swimmer. Mirrors `HomeView`: "" is
-    /// everyone, and a swimmer with no swims at all falls back to everyone
-    /// rather than reporting a false "no baseline" on every card — the same
-    /// stale-name guard the Home focus fault already uses, so the two
-    /// surfaces cannot disagree about whose training they are describing.
+    /// Does an item recorded by `owner` count inside `scope`?
+    ///
+    /// The one ownership test in the read-out — swims, taps and the drill
+    /// card's practice tally all ask it, which is what keeps the boundary
+    /// and the statistic describing the same person. An empty scope takes
+    /// everything; a named scope takes its own name only, untagged items
+    /// excluded (see the type's doc for why legacy taps are not lent out).
+    static func belongs(_ owner: String, to scope: String) -> Bool {
+        scope.isEmpty || owner == scope
+    }
+
+    /// The scope actually applied, after resolving a name the data no
+    /// longer knows. Mirrors `HomeView`: "" is everyone, and a swimmer with
+    /// no swims at all falls back to everyone rather than reporting a false
+    /// "no baseline" on every card — the same stale-name guard the Home
+    /// focus fault already uses, so the two surfaces cannot disagree about
+    /// whose training they are describing.
+    static func resolvedScope(_ swimmer: String, knownSwimmers: [String]) -> String {
+        knownSwimmers.contains(swimmer) ? swimmer : ""
+    }
+
+    /// Swims belonging to the active swimmer, stale names resolved.
     static func scoped(_ swims: [Swim], to swimmer: String) -> [Swim] {
-        guard !swimmer.isEmpty else { return swims }
-        let mine = swims.filter { $0.swimmer == swimmer }
-        return mine.isEmpty ? swims : mine
+        let scope = resolvedScope(swimmer, knownSwimmers: swims.map(\.swimmer))
+        return swims.filter { belongs($0.swimmer, to: scope) }
     }
 
     /// True for a session saved before `SwimSession.issueNames` existed:

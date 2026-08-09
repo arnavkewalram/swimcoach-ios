@@ -15,11 +15,27 @@ struct DrillsView: View {
     /// read-out. Hoisted into state and refreshed on appearance because
     /// resolving legacy rows can decode result blobs — nothing behind this
     /// screen writes a session, so once per visit is enough.
-    @State private var swims: [DrillEffect.Swim] = []
+    ///
+    /// `nil` until that first pass runs. An empty array here would be read
+    /// as "this swimmer has no swims", which is a claim about their history
+    /// rather than about a load that has not happened yet.
+    @State private var swims: [DrillEffect.Swim]? = nil
 
     private var highlightedIDs: Set<String> {
         guard let issue = highlightIssue else { return [] }
         return Set(DrillCatalog.drills(fixing: issue).map(\.id))
+    }
+
+    /// Whose practice this screen is describing. Resolved off the session
+    /// list rather than `swims` so it is stable before the first load, and
+    /// by the same rule `DrillEffect` applies to the read-out.
+    private var scope: String {
+        DrillEffect.resolvedScope(activeSwimmer, knownSwimmers: sessions.map(\.swimmer))
+    }
+
+    /// This swimmer's taps — everything the cards count.
+    private var scopedEvents: [DrillPracticeEvent] {
+        DrillPractice.scoped(practiceEvents, to: scope)
     }
 
     /// Of the fixing drills, the one most due for practice — the scroll
@@ -28,7 +44,7 @@ struct DrillsView: View {
         guard let issue = highlightIssue else { return nil }
         return DrillPractice.leastRecentlyPracticed(
             of: DrillCatalog.drills(fixing: issue).map(\.id),
-            events: practiceEvents)
+            events: scopedEvents)
     }
 
     /// Stored swims in `DrillEffect`'s vocabulary. Sessions saved before
@@ -51,14 +67,38 @@ struct DrillsView: View {
         }
     }
 
-    private func effect(for drill: Drill) -> DrillEffect.Result {
-        DrillEffect.result(
+    /// The card's read-out, or nil while there is nothing honest to say.
+    ///
+    /// Taps go in unfiltered: `DrillEffect.result` scopes them and the
+    /// swims together, so the boundary and the statistic are one swimmer's.
+    ///
+    /// Static and value-only so the withheld-until-loaded rule is testable
+    /// without standing up the view.
+    static func readout(for drill: Drill,
+                        events: [DrillPracticeEvent],
+                        swims: [DrillEffect.Swim]?,
+                        activeSwimmer: String) -> DrillEffect.Result? {
+        let result = DrillEffect.result(
             fixes: drill.fixes,
-            practiceDates: practiceEvents.compactMap {
-                $0.drillID == drill.id ? $0.date : nil
+            practices: events.compactMap {
+                $0.drillID == drill.id
+                    ? DrillEffect.Practice(date: $0.date, swimmer: $0.swimmer)
+                    : nil
             },
-            swims: swims,
+            swims: swims ?? [],
             activeSwimmer: activeSwimmer)
+        // Before the swims land, the only answer that does not depend on
+        // them is "never marked done" — every other one would be a sentence
+        // about the swimmer's history built from an empty array.
+        guard swims != nil || result == .notEnough(.neverPractised) else { return nil }
+        return result
+    }
+
+    private func effect(for drill: Drill) -> DrillEffect.Result? {
+        Self.readout(for: drill,
+                     events: practiceEvents,
+                     swims: swims,
+                     activeSwimmer: activeSwimmer)
     }
 
     var body: some View {
@@ -85,11 +125,17 @@ struct DrillsView: View {
                                     isHighlighted: highlightedIDs.contains(drill.id),
                                     isStartHere: drill.id == startHereID,
                                     practice: DrillPractice.summary(
-                                        for: drill.id, events: practiceEvents),
+                                        for: drill.id, events: scopedEvents),
                                     effect: effect(for: drill),
                                     onMarkDone: {
+                                        // Stamped with the swimmer the rest
+                                        // of the screen is scoped to — the
+                                        // resolved one, so a stale name is
+                                        // recorded as the "everyone" the
+                                        // card was actually showing.
                                         modelContext.insert(
-                                            DrillPracticeEvent(drillID: drill.id))
+                                            DrillPracticeEvent(drillID: drill.id,
+                                                               swimmer: scope))
                                         Haptics.tap()
                                     })
                                     .id(drill.id)
@@ -134,7 +180,9 @@ private struct DrillCard: View {
     let isHighlighted: Bool
     var isStartHere: Bool = false
     let practice: DrillPractice.Summary
-    let effect: DrillEffect.Result
+    /// nil while the swim history is still loading — the row stays away
+    /// rather than claiming a history nobody has read yet.
+    let effect: DrillEffect.Result?
     let onMarkDone: () -> Void
 
     var body: some View {
@@ -196,7 +244,9 @@ private struct DrillCard: View {
                 }
             }
 
-            DrillEffectRow(effect: effect)
+            if let effect {
+                DrillEffectRow(effect: effect)
+            }
 
             HStack {
                 if practice.count > 0, let last = practice.lastDate {
