@@ -52,6 +52,42 @@ final class SmokeUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Pull-Buoy Pull"].exists)
     }
 
+    /// The drill read-out speaks in two registers and they must not collapse
+    /// into one: a measured verdict states itself as a chip, a refusal to
+    /// answer states itself as prose. They used to render byte-identically,
+    /// so `testDrillsRendersLibrary` — which only proves the cards load —
+    /// would have watched the distinction disappear without a word.
+    ///
+    /// Both are asserted from the seeded fixture, which lands one of each on
+    /// a known card, and the screenshot is attached so the visual difference
+    /// is reviewable at whatever text size the run used.
+    func testDrillReadoutKeepsVerdictsAndRefusalsInDifferentRegisters() {
+        let app = launch(["-seedDrillPractice", "-openDrills"])
+        XCTAssertTrue(app.staticTexts["Fingertip Drag"].waitForExistence(timeout: 10))
+
+        // Card 01 has never been marked done: a refusal, set as prose.
+        XCTAssertTrue(labelled(app, "Not tracked yet").exists,
+                      "the refusal register vanished from the never-practised card")
+
+        // Card 03's faults advanced after the first tap: a verdict, in a chip.
+        let verdict = labelled(app, "Showing up more")
+        XCTAssertTrue(scroll(app, to: verdict, maxSwipes: 12),
+                      "no measured verdict ever came into view")
+        let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        shot.name = "drill-verdict-chip"
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
+    /// Match on label content rather than element type: the drill card
+    /// combines its children, so the read-out's words arrive folded into the
+    /// card's own label rather than as free-standing static text.
+    private func labelled(_ app: XCUIApplication, _ text: String) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS[c] %@", text))
+            .firstMatch
+    }
+
     func testAboutRendersVersionAndPrivacy() {
         let app = launch(["-openAbout"])
         XCTAssertTrue(app.staticTexts["PRIVACY"].waitForExistence(timeout: 10))

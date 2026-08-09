@@ -113,6 +113,31 @@ final class ColorContrastTests: XCTestCase {
         }
     }
 
+    /// The drill read-out's chip tints, measured where they are actually
+    /// painted: 9pt tracked caps on a card, so `DS.surface`, so 4.5:1.
+    ///
+    /// Also pins that the flat verdict is tinted APART from the two movement
+    /// verdicts. SHOWING UP LESS earns pine green; ABOUT THE SAME earns
+    /// nothing, and must not be able to drift into a severity tint and start
+    /// reading as good or bad news.
+    func testDrillVerdictChipTintsClearAAAndStayDistinct() {
+        let tones: [(String, DrillEffectPresentation.Tone)] = [
+            ("receding", .receding), ("advancing", .advancing), ("flat", .flat),
+        ]
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            for (name, tone) in tones {
+                assertContrast(tone.color, on: stockOrRaised, style: style,
+                               atLeast: 4.5, token: "DrillEffectPresentation.Tone.\(name)")
+            }
+            let swatches = tones.map { hex(resolve($0.1.color, style)) }
+            XCTAssertEqual(Set(swatches).count, tones.count,
+                           "the drill verdict tones collapsed in "
+                           + "\(style == .dark ? "DARK" : "LIGHT"): \(swatches). "
+                           + "A verdict that measured no movement must not wear "
+                           + "the colour of one that did.")
+        }
+    }
+
     /// Clearing AA is not the same as having a hierarchy.
     ///
     /// Light tertiary used to measure 2.50:1 on paper. Lifting it to the 5:1
