@@ -3,6 +3,19 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.47.2] — 2026-08-08
+
+### Fixed
+- **A clip that won't open no longer looks like a clip that's playing.** If
+  a stored take was damaged — a recording interrupted partway through
+  saving, say — Compare drew a black pane with a live player behind it, a
+  transport frozen at `0:00 / 0:00`, and no explanation anywhere on screen.
+  A side now counts as having a clip only once its clip actually opens, so
+  the pane, its label, its timecode, its spoken description and the
+  explanation card can't disagree about what you're looking at.
+- The "clip missing" card now appears for a damaged clip too, not only an
+  absent one, and says so — the file may still be on your phone.
+
 ## [1.47.1] — 2026-08-08
 
 ### Fixed
