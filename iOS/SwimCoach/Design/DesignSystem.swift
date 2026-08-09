@@ -244,6 +244,60 @@ struct LaneRule: View {
     }
 }
 
+// MARK: - Verdict chip
+
+/// The house chip: a tracked all-caps finding, tinted, inside a hairline
+/// outline of the same tint at 55%.
+///
+/// This mark is already the app's word for "we measured this and here is
+/// the answer" — Compare states NEW / RESOLVED / SAME with it, History a
+/// week streak, Home a met goal, Results a severity. It is codified here so
+/// a new surface reuses the vocabulary instead of forking it, and so the
+/// converse holds as a rule: **anything the app did not measure must not
+/// wear one.** Drills leaned on that converse first — its measured verdicts
+/// and its refusals to answer used to render byte-identically, which made
+/// "we looked, nothing moved" indistinguishable from "we don't know".
+///
+/// `icon` is the optional direction mark that rides ahead of the label.
+struct VerdictChip: View {
+    let text: String
+    var icon: String? = nil
+    let tint: Color
+
+    /// 9pt at the default text size — the size every hand-rolled instance
+    /// of this chip already uses, so adopting it changes no pixels there.
+    static let baseSize: CGFloat = 9
+    /// Growth stops here. A chip is a fixed-width mark parked at the end of
+    /// a row; left uncapped, a three-word verdict at AX5 is wider than the
+    /// card that holds it, and no amount of wrapping makes that a chip.
+    static let maxSize: CGFloat = 13
+
+    @ScaledMetric(relativeTo: .caption2) private var scaled: CGFloat = VerdictChip.baseSize
+
+    /// Type size after the cap, and the factor the geometry rides on so the
+    /// outline keeps its proportions instead of strangling the label.
+    private var size: CGFloat { min(scaled, Self.maxSize) }
+    private var growth: CGFloat { size / Self.baseSize }
+
+    var body: some View {
+        HStack(spacing: 4 * growth) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: size - 1, weight: .bold))
+                    .accessibilityHidden(true)
+            }
+            Text(text)
+                .font(.custom(GroteskWeight.medium.postScriptName, size: size))
+                .tracking(1.2)
+        }
+        .foregroundStyle(tint)
+        .padding(.horizontal, 7 * growth)
+        .padding(.vertical, 4 * growth)
+        .overlay(RoundedRectangle(cornerRadius: 4 * growth)
+            .stroke(tint.opacity(0.55), lineWidth: 1))
+    }
+}
+
 // MARK: - Severity badge
 
 struct SeverityBadge: View {

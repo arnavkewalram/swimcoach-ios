@@ -253,7 +253,12 @@ private struct DrillCard: View {
                     Text("PRACTICED \(practice.count)× · LAST \(last.formatted(.dateTime.day().month()).uppercased())")
                         .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
                         .tracking(1.0)
-                        .foregroundStyle(DS.severityMinor)
+                        // A tally, not a verdict. It used to be pine green —
+                        // the same token SHOWING UP LESS wears — so a plain
+                        // count of taps read as good news about the swimmer's
+                        // faults. Whether the drill is working is the row
+                        // above's job, and only it gets to answer in colour.
+                        .foregroundStyle(DS.inkTertiary)
                 }
                 Spacer()
                 Button(action: onMarkDone) {
@@ -286,79 +291,104 @@ private struct DrillCard: View {
     }
 }
 
+// MARK: - "Is it working?" presentation
+//
+// Which of two registers the read-out speaks in. Split out as a value so
+// the distinction is pinned by a test rather than by whichever branch of a
+// view body happened to run: `.measured` and `.notEnough` used to render
+// byte-identically — ABOUT THE SAME and NOT ENOUGH SWIMS YET both landed on
+// RGB(60,66,75) — so a statistical answer and a refusal to give one were
+// indistinguishable. `DrillEffect`'s whole posture is that silence beats
+// noise; that has to be visible, or the honesty is only in the source.
+
+enum DrillEffectPresentation: Equatable {
+    /// A measured finding. Wears the app's `VerdictChip`, because the chip
+    /// is what this app says when it has actually measured something.
+    case verdict(label: String, arrow: String?, tone: Tone,
+                 detail: String, caveat: String?)
+    /// No verdict, and why not. Prose in the quietest ink tier: no rule, no
+    /// question label, no answer column, no chip. A refusal to answer is
+    /// not a muted answer, so it does not take the shape of one.
+    case note(headline: String, detail: String)
+
+    /// Semantic tint, kept out of `Color` so the mapping stays comparable.
+    enum Tone: Equatable { case receding, advancing, flat }
+
+    static func of(_ effect: DrillEffect.Result) -> Self {
+        switch effect {
+        case .notEnough(let missing):
+            return .note(headline: missing.headline, detail: missing.detail)
+        case .measured(let readout):
+            // Direction marks reuse the History chart's vocabulary: down-right
+            // for a fault receding, up-right for one advancing, no mark at all
+            // when nothing moved.
+            let (arrow, tone): (String?, Tone)
+            switch readout.verdict {
+            case .lessOften: (arrow, tone) = ("arrow.down.right", .receding)
+            case .moreOften: (arrow, tone) = ("arrow.up.right", .advancing)
+            case .unchanged: (arrow, tone) = (nil, .flat)
+            }
+            return .verdict(label: readout.headline, arrow: arrow, tone: tone,
+                            detail: readout.detail, caveat: readout.caveat)
+        }
+    }
+}
+
+extension DrillEffectPresentation.Tone {
+    var color: Color {
+        switch self {
+        case .receding:  return DS.severityMinor
+        case .advancing: return DS.severityMajor
+        // Compare tints its own SAME chip `inkTertiary`; a measured
+        // non-result reads the same way on both screens.
+        case .flat:      return DS.inkTertiary
+        }
+    }
+}
+
 // MARK: - "Is it working?" read-out
 //
 // The loop-closer: how often this drill's targeted faults appeared before
 // the swimmer first marked it done versus since. Presentational only — the
 // rule, the sample gates and every word of copy live in `DrillEffect`, so
 // this file cannot quietly turn a correlation into a claim.
-//
-// Verdict marks reuse the History chart's vocabulary: a green down-arrow
-// for a fault receding, a red up-arrow for one advancing, and no mark at
-// all when nothing moved.
 private struct DrillEffectRow: View {
     let effect: DrillEffect.Result
 
-    private var headline: String {
-        switch effect {
-        case .notEnough(let missing): return missing.headline
-        case .measured(let readout):  return readout.headline
-        }
-    }
-
-    private var detail: String {
-        switch effect {
-        case .notEnough(let missing): return missing.detail
-        case .measured(let readout):  return readout.detail
-        }
-    }
-
-    private var caveat: String? {
-        guard case .measured(let readout) = effect else { return nil }
-        return readout.caveat
-    }
-
-    /// Direction mark, or nil where there is no movement to point at.
-    private var arrow: String? {
-        guard case .measured(let readout) = effect else { return nil }
-        switch readout.verdict {
-        case .lessOften: return "arrow.down.right"
-        case .moreOften: return "arrow.up.right"
-        case .unchanged: return nil
-        }
-    }
-
-    private var tint: Color {
-        guard case .measured(let readout) = effect else { return DS.inkSecondary }
-        switch readout.verdict {
-        case .lessOften: return DS.severityMinor
-        case .moreOften: return DS.severityMajor
-        case .unchanged: return DS.inkSecondary
-        }
-    }
+    /// Matches `VerdictChip`'s capped growth so the question and its answer
+    /// stay on one typographic level at accessibility sizes.
+    @ScaledMetric(relativeTo: .caption2) private var scaledLabel: CGFloat = VerdictChip.baseSize
+    private var labelSize: CGFloat { min(scaledLabel, VerdictChip.maxSize) }
 
     var body: some View {
-        // A drill never marked done has nothing to compare, so it gets one
-        // quiet inviting line instead of an empty scoreboard — otherwise a
-        // first-run library would be ten identical blank read-outs.
-        if case .notEnough(.neverPractised) = effect {
-            Text(DrillEffect.Missing.neverPractised.detail)
-                .font(.caption2)
-                .foregroundStyle(DS.inkTertiary)
-                .fixedSize(horizontal: false, vertical: true)
-        } else {
+        switch DrillEffectPresentation.of(effect) {
+        case .note(let headline, let detail):
+            // No scoreboard to draw: the app has nothing to report, and a
+            // note in the margin is the honest shape for saying so.
+            VStack(alignment: .leading, spacing: 3) {
+                Text(headline)
+                    .font(.footnote.weight(.semibold))
+                Text(detail)
+                    .font(.caption2)
+                    .lineSpacing(2)
+            }
+            .foregroundStyle(DS.inkTertiary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, 2)
+
+        case .verdict(let label, let arrow, let tone, let detail, let caveat):
             VStack(alignment: .leading, spacing: 6) {
                 Rectangle().fill(DS.border).frame(height: 1)
                     .accessibilityHidden(true)
                 ViewThatFits(in: .horizontal) {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        label
+                        question
                         Spacer(minLength: 10)
-                        status
+                        chip(label, arrow, tone)
                     }
                     VStack(alignment: .leading, spacing: 5) {
-                        label
-                        status
+                        question
+                        chip(label, arrow, tone)
                     }
                 }
                 Text(detail)
@@ -377,26 +407,20 @@ private struct DrillEffectRow: View {
         }
     }
 
-    private var label: some View {
+    private var question: some View {
         Text("IS IT WORKING?")
-            .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
+            .font(.custom(GroteskWeight.medium.postScriptName, size: labelSize))
             .tracking(1.2)
             .foregroundStyle(DS.inkTertiary)
             .fixedSize()
     }
 
-    private var status: some View {
-        HStack(spacing: 4) {
-            if let arrow {
-                Image(systemName: arrow)
-                    .font(.system(size: 8, weight: .bold))
-                    .accessibilityHidden(true)
-            }
-            Text(headline.uppercased())
-                .font(.custom(GroteskWeight.medium.postScriptName, size: 9))
-                .tracking(1.2)
-        }
-        .foregroundStyle(tint)
-        .fixedSize()
+    private func chip(_ label: String, _ arrow: String?,
+                      _ tone: DrillEffectPresentation.Tone) -> some View {
+        VerdictChip(text: label.uppercased(), icon: arrow, tint: tone.color)
+            .fixedSize()
+            // Spoken as authored — the caps are a typographic register, not
+            // an acronym, and VoiceOver need not shout them.
+            .accessibilityLabel(label)
     }
 }

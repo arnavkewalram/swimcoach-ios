@@ -447,6 +447,45 @@ final class DrillEffectTests: XCTestCase {
                        "Only 2 swims on record from before you started this drill — 3 needed to compare against.")
     }
 
+    // MARK: - Presentation register
+
+    /// The screen has exactly two things to say, and they must not look
+    /// alike: a measured verdict, and a refusal to give one. They used to
+    /// render byte-identically — ABOUT THE SAME and NOT ENOUGH SWIMS YET
+    /// both landed on the same ink — which hid the one property
+    /// `DrillEffect` is built around. `.verdict` is the chip register;
+    /// `.note` is prose with no chip at all.
+    func testEveryRefusalToAnswerStaysOutOfTheChipRegister() {
+        let refusals: [DrillEffect.Missing] = [.neverPractised, .faultNotSeen,
+                                               .tooFewBefore(have: 0), .tooFewBefore(have: 2),
+                                               .tooFewAfter(have: 0), .tooFewAfter(have: 1)]
+        for missing in refusals {
+            let presentation = DrillEffectPresentation.of(.notEnough(missing))
+            guard case .note(let headline, let detail) = presentation else {
+                return XCTFail("\(missing) wears a verdict chip — a refusal to "
+                               + "answer must not take the shape of an answer")
+            }
+            XCTAssertEqual(headline, missing.headline)
+            XCTAssertEqual(detail, missing.detail)
+        }
+    }
+
+    func testEveryMeasuredVerdictWearsTheChip() {
+        let expected: [(DrillEffect.Verdict, String?, DrillEffectPresentation.Tone)] = [
+            (.lessOften, "arrow.down.right", .receding),
+            (.moreOften, "arrow.up.right", .advancing),
+            (.unchanged, nil, .flat),
+        ]
+        for (verdict, arrow, tone) in expected {
+            let readout = DrillEffect.Readout(verdict: verdict, beforeHits: 4, beforeTotal: 5,
+                                              afterHits: 1, afterTotal: 6)
+            XCTAssertEqual(DrillEffectPresentation.of(.measured(readout)),
+                           .verdict(label: readout.headline, arrow: arrow, tone: tone,
+                                    detail: readout.detail, caveat: readout.caveat),
+                           "\(verdict) must state itself as a chip")
+        }
+    }
+
     // MARK: - Catalog integration
 
     func testEveryCatalogDrillCanProduceAReadout() {
