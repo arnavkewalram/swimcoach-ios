@@ -3,6 +3,20 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.47.3] — 2026-08-08
+
+### Changed
+- **A drill verdict and a refusal to give one no longer look alike.** "About
+  the same" is a measurement; "not enough swims yet" is the app declining to
+  answer — and they were rendering in identical type at an identical colour.
+  Measured verdicts now wear the same outlined chip Compare uses for its
+  findings. A drill the app can't judge yet drops the scoreboard entirely —
+  no rule, no question, no chip — and says so in a quiet line instead.
+- The distinction survives greyscale: it's carried by the rule, the label,
+  the container, the column and the letterforms at once, not by colour.
+- `PRACTICED n×` is no longer green. It was wearing the exact tint of
+  "showing up less", so a neutral count read as good news.
+
 ## [1.47.2] — 2026-08-08
 
 ### Fixed
