@@ -324,6 +324,10 @@ struct HomeView: View {
             if args.contains("-seedUnfinishedTakes") {
                 seedUnfinishedTakes()
             }
+            // After the sessions exist: these clips are claimed BY them.
+            if args.contains("-seedStoredClips") {
+                seedStoredClips()
+            }
             // Before the takes list is derived, not after: the demo clip is
             // not a lap anybody filmed, so it must never reach it.
             sweepDemoCompareClip()
@@ -656,6 +660,39 @@ struct HomeView: View {
             let filmedAt = Date().addingTimeInterval(-Double(hoursAgo) * 3600)
             try? FileManager.default.setAttributes(
                 [.modificationDate: filmedAt], ofItemAtPath: dest.path)
+        }
+    }
+
+    /// Simulator fixture for About's clip-storage section. Recording is the
+    /// only thing that fills the store for real and the simulator has no
+    /// camera, so this copies the bundled clip in under the ids of the four
+    /// newest saved sessions — the `<result-id>.<ext>` invariant, hence
+    /// genuinely *claimed* files, not lookalikes — and back-dates them across
+    /// the offered cutoffs so every age row prices a different set.
+    ///
+    /// Each session is repointed at its own copy too, so the fixture is the
+    /// real relationship end to end: Results plays these clips before the
+    /// delete and drops its video section after it.
+    ///
+    /// Fetches rather than reading `sessions`: `-seedTrainingLog` runs a few
+    /// lines above and the `@Query` snapshot still predates it, the same
+    /// reason `-demoResultsSaved` fetches.
+    private func seedStoredClips() {
+        guard let source = Bundle.main.url(forResource: "swim_test", withExtension: "mp4"),
+              let saved = try? modelContext.fetch(FetchDescriptor<SwimSession>(
+                  sortBy: [SortDescriptor(\.analyzedAt, order: .reverse)]))
+        else { return }
+        for (session, daysAgo) in zip(saved, [1, 45, 120, 500]) {
+            let name = "\(session.id.uuidString).mp4"
+            let dest = SessionVideoStore.directory.appendingPathComponent(name)
+            try? FileManager.default.removeItem(at: dest)
+            guard (try? FileManager.default.copyItem(at: source, to: dest)) != nil else { continue }
+            try? FileManager.default.setAttributes(
+                [.modificationDate: Date().addingTimeInterval(-Double(daysAgo) * 24 * 60 * 60)],
+                ofItemAtPath: dest.path)
+            guard var result = session.decoded() else { continue }
+            result.videoFileName = name
+            session.resultData = (try? JSONEncoder().encode(result)) ?? session.resultData
         }
     }
 

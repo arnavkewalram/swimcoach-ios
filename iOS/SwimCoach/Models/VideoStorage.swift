@@ -171,15 +171,24 @@ enum VideoStorage {
                          byteCount: totalBytes(candidates))
     }
 
-    /// Claimed files, using the sweeper's own definition of claimed rather
-    /// than a second one — `orphanedFileNames` is what decides that a saved
-    /// session's video is untouchable, and a divergence between the two would
-    /// be a delete path that disagrees with the invariant it has to respect.
+    /// The names in `fileNames` that a saved session still claims.
+    ///
+    /// The single gate every deletion in this feature passes through, and it
+    /// uses the sweeper's own definition of claimed rather than a second one —
+    /// `orphanedFileNames` is what decides that a saved session's video is
+    /// untouchable, and a divergence between the two would be a delete path
+    /// that disagrees with the invariant it has to respect.
+    static func claimedNames(among fileNames: [String],
+                             referencedIDs: Set<String>) -> [String] {
+        let unclaimed = Set(SessionVideoStore.orphanedFileNames(
+            among: fileNames, referencedIDs: referencedIDs))
+        return fileNames.filter { !unclaimed.contains($0) }
+    }
+
     private static func sessionClips(among files: [UnfinishedTakes.StoredFile],
                                      referencedIDs: Set<String>) -> [UnfinishedTakes.StoredFile] {
-        let unclaimed = Set(SessionVideoStore.orphanedFileNames(
-            among: files.map(\.name), referencedIDs: referencedIDs))
-        return files.filter { !unclaimed.contains($0.name) }
+        let claimed = Set(claimedNames(among: files.map(\.name), referencedIDs: referencedIDs))
+        return files.filter { claimed.contains($0.name) }
     }
 
     /// Strictly older. A clip filmed exactly 30 days ago is not yet "older

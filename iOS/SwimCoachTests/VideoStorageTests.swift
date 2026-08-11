@@ -334,6 +334,16 @@ final class VideoStorageStoreTests: XCTestCase {
         VideoStorage.cutoffs.first { $0.days == days }!
     }
 
+    /// The screen's own two steps, in order: price the store, then delete the
+    /// offer that was priced. Tests go through both so they exercise the same
+    /// hand-off the UI does rather than a shortcut only they can take.
+    @discardableResult
+    private func priceThenDelete(days: Int?, referencedIDs: Set<String>) -> [String] {
+        let offer = SessionVideoStore.storageSummary(referencedIDs: referencedIDs)
+            .offer(for: cutoff(days: days))
+        return SessionVideoStore.deleteSessionClips(offer, referencedIDs: referencedIDs)
+    }
+
     // MARK: - Sizes for claimed files
 
     func testSummaryReportsTheBytesOfAClaimedClip() throws {
@@ -356,11 +366,10 @@ final class VideoStorageStoreTests: XCTestCase {
         let oldURL = try writeStoredClip(id: old, daysAgo: 400)
         let recentURL = try writeStoredClip(id: recent, daysAgo: 2)
 
-        let removed = SessionVideoStore.deleteSessionClips(
-            olderThan: cutoff(days: 90),
-            referencedIDs: [old.uuidString, recent.uuidString])
+        let removed = priceThenDelete(days: 90,
+                                      referencedIDs: [old.uuidString, recent.uuidString])
 
-        XCTAssertEqual(removed.fileNames, ["\(old.uuidString).mov"])
+        XCTAssertEqual(removed, ["\(old.uuidString).mov"])
         XCTAssertFalse(FileManager.default.fileExists(atPath: oldURL.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: recentURL.path))
     }
@@ -371,9 +380,8 @@ final class VideoStorageStoreTests: XCTestCase {
         let b = try writeStoredClip(id: claimedB, ext: "mp4", daysAgo: 3)
         let takeURL = try writeStoredClip(id: take, daysAgo: 1)
 
-        SessionVideoStore.deleteSessionClips(
-            olderThan: cutoff(days: nil),
-            referencedIDs: [claimedA.uuidString, claimedB.uuidString])
+        priceThenDelete(days: nil,
+                        referencedIDs: [claimedA.uuidString, claimedB.uuidString])
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: a.path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: b.path))
@@ -387,8 +395,7 @@ final class VideoStorageStoreTests: XCTestCase {
         let id = UUID()
         try writeStoredClip(id: id, daysAgo: 400)
 
-        SessionVideoStore.deleteSessionClips(olderThan: cutoff(days: 90),
-                                             referencedIDs: [id.uuidString])
+        priceThenDelete(days: 90, referencedIDs: [id.uuidString])
 
         // The session still exists, so the id is still referenced — and the
         // file is gone, so the listing cannot surface it either way.
@@ -405,8 +412,7 @@ final class VideoStorageStoreTests: XCTestCase {
         let id = UUID()
         let url = try writeStoredClip(id: id, daysAgo: 0)
 
-        SessionVideoStore.deleteSessionClips(olderThan: cutoff(days: nil),
-                                             referencedIDs: [id.uuidString])
+        priceThenDelete(days: nil, referencedIDs: [id.uuidString])
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path),
                        "A clip younger than the retention window must still go when explicitly asked")
@@ -416,8 +422,89 @@ final class VideoStorageStoreTests: XCTestCase {
         let id = UUID()
         let url = try writeStoredClip(id: id, daysAgo: 5)
 
-        let removed = SessionVideoStore.deleteSessionClips(olderThan: cutoff(days: 30),
-                                                           referencedIDs: [id.uuidString])
+        let removed = priceThenDelete(days: 30, referencedIDs: [id.uuidString])
+
+        XCTAssertTrue(removed.isEmpty)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    // MARK: - The gate at the deletion site
+
+    /// The trap, asserted at the only place it could actually spring.
+    ///
+    /// `VideoStorage` never nominates an unclaimed file, but the store must not
+    /// be *relying* on that: a caller that hands over a hand-built selection, or
+    /// one built before a session was deleted, must still not be able to destroy
+    /// an unfinished take through this door. The claim check runs at the
+    /// deletion site, against the live ids, so the name is refused here.
+    func testASelectionNamingAnUnclaimedTakeDeletesNothing() throws {
+        let take = UUID()
+        let url = try writeStoredClip(id: take, daysAgo: 900)
+        // Hand-built: exactly what `VideoStorage` would never produce.
+        let forged = VideoStorage.Selection(cutoff: cutoff(days: nil),
+                                            fileNames: ["\(take.uuidString).mov"],
+                                            byteCount: 1_024)
+
+        let removed = SessionVideoStore.deleteSessionClips(forged, referencedIDs: [])
+
+        XCTAssertTrue(removed.isEmpty, "an unclaimed take was accepted for deletion")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path),
+                      "an unfinished take is a swim that only exists as video — "
+                      + "no selection may reach it")
+    }
+
+    /// The stale-selection case: the screen priced two clips, then the session
+    /// behind one of them was erased. The clip that lost its session is now an
+    /// unclaimed file, so it drops out of the delete rather than being taken
+    /// out from under the retention window that now owns it.
+    func testAClipThatLostItsSessionAfterPricingIsNotDeleted() throws {
+        let kept = UUID(), erased = UUID()
+        let keptURL = try writeStoredClip(id: kept, daysAgo: 400)
+        let erasedURL = try writeStoredClip(id: erased, daysAgo: 400)
+
+        let priced = SessionVideoStore.storageSummary(
+            referencedIDs: [kept.uuidString, erased.uuidString]).offer(for: cutoff(days: 90))
+        XCTAssertEqual(priced.count, 2, "precondition: both were offered")
+
+        // …and only one session survives to the moment of the delete.
+        let removed = SessionVideoStore.deleteSessionClips(priced,
+                                                           referencedIDs: [kept.uuidString])
+
+        XCTAssertEqual(removed, ["\(kept.uuidString).mov"])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: keptURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: erasedURL.path))
+    }
+
+    /// The mirror of the above: the delete may only ever *shrink* the offer.
+    /// Nothing outside what the user was shown and agreed to can go, however
+    /// the store has changed since.
+    func testDeleteNeverRemovesAnythingOutsideThePricedSet() throws {
+        let priced = UUID(), unpriced = UUID()
+        let pricedURL = try writeStoredClip(id: priced, daysAgo: 400)
+        let unpricedURL = try writeStoredClip(id: unpriced, daysAgo: 400)
+        let referenced: Set<String> = [priced.uuidString, unpriced.uuidString]
+
+        // An offer naming only one of the two claimed, old-enough clips.
+        let offer = VideoStorage.Selection(cutoff: cutoff(days: 90),
+                                           fileNames: ["\(priced.uuidString).mov"],
+                                           byteCount: 1_024)
+        let removed = SessionVideoStore.deleteSessionClips(offer, referencedIDs: referenced)
+
+        XCTAssertEqual(removed, ["\(priced.uuidString).mov"])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: pricedURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: unpricedURL.path),
+                      "a clip the user was never shown must not be deleted alongside one they were")
+    }
+
+    /// An empty offer is a no-op, not a sweep. The control never reaches here
+    /// with one — the button does not exist over an empty set — but the store
+    /// must not turn "nothing selected" into "everything".
+    func testAnEmptySelectionDeletesNothing() throws {
+        let id = UUID()
+        let url = try writeStoredClip(id: id, daysAgo: 900)
+        let empty = VideoStorage.Selection(cutoff: cutoff(days: nil), fileNames: [], byteCount: 0)
+
+        let removed = SessionVideoStore.deleteSessionClips(empty, referencedIDs: [id.uuidString])
 
         XCTAssertTrue(removed.isEmpty)
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
@@ -450,8 +537,7 @@ final class VideoStorageStoreTests: XCTestCase {
         let referenced = Set(try context.fetch(FetchDescriptor<SwimSession>()).map(\.id.uuidString))
         XCTAssertNotNil(session.decoded()?.videoURL, "precondition: the clip is playable")
 
-        SessionVideoStore.deleteSessionClips(olderThan: cutoff(days: 90),
-                                             referencedIDs: referenced)
+        priceThenDelete(days: 90, referencedIDs: referenced)
 
         let fetched = try context.fetch(FetchDescriptor<SwimSession>())
         XCTAssertEqual(fetched.count, 1, "The session must survive its clip")
@@ -479,8 +565,7 @@ final class VideoStorageStoreTests: XCTestCase {
         try writeStoredClip(id: dropped, daysAgo: 400)
         let referenced: Set<String> = [kept.uuidString, dropped.uuidString]
 
-        SessionVideoStore.deleteSessionClips(olderThan: cutoff(days: 90),
-                                            referencedIDs: referenced)
+        priceThenDelete(days: 90, referencedIDs: referenced)
 
         let after = SessionVideoStore.storageSummary(referencedIDs: referenced)
         XCTAssertTrue(after.offer(for: cutoff(days: nil)).fileNames
