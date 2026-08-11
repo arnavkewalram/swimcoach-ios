@@ -3,6 +3,24 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.51.0] — 2026-08-11 — "Try a Sample Swim"
+
+### Added
+- **Four real swims you can analyze without going to a pool.** The app now
+  ships sample footage — actual swimmers doing freestyle, filmed from the
+  deck and from underwater — and running one puts it through the same
+  analysis your own clips get. The score and the faults are what the model
+  actually found on those frames, on your iPhone.
+- Reachable from Home, and offered on the first-run card, which until now
+  described a technique score, detected faults and drills to somebody who
+  had no way to see any of them yet.
+- Samples are somebody else's laps, so they are not written to your
+  history: they cannot move your trends, your streak, your weekly goal or
+  your drill statistics. The screen says so before you tap, alongside the
+  fact that the numbers are real.
+- Footage is "Mary's Swim Boot Camp" by koolkatkari via Wikimedia Commons,
+  used under CC BY 3.0 and credited in the app.
+
 ## [1.50.0] — 2026-08-10 — "Room to Swim"
 
 ### Added
