@@ -33,6 +33,17 @@ final class ClipStorageUITests: XCTestCase {
         return target.exists && target.isHittable
     }
 
+    /// Keep what the run actually saw. A failure here is "the wrong number of
+    /// clips went", which is very hard to read from an assertion message and
+    /// obvious from the frame — and the section lives below the fold, so it is
+    /// otherwise unphotographable from outside the test.
+    private func capture(_ app: XCUIApplication, _ name: String) {
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = name
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     /// The seeded fixture: four session clips back-dated 1 / 45 / 120 / 500
     /// days, plus the two unfinished takes `-seedUnfinishedTakes` writes.
     func testDroppingFootageKeepsTheSwimsAndResurrectsNothing() {
@@ -49,6 +60,7 @@ final class ClipStorageUITests: XCTestCase {
                       "the headline must be a size, not a count — read: \(total.label)")
         XCTAssertTrue(seeded.staticTexts["4 clips belong to saved swims; 2 are still waiting to be scored."].exists,
                       "the breakdown has to reconcile with the total")
+        capture(seeded, "01-priced")
 
         // Each age prices its own set: 500d / 120d+500d / 45d+120d+500d / all.
         XCTAssertTrue(element(seeded, "clipStorageCutoff-365").label.contains("1 clip,"))
@@ -77,8 +89,14 @@ final class ClipStorageUITests: XCTestCase {
         let delete = element(app, "clipStorageDelete")
         XCTAssertTrue(scroll(app, to: delete), "no delete control for a non-empty selection")
         XCTAssertTrue(delete.label.contains("Delete 4 clips"), "read: \(delete.label)")
+        capture(app, "02-any-age-selected")
         delete.tap()
-        app.buttons["Delete 4 clips"].tap()
+
+        let confirm = app.buttons["Delete 4 clips"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5),
+                      "a destructive control must ask before it acts")
+        capture(app, "03-confirmation")
+        confirm.tap()
 
         // The two takes are still there, so the section stays — but there is
         // nothing left it may delete, and it stops offering to.
@@ -87,6 +105,7 @@ final class ClipStorageUITests: XCTestCase {
         XCTAssertTrue(element(app, "clipStorageEmptyNote").exists)
         XCTAssertTrue(element(app, "clipStorageTotal").label.contains("2 clips"),
                       "read: \(element(app, "clipStorageTotal").label)")
+        capture(app, "04-after-delete")
         app.terminate()
 
         // ── 4. Nothing came back as a recoverable take ──────────────────
@@ -108,6 +127,7 @@ final class ClipStorageUITests: XCTestCase {
         XCTAssertFalse(after.staticTexts["VIDEO · 1:00"].exists,
                        "Results must simply drop its video section, not break on the missing file")
         XCTAssertFalse(after.staticTexts["SESSION VIDEO"].exists)
+        capture(after, "05-results-without-video")
     }
 
     /// A store with nothing a session claims must show what it costs and offer

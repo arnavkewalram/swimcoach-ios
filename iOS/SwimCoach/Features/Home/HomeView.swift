@@ -321,12 +321,13 @@ struct HomeView: View {
             if args.contains("-seedDrillPractice") {
                 seedDrillPractice()
             }
-            if args.contains("-seedUnfinishedTakes") {
-                seedUnfinishedTakes()
-            }
-            // After the sessions exist: these clips are claimed BY them.
+            // After the sessions exist (these clips are claimed BY them) and
+            // before the takes, which it would otherwise wipe.
             if args.contains("-seedStoredClips") {
                 seedStoredClips()
+            }
+            if args.contains("-seedUnfinishedTakes") {
+                seedUnfinishedTakes()
             }
             // Before the takes list is derived, not after: the demo clip is
             // not a lap anybody filmed, so it must never reach it.
@@ -679,6 +680,13 @@ struct HomeView: View {
     /// its inserts are not yet on disk. Without the save the fetch comes back
     /// empty and the fixture silently writes nothing.
     private func seedStoredClips() {
+        // `-seedTrainingLog` replaces the sessions but nothing replaces the
+        // video store, so clips claimed by the sessions it just deleted would
+        // linger as orphans and be counted alongside this fixture — the store
+        // has to start from a known state or the numbers are whatever the
+        // previous run happened to leave. Runs before `-seedUnfinishedTakes`
+        // so the takes it writes survive this.
+        SessionVideoStore.removeAll()
         try? modelContext.save()
         guard let source = Bundle.main.url(forResource: "swim_test", withExtension: "mp4"),
               let saved = try? modelContext.fetch(FetchDescriptor<SwimSession>(
