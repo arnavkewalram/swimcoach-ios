@@ -51,18 +51,35 @@ struct SampleClipThumbnail: View {
         .task(id: clip.id) { await loadFrame() }
     }
 
-    /// One frame, a second in. Not frame zero: a clip can open mid-splash or
-    /// with the swimmer half out of shot, and every sample runs 6 s, so one
-    /// second is comfortably inside all of them.
+    /// A frame from the middle of the swim.
+    ///
+    /// Proportional rather than a fixed offset, and deliberately not frame
+    /// zero. These clips are handheld: they open with the swimmer at distance,
+    /// half out of shot or not yet in it, and a first-second still gave two of
+    /// the four rows a thumbnail of empty water. Taking the point at
+    /// `midSwimFraction` puts the swimmer in frame in all four, and keeps
+    /// doing so for a fifth clip of some other length.
+    private static let midSwimFraction = 0.6
+
     private func loadFrame() async {
         guard frame == nil, let url = clip.bundleURL() else { return }
-        let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+        let asset = AVURLAsset(url: url)
+        let generator = AVAssetImageGenerator(asset: asset)
         generator.appliesPreferredTrackTransform = true
         // Enough to fill the capped box on a 3× screen, and no more — the
         // full 854×480 frame is four times the pixels this ever draws.
         generator.maximumSize = CGSize(width: Self.maxWidth * 3,
                                        height: (Self.maxWidth / Self.aspectRatio) * 3)
-        let at = CMTime(seconds: 1, preferredTimescale: 600)
+        // Nearest keyframe is fine and much cheaper — nothing here depends on
+        // landing on one exact frame.
+        generator.requestedTimeToleranceBefore = CMTime(seconds: 0.5, preferredTimescale: 600)
+        generator.requestedTimeToleranceAfter = CMTime(seconds: 0.5, preferredTimescale: 600)
+
+        // An unreadable duration falls back to a second in rather than to
+        // zero: a still of the opening frame is the case this avoids.
+        let duration = (try? await asset.load(.duration).seconds) ?? 0
+        let seconds = duration > 0 ? duration * Self.midSwimFraction : 1
+        let at = CMTime(seconds: seconds, preferredTimescale: 600)
         // A still that will not decode is not worth a failure state: the
         // reserved ground already reads as a clip box, and the row's text —
         // which is what actually describes the footage — is unaffected.

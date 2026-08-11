@@ -74,8 +74,11 @@ final class SampleSwimsUITests: XCTestCase {
         XCTAssertTrue(labelled(app, "not saved").exists,
                       "the screen stopped saying the result stays out of history")
 
+        // Captured before the scroll, so the attachment shows what a user
+        // sees on arrival rather than wherever the search left the page.
+        attach("samples-light-top")
         assertEveryClipRowIsPresent(app)
-        attach("samples-light")
+        attach("samples-light-clips")
     }
 
     /// CC BY 3.0 §4(c) is a shipping condition, not a nicety: the author, the
@@ -105,8 +108,9 @@ final class SampleSwimsUITests: XCTestCase {
         let app = launch(["-openSamples", "-UIUserInterfaceStyle", "Dark"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
         XCTAssertTrue(labelled(app, "Real numbers").exists)
+        attach("samples-dark-top")
         assertEveryClipRowIsPresent(app)
-        attach("samples-dark")
+        attach("samples-dark-clips")
     }
 
     // MARK: - Accessibility text sizes
@@ -163,10 +167,27 @@ final class SampleSwimsUITests: XCTestCase {
         attach("home-seeded-with-sample")
     }
 
-    /// The route end to end, as far as the simulator can take it: Home → the
-    /// sheet → a tap on a real clip → the ordinary analyzing screen. What
-    /// happens after that needs Vision, and therefore a device.
-    func testTappingASampleReachesTheOrdinaryAnalysisScreen() {
+    /// The route, as far as the simulator can take it: the sheet closes, the
+    /// stack pushes, and the clip lands in `AnalyzingView` — the same screen
+    /// a filmed swim gets, not a bespoke sample player.
+    ///
+    /// It then fails, and that failure is the assertion. Vision returns error
+    /// 9 for every frame in the simulator, so pose extraction finds no
+    /// swimmer and the run stops at `noSwimmerDetected` — the ordinary
+    /// footage-rejection state, stamped NO READ.
+    ///
+    /// That is a stronger result than catching the ANALYZING masthead would
+    /// have been, and it is why this test does not wait for one: reaching a
+    /// *pose-extraction* failure proves the clip went through
+    /// `runAnalysis()`. The bundled demo cartoon's `runDemoAnalysis()` path
+    /// fabricates a fixed result without touching Vision and always reaches
+    /// Results. A sample that had been mistaken for the demo clip, or given a
+    /// shortcut of its own, could not fail this way.
+    ///
+    /// What the simulator cannot show is a run that succeeds. Real scores,
+    /// real faults, and the no-save rule taking effect on a result that
+    /// actually exists all need a device.
+    func testTappingASampleRunsTheRealPipelineAndNotTheDemoShortcut() {
         let app = launch(["-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
 
@@ -174,11 +195,20 @@ final class SampleSwimsUITests: XCTestCase {
         XCTAssertTrue(scroll(app, to: row))
         row.tap()
 
-        // Not a bespoke sample screen — the same ANALYZING masthead a filmed
-        // swim gets. If this ever renders something else, the pipeline has
-        // been forked.
-        XCTAssertTrue(app.staticTexts["ANALYZING"].waitForExistence(timeout: 10),
-                      "a sample did not reach the app's ordinary analysis screen")
-        attach("samples-analyzing")
+        XCTAssertTrue(app.staticTexts["ANALYSIS FAILED"].waitForExistence(timeout: 30),
+                      "a sample never reached the app's ordinary analysis screen")
+        XCTAssertTrue(labelled(app, "No horizontal swimmer detected").exists,
+                      """
+                      the run did not stop in pose extraction, so this clip did not \
+                      go through the real Vision path — check that it has not been \
+                      routed to runDemoAnalysis()
+                      """)
+        attach("samples-analyzing-simulator")
+
+        // And it did not quietly bank the attempt: back on Home the app is
+        // still in its zero-session state.
+        app.buttons["Back to Home"].tap()
+        XCTAssertTrue(app.staticTexts["Film your first swim"].waitForExistence(timeout: 10),
+                      "a sample run left something behind in the user's history")
     }
 }
