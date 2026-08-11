@@ -39,6 +39,118 @@ final class SmokeUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["ISSUES DETECTED"].exists)
     }
 
+    /// The full read-out reports channels the Issues section never mentions,
+    /// so "it built" proves nothing — the rows have to be in the tree. The
+    /// close band is asserted hardest because it is the band that can be
+    /// misread: a row reading under the bar must never surface as a detection,
+    /// and must never speak a severity, which is the app's word for one.
+    func testDemoResultsRendersFullReadoutIncludingTheCloseBand() {
+        let app = launch(["-demoResults"])
+        XCTAssertTrue(app.staticTexts["TECHNIQUE SCORE"].waitForExistence(timeout: 10))
+
+        let header = app.staticTexts["FULL READ-OUT"]
+        XCTAssertTrue(scroll(app, to: header, maxSwipes: 14), "Full read-out never came into view")
+        XCTAssertTrue(app.staticTexts["FLAGGED · 3"].exists)
+        XCTAssertTrue(app.staticTexts["CLOSE, NOT FLAGGED · 2"].exists)
+        attach(XCUIScreen.main.screenshot(), "full-readout-flagged-and-close")
+
+        // A flagged row is a finding, and says so in the Issues section's own
+        // vocabulary — the chip word is folded into the row's label.
+        let sag = labelled(app, "Body Sag, flagged")
+        XCTAssertTrue(scroll(app, to: sag, maxSwipes: 14), "The flagged band never came into view")
+        XCTAssertTrue(sag.label.contains("major severity"),
+                      "A finding must carry its severity: \(sag.label)")
+
+        // Every scored fault is present, not just the three that fired.
+        let asymmetry = labelled(app, "Stroke Asymmetry, close")
+        XCTAssertTrue(scroll(app, to: asymmetry, maxSwipes: 14),
+                      "A sub-threshold fault must still be listed")
+        XCTAssertTrue(asymmetry.label.contains("close but not flagged"),
+                      "Close reading spoke as: \(asymmetry.label)")
+        XCTAssertTrue(asymmetry.label.contains("Not a detected issue"),
+                      "A near miss must say it is not a detection: \(asymmetry.label)")
+        for word in ["major severity", "moderate severity", "minor severity"] {
+            XCTAssertFalse(asymmetry.label.contains(word),
+                           "A near miss wore a severity — the app's mark for a "
+                           + "finding: \(asymmetry.label)")
+        }
+
+        let clear = labelled(app, "Excessive Kick Rate, clear")
+        XCTAssertTrue(scroll(app, to: clear, maxSwipes: 14), "A clean fault must still be listed")
+        XCTAssertTrue(clear.label.contains("clear"), "Clear reading spoke as: \(clear.label)")
+        attach(XCUIScreen.main.screenshot(), "full-readout-clear")
+    }
+
+    /// Name + mark + figure on one line is the densest row in the app, and at
+    /// an accessibility size it has to reflow downward rather than truncate.
+    ///
+    /// Measured from the rows' frames rather than by scrolling to them: the
+    /// section runs several screens long at these sizes, and a swipe-until-
+    /// visible walk is a coin toss about overshoot, not a layout assertion.
+    /// The read-out lives in a `ScrollView`, so every row is in the tree with a
+    /// real frame whether or not it is on screen.
+    ///
+    /// Two things are pinned. Every row stays inside the window horizontally —
+    /// a row that failed to reflow would push its figure past the edge. And
+    /// every row is TALLER than at the default size, which is what proves the
+    /// override took: an accessibility run that silently rendered at the
+    /// default size would satisfy every other assertion here without having
+    /// tested anything. (That is not hypothetical — configuring this through
+    /// `launchEnvironment["UIPreferredContentSizeCategoryName"]` does exactly
+    /// that. The UserDefaults-override form below is the one that applies.)
+    func testFullReadoutSurvivesAccessibilityType() {
+        let readoutRows = { (app: XCUIApplication) -> [XCUIElement] in
+            // Only the read-out's own rows say this — one phrase, ten rows.
+            app.descendants(matching: .any)
+                .matching(NSPredicate(format: "label CONTAINS %@", "percent line"))
+                .allElementsBoundByIndex
+        }
+
+        let baseline = launch(["-demoResults"])
+        XCTAssertTrue(baseline.staticTexts["TECHNIQUE SCORE"].waitForExistence(timeout: 10))
+        let defaultHeights = readoutRows(baseline).map(\.frame.height)
+        XCTAssertEqual(defaultHeights.count, 10,
+                       "expected one row per scored fault at the default size")
+        baseline.terminate()
+
+        let app = launch(["-UIPreferredContentSizeCategoryName",
+                          "UICTContentSizeCategoryAccessibilityL",
+                          "-demoResults"])
+        XCTAssertTrue(app.staticTexts["TECHNIQUE SCORE"].waitForExistence(timeout: 10))
+
+        let rows = readoutRows(app)
+        XCTAssertEqual(rows.count, 10, "expected one row per scored fault at accessibility type")
+
+        let window = app.windows.firstMatch.frame
+        for (row, defaultHeight) in zip(rows, defaultHeights) {
+            XCTAssertGreaterThanOrEqual(row.frame.minX, window.minX,
+                                        "row overflows the window: \(row.label)")
+            XCTAssertLessThanOrEqual(row.frame.maxX, window.maxX,
+                                     "row overflows the window: \(row.label)")
+            XCTAssertGreaterThan(
+                row.frame.height, defaultHeight,
+                """
+                \(row.label) is \(row.frame.height)pt at AccessibilityL and \
+                \(defaultHeight)pt at the default size. Either the row truncated \
+                instead of reflowing, or the content-size override never applied \
+                and this test measured the default size twice.
+                """)
+        }
+
+        // Deliberately not scrolled to: at these sizes the section runs several
+        // screens down, and swiping until it lands is a race with overshoot,
+        // not evidence. The frames above are the assertion; this is only a
+        // reviewable confirmation that the run really was at an AX size.
+        attach(XCUIScreen.main.screenshot(), "results-at-accessibility-large")
+    }
+
+    private func attach(_ screenshot: XCUIScreenshot, _ name: String) {
+        let shot = XCTAttachment(screenshot: screenshot)
+        shot.name = name
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     func testSeededHistoryRendersChartsAndSessions() {
         let app = launch(["-seedTrainingLog", "-openHistory"])
         XCTAssertTrue(app.staticTexts["SCORE TREND"].waitForExistence(timeout: 10))

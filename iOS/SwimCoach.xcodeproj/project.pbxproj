@@ -74,6 +74,7 @@
 		731BAA3DC912963973953AFD /* ProgressThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E423487D1E586FE2805BEF /* ProgressThrottle.swift */; };
 		76DA86DFB3778BE9E0ED8025 /* DrillCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */; };
 		78B84EAA41F09EB2FF2417A3 /* AnalyzingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AC560CE3C7B75914B49079 /* AnalyzingView.swift */; };
+		80EB138D60CC1C6F51CE775D /* FaultReadout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC829995748AB2CE3076F91 /* FaultReadout.swift */; };
 		859AD7AE16F22FD47E69B08B /* SessionFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B732C3B50E0D87F181B63E4 /* SessionFilterTests.swift */; };
 		882E09529C740DB2446619E9 /* SwimCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E721FA48603268C362E7F84E /* SwimCoachApp.swift */; };
 		88505CD0796817BAA863672C /* FocusFault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 440FD098C083BE63E4C44154 /* FocusFault.swift */; };
@@ -99,6 +100,7 @@
 		AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */; };
 		AB95CEAB12265A86D19CD3D7 /* IssueTimelineStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0310224F538D191BF5071C /* IssueTimelineStrip.swift */; };
 		AE91DA8ACFEABB5FB7964C16 /* DrillEffectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB25B8BF4FFD570AD103250 /* DrillEffectTests.swift */; };
+		AF67FA51B04551CDE697CB63 /* FaultReadoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A257301D5339F950728DA8AC /* FaultReadoutTests.swift */; };
 		B03EF14770A341DB035E8D42 /* IssueWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D9E931537A6F52120C9319 /* IssueWindow.swift */; };
 		B21693A6CF7528E594204809 /* VideoTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E1CC5D111B6A5AAB5640BE /* VideoTransform.swift */; };
 		B273B39A76FC83B7EDA6EA92 /* FocusFaultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D016218CB2E6A0CE353E62 /* FocusFaultTests.swift */; };
@@ -126,6 +128,7 @@
 		EC86F60CC87902DDC7B82834 /* SkeletonOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC20876C011158E31B687438 /* SkeletonOverlayView.swift */; };
 		F0F97C28AA69CA36A4D27AE9 /* GoalReminderStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76625762B5B154274C37AB05 /* GoalReminderStoreTests.swift */; };
 		F2D3E90213E8B69E7AFED91C /* MetricTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C9940C7B28F0914F98911F /* MetricTrend.swift */; };
+		F5CD1D88A4164045E856BFD8 /* FullReadoutSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEEF4CE6A35449575F603AE /* FullReadoutSection.swift */; };
 		F67D8DEE93408306AFDA49A6 /* GoalReminderPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A99D38012E98930A2AC466 /* GoalReminderPlanner.swift */; };
 		F7456E3C5A1A5D754FEEAC04 /* MetricTrendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4169F43C5AAA45F113184C03 /* MetricTrendTests.swift */; };
 		F9E65DC9B6A9B81A6DF4B4C6 /* WeeklyGoalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B480143F382A8EF617A8858C /* WeeklyGoalSheet.swift */; };
@@ -179,6 +182,7 @@
 		3A9CE282550C08C6A515A0E9 /* SpaceGrotesk-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SpaceGrotesk-Medium.ttf"; sourceTree = "<group>"; };
 		3C44F6B61F32A5775579A74C /* ResultsView+Sections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ResultsView+Sections.swift"; sourceTree = "<group>"; };
 		3D6DF69F49EAF8628F75E555 /* ColorContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorContrastTests.swift; sourceTree = "<group>"; };
+		3DEEF4CE6A35449575F603AE /* FullReadoutSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullReadoutSection.swift; sourceTree = "<group>"; };
 		40633BA21614795097855CE9 /* SwimTCNRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimTCNRunnerTests.swift; sourceTree = "<group>"; };
 		4169F43C5AAA45F113184C03 /* MetricTrendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricTrendTests.swift; sourceTree = "<group>"; };
 		440FD098C083BE63E4C44154 /* FocusFault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusFault.swift; sourceTree = "<group>"; };
@@ -215,6 +219,7 @@
 		84DCE08AFBBC4F870CCD6A97 /* IssueFrequencyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueFrequencyTests.swift; sourceTree = "<group>"; };
 		869DD420BA54EE808DAA8590 /* ImportedVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedVideo.swift; sourceTree = "<group>"; };
 		8B9F40BF0F2CECB806C42A48 /* swim_tcn.mlpackage */ = {isa = PBXFileReference; path = swim_tcn.mlpackage; sourceTree = "<group>"; };
+		8CC829995748AB2CE3076F91 /* FaultReadout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaultReadout.swift; sourceTree = "<group>"; };
 		8EE7A8C38BF18F6B32F66898 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8F2E3F6059812F50F6CD6F07 /* SessionComparisonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionComparisonTests.swift; sourceTree = "<group>"; };
 		8F51D64597390CD17D508EC3 /* SessionExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExport.swift; sourceTree = "<group>"; };
@@ -235,6 +240,7 @@
 		A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillPracticeEvent.swift; sourceTree = "<group>"; };
 		A1435BBBBBF97D7EE43DC669 /* HomeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCards.swift; sourceTree = "<group>"; };
 		A16E3AD8AA153449FF4ECD1F /* TrainingLogWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogWriter.swift; sourceTree = "<group>"; };
+		A257301D5339F950728DA8AC /* FaultReadoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaultReadoutTests.swift; sourceTree = "<group>"; };
 		A2A8A3C1E5A6B64B00D0A20B /* TrainingLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLogTests.swift; sourceTree = "<group>"; };
 		A2DAC39555DB6C2DA1DF8CE8 /* ReportCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportCardTests.swift; sourceTree = "<group>"; };
 		A3F58D5D4BC3109B966FB868 /* IssueRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueRow.swift; sourceTree = "<group>"; };
@@ -351,6 +357,7 @@
 		376F99D216F528CB58C092EE /* Results */ = {
 			isa = PBXGroup;
 			children = (
+				3DEEF4CE6A35449575F603AE /* FullReadoutSection.swift */,
 				A3F58D5D4BC3109B966FB868 /* IssueRow.swift */,
 				EA0310224F538D191BF5071C /* IssueTimelineStrip.swift */,
 				F9963785A23CAAB343778FC6 /* OverlayExportControl.swift */,
@@ -401,6 +408,7 @@
 				95EC14A8D251A593312E9915 /* CompareClipsTests.swift */,
 				B1AA40952F1533417611DE8E /* DrillCatalogTests.swift */,
 				7AB25B8BF4FFD570AD103250 /* DrillEffectTests.swift */,
+				A257301D5339F950728DA8AC /* FaultReadoutTests.swift */,
 				A907F81648375699CBDD9F16 /* FeatureExtractorTests.swift */,
 				1797F4E153137F72A6BD0036 /* FeedbackEngineTests.swift */,
 				D8D016218CB2E6A0CE353E62 /* FocusFaultTests.swift */,
@@ -474,6 +482,7 @@
 				6F1C5CC95E42646636CE665F /* DrillCatalog.swift */,
 				F6FAC2F2642E93C6799E4963 /* DrillEffect.swift */,
 				A02C2D4F4B5C8F20065E2B25 /* DrillPracticeEvent.swift */,
+				8CC829995748AB2CE3076F91 /* FaultReadout.swift */,
 				440FD098C083BE63E4C44154 /* FocusFault.swift */,
 				66A99D38012E98930A2AC466 /* GoalReminderPlanner.swift */,
 				ED4E2F36A6EB134177F18709 /* GoalReminderStore.swift */,
@@ -746,6 +755,7 @@
 				8935E930E98AF73B49AD2605 /* CompareClipsTests.swift in Sources */,
 				76DA86DFB3778BE9E0ED8025 /* DrillCatalogTests.swift in Sources */,
 				AE91DA8ACFEABB5FB7964C16 /* DrillEffectTests.swift in Sources */,
+				AF67FA51B04551CDE697CB63 /* FaultReadoutTests.swift in Sources */,
 				AA29DBE6EB93F2C57D6881FF /* FeatureExtractorTests.swift in Sources */,
 				C2B20FFFF1976EEB632225AE /* FeedbackEngineTests.swift in Sources */,
 				B273B39A76FC83B7EDA6EA92 /* FocusFaultTests.swift in Sources */,
@@ -813,9 +823,11 @@
 				92ABEB3BA3FDB5242796D99C /* DrillEffect.swift in Sources */,
 				0DF63EA8693F3E7FFA9CA9F9 /* DrillPracticeEvent.swift in Sources */,
 				5AC6297BE8258500F7D893CD /* DrillsView.swift in Sources */,
+				80EB138D60CC1C6F51CE775D /* FaultReadout.swift in Sources */,
 				3817ECA74C307C1A675BDD09 /* FeatureExtractor.swift in Sources */,
 				15A029877A18065E055732B8 /* FeedbackEngine.swift in Sources */,
 				88505CD0796817BAA863672C /* FocusFault.swift in Sources */,
+				F5CD1D88A4164045E856BFD8 /* FullReadoutSection.swift in Sources */,
 				F67D8DEE93408306AFDA49A6 /* GoalReminderPlanner.swift in Sources */,
 				0FE7566FE873AB3894C8A661 /* GoalReminderScheduler.swift in Sources */,
 				8F38F1552A60BB542F5D70C8 /* GoalReminderStore.swift in Sources */,

@@ -138,6 +138,57 @@ final class ColorContrastTests: XCTestCase {
         }
     }
 
+    /// The Results full read-out prints ten rows of text and draws ten meters
+    /// on a card, so both tiers are measured where they are actually painted.
+    ///
+    /// The meter is the part worth pinning. Its threshold line is `DS.ink`
+    /// drawn BEHIND the track — if it were ever moved on top of the fills it
+    /// would have to hold 3:1 against coral, amber and spearmint, which it
+    /// does not in dark. Behind, it only ever sits on the card or on the
+    /// near-transparent `surface2` track, which is what these cases measure.
+    /// The sub-threshold bar is `inkTertiary` on that same track, and it has
+    /// to stay separable from it: a "close" reading whose bar cannot be told
+    /// from the empty lane behind it answers nothing.
+    func testFullReadoutTextAndMetersClearTheirTiers() {
+        let card = stockOrRaised
+        // `surface2` is translucent; the track a bar sits in is that token
+        // composited over the card.
+        let trackOverCard = { (style: UIUserInterfaceStyle) -> Ground in
+            Ground(name: "DS.surface2 over DS.surface",
+                   color: self.opaque(self.composite(self.resolve(DS.surface2, style),
+                                                     over: self.resolve(DS.surface, style))))
+        }
+
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            // Row text. Names and figures step down the ink ladder by band;
+            // the peak line is the quietest thing on the row.
+            for (token, color) in [("DS.ink", DS.ink),
+                                   ("DS.inkSecondary", DS.inkSecondary),
+                                   ("DS.inkTertiary", DS.inkTertiary)] {
+                assertContrast(color, on: card, style: style, atLeast: 4.5, token: token)
+            }
+
+            // Flagged rows wear a VerdictChip tinted from the severity ramp —
+            // 9pt tracked caps on the card, so the small-text bar.
+            for (token, color) in [("DS.severityMajor", DS.severityMajor),
+                                   ("DS.severityModerate", DS.severityModerate),
+                                   ("DS.severityMinor", DS.severityMinor)] {
+                assertContrast(color, on: card, style: style, atLeast: 4.5, token: token)
+                // …and the same fill is the bar, a non-text mark on the track.
+                assertContrast(color, on: trackOverCard(style), style: style,
+                               atLeast: 3.0, token: "\(token) (meter bar)")
+            }
+
+            // Sub-threshold bars, and the threshold line behind the track.
+            assertContrast(DS.inkTertiary, on: trackOverCard(style), style: style,
+                           atLeast: 3.0, token: "DS.inkTertiary (sub-threshold bar)")
+            assertContrast(DS.ink, on: card, style: style,
+                           atLeast: 3.0, token: "DS.ink (threshold line, on card)")
+            assertContrast(DS.ink, on: trackOverCard(style), style: style,
+                           atLeast: 3.0, token: "DS.ink (threshold line, behind track)")
+        }
+    }
+
     /// Clearing AA is not the same as having a hierarchy.
     ///
     /// Light tertiary used to measure 2.50:1 on paper. Lifting it to the 5:1
@@ -234,6 +285,14 @@ final class ColorContrastTests: XCTestCase {
             return (0, 0, 0, 1)
         }
         return (Double(r), Double(g), Double(b), Double(a))
+    }
+
+    /// A already-composited RGBA back as a flat `Color`, so a derived ground
+    /// (a translucent track over a card) can be measured against like any
+    /// other token.
+    private func opaque(_ c: RGBA) -> Color {
+        Color(uiColor: UIColor(red: CGFloat(c.r), green: CGFloat(c.g),
+                               blue: CGFloat(c.b), alpha: 1))
     }
 
     /// Source-over composite of a translucent token onto its opaque ground.
