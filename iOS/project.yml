@@ -30,6 +30,14 @@ targets:
     resources:
       - path: SwimCoach/PrivacyInfo.xcprivacy
       - path: SwimCoach/Resources/swim_test.mp4
+      # Real, CC BY 3.0 swimming footage behind "Try a sample swim". Added as
+      # a directory, which XcodeGen flattens into the bundle root the same way
+      # it does Fonts — load-bearing, because `SampleClip.bundleURL` resolves
+      # through `Bundle.main.url(forResource:withExtension:)` (no subdirectory)
+      # and `SessionVideoStore.persist` recognises a bundled source by exactly
+      # that call. Nested under SampleClips/ they would be copied into the
+      # session store on every run instead.
+      - path: SwimCoach/Resources/SampleClips
       - path: SwimCoach/Resources/Fonts
     info:
       path: SwimCoach/Info.plist
