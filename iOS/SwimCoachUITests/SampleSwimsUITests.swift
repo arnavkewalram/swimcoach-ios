@@ -215,6 +215,25 @@ final class SampleSwimsUITests: XCTestCase {
         attach("samples-ax-credit")
     }
 
+    /// Home's index rows are shared by History, the sample swims and the
+    /// drill library, and they were three hand-copied blocks until this
+    /// feature merged them into `HomeIndexRow`. At accessibility sizes the
+    /// count moves to its own line; this asserts all three rows survive that
+    /// and stay tappable, so the consolidation cannot regress the two rows
+    /// that already existed.
+    func testHomeIndexRowsSurviveAccessibilityTextSizes() {
+        let app = launch(["-seedTrainingLog",
+                          "-UIPreferredContentSizeCategoryName",
+                          "UICTContentSizeCategoryAccessibilityXXXL"])
+        XCTAssertTrue(app.staticTexts["SwimCoach"].waitForExistence(timeout: 10))
+
+        for title in ["History", "Sample swims", "Drill library"] {
+            XCTAssertTrue(scroll(app, to: labelled(app, title), maxSwipes: 20),
+                          "\(title) is unreachable on Home at accessibility text sizes")
+        }
+        attach("home-ax-index-rows")
+    }
+
     // MARK: - Entry points on Home
 
     /// Both entry points, in the state each exists for. The index row is
