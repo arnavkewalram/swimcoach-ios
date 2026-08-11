@@ -199,14 +199,23 @@ enum CompareClipAvailability: Equatable {
     }
 
     /// What is missing and why, in plain words. Nil when both clips exist.
+    ///
+    /// The reason is a list of causes the swimmer cannot tell apart from here,
+    /// so it has to cover all of them. Since About gained "delete clips older
+    /// than…", there are three: never kept, dropped on purpose, or unreadable.
+    /// Hence **footage**, not "take" — a take is specifically an unclaimed clip
+    /// waiting on the Takes screen, and the clip behind a compared session is
+    /// by definition not one — and **deleted**, the verb that control uses, so
+    /// a swimmer who freed the space recognises their own doing instead of
+    /// being offered damage as the likelier explanation.
     var shortfallDetail: String? {
         switch self {
         case .both:
             return nil
         case let .only(side, _):
             return "The \(side.other.rawValue) session has no clip to play — it was "
-                 + "analyzed before clips were kept, or its take has since been "
-                 + "removed or damaged. The \(side.rawValue) swim plays on its own; "
+                 + "analyzed before clips were kept, or its footage has since been "
+                 + "deleted or damaged. The \(side.rawValue) swim plays on its own; "
                  + "the numbers below compare both."
         case .neither:
             return "Neither session has a clip that plays, so there is nothing to "

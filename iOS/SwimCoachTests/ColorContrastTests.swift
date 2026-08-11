@@ -189,6 +189,41 @@ final class ColorContrastTests: XCTestCase {
         }
     }
 
+    /// About's clip-storage control, measured where it is actually painted.
+    ///
+    /// About is a bare page — no cards — so every one of these sits on
+    /// `DS.background` rather than a surface. The tints are all already in
+    /// `textCases`, but the age rows introduce something none of them covers:
+    /// a **state** carried by a 3pt rule that switches `DS.accent` ↔
+    /// `DS.border`. §1.4.11 wants 3:1 for the visual information that
+    /// identifies a component's state, and a hairline token pressed into
+    /// service as a selection mark is exactly where that quietly fails —
+    /// `DS.border` is 1.33:1 against paper on its own, because it was drawn to
+    /// be a rule, not a signal.
+    ///
+    /// It passes because the *selected* end is the accent, and the two ends
+    /// are measured against each other rather than against the page.
+    func testTheSelectedAgeRowIsDistinguishableFromAnUnselectedOne() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            let ground = resolve(DS.background, style)
+            let selected = composite(resolve(DS.accent, style), over: ground)
+            let unselected = composite(resolve(DS.border, style), over: ground)
+            let measured = contrastRatio(selected, unselected)
+
+            XCTAssertGreaterThanOrEqual(
+                measured, 3.0,
+                """
+                The age-row selection mark is not readable as a state in \
+                \(style == .dark ? "DARK" : "LIGHT").
+                  selected   DS.accent = \(hex(selected))
+                  unselected DS.border = \(hex(unselected))
+                  measured \(String(format: "%.2f", measured)):1 — required 3.00:1
+                Which age a destructive control is pointed at cannot be carried \
+                by a mark the user cannot see change.
+                """)
+        }
+    }
+
     /// Clearing AA is not the same as having a hierarchy.
     ///
     /// Light tertiary used to measure 2.50:1 on paper. Lifting it to the 5:1

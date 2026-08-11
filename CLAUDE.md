@@ -66,8 +66,11 @@ cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
   otherwise only reachable by recording), `-openHistory`, `-openDrills [issue]`,
   `-openAbout`, `-openTakes` (unfinished-takes recovery screen),
   `-seedUnfinishedTakes` (replaces the waiting takes with two back-dated
-  clips), `-seedTrainingLog` (deterministic 3-week fixture; wipes
-  the store), `-analyzeDocs <file>` (file from the app's Documents dir).
+  clips), `-seedStoredClips` (gives the four newest saved sessions a real
+  stored clip each, back-dated 1/45/120/500 days — About's clip-storage
+  section; use with `-seedTrainingLog`), `-seedTrainingLog` (deterministic
+  3-week fixture; wipes the store), `-analyzeDocs <file>` (file from the
+  app's Documents dir).
 - `iOS/SwimCoach/Resources/swim_test.mp4` is a synthetic cartoon — it
   validates plumbing, not model accuracy.
 - The CLI gate (`ml/analysis/gating.py`) mirrors iOS `PoseAnalyzer` filters;
