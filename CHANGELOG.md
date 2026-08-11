@@ -3,6 +3,24 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.49.0] — 2026-08-10 — "One Fault at a Time"
+
+### Added
+- **A fault now has a page of its own.** History could tell you "Body Sag
+  appeared in 9 of 12 swims, and it's worsening" and then answer nothing
+  else — the bars weren't tappable. Now they are, as is the fault on Home's
+  focus panel. The page shows when the fault first appeared, how often it
+  turns up, how its detection strength has moved, the swims it appeared in,
+  and the drills that target it.
+- A fault the app hasn't seen enough of says so rather than drawing a line
+  through two points and letting it read as a trend. "Steady" is a finding;
+  "too little history to call it" is not, and they no longer look alike.
+
+### Fixed
+- The app treated "we compared your swims and nothing moved" and "there
+  aren't enough swims to compare" as the same answer. They were the same
+  value internally, so the second was rendered as the first.
+
 ## [1.48.0] — 2026-08-10 — "The Other Seven"
 
 ### Added
