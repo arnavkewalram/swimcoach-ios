@@ -80,10 +80,16 @@ struct AboutView: View {
                             Button(role: .destructive) {
                                 confirmErase = true
                             } label: {
-                                dataActionLabel("ERASE ALL SESSIONS", icon: "trash",
-                                                color: DS.severityMajor)
+                                DataActionLabel(title: "ERASE ALL SESSIONS",
+                                                adornment: .icon("trash"),
+                                                tint: DS.severityMajor)
                             }
                         }
+
+                        // Inside the same condition "Your data" uses: with no
+                        // sessions there is no footage to account for, and the
+                        // section owns everything below that line itself.
+                        ClipStorageSection(referencedIDs: referencedSessionIDs)
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
@@ -150,31 +156,10 @@ struct AboutView: View {
         }
     }
 
-    private func dataActionLabel(_ title: String, icon: String, color: Color) -> some View {
-        dataActionLabel(title, color: color) {
-            Image(systemName: icon)
-                .font(.caption)
-                .accessibilityHidden(true)
-        }
-    }
-
-    private func dataActionLabel<Leading: View>(
-        _ title: String, color: Color, @ViewBuilder leading: () -> Leading
-    ) -> some View {
-        HStack(spacing: 6) {
-            leading()
-            Text(title)
-                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                .tracking(1.2)
-        }
-        .foregroundStyle(color)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(color.opacity(0.45), lineWidth: 1))
-        // Pill stays visually compact; the frame extends the tap target
-        // to the HIG 44pt minimum.
-        .frame(minHeight: 44)
-        .contentShape(Rectangle())
+    /// Session membership from the cheap stored `id` column — no result blob
+    /// is decoded, the same rule the launch sweep follows.
+    private var referencedSessionIDs: Set<String> {
+        Set(sessions.map(\.id.uuidString))
     }
 
     /// One export row: prepare button → spinner while the file builds →
@@ -186,20 +171,18 @@ struct AboutView: View {
         switch state {
         case .idle, .failed:
             Button(action: prepare) {
-                dataActionLabel(state == .failed ? "RETRY \(noun)" : "PREPARE \(noun)",
-                                icon: state == .failed ? "arrow.clockwise" : icon,
-                                color: state == .failed ? DS.severityMajor : DS.accent)
+                DataActionLabel(title: state == .failed ? "RETRY \(noun)" : "PREPARE \(noun)",
+                                adornment: .icon(state == .failed ? "arrow.clockwise" : icon),
+                                tint: state == .failed ? DS.severityMajor : DS.accent)
             }
         case .preparing:
-            dataActionLabel("PREPARING \(noun)", color: DS.inkTertiary) {
-                ProgressView()
-                    .controlSize(.mini)
-                    .accessibilityHidden(true)
-            }
-            .accessibilityLabel("Preparing \(noun.lowercased())")
+            DataActionLabel(title: "PREPARING \(noun)", adornment: .spinner,
+                            tint: DS.inkTertiary)
+                .accessibilityLabel("Preparing \(noun.lowercased())")
         case .ready(let url):
             ShareLink(item: url) {
-                dataActionLabel("EXPORT \(noun)", icon: "square.and.arrow.up", color: DS.accent)
+                DataActionLabel(title: "EXPORT \(noun)", adornment: .icon("square.and.arrow.up"),
+                                tint: DS.accent)
             }
         }
     }
@@ -258,5 +241,7 @@ struct AboutView: View {
         for event in practiceEvents { modelContext.delete(event) }
         archiveExport = .idle
         csvExport = .idle
+        // `ClipStorageSection` is watching `referencedSessionIDs`, which just
+        // emptied — it re-reads the store itself rather than being told.
     }
 }

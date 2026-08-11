@@ -205,6 +205,64 @@ enum SessionVideoStore {
         AppLog.storage.info("Erased all stored session videos")
     }
 
+    // MARK: - Clip storage
+
+    /// What the store currently costs, split into the clips saved sessions
+    /// claim and the clips nothing has scored yet.
+    ///
+    /// The directory pass already reads `.fileSizeKey` for the retention
+    /// decision; until now the byte count survived only onto an unfinished
+    /// take, so About could report how many sessions exist but not what their
+    /// footage weighs. Same pass, both populations.
+    static func storageSummary(referencedIDs: Set<String>,
+                               now: Date = Date()) -> VideoStorage.Summary {
+        VideoStorage.summarize(files: storedFiles(), referencedIDs: referencedIDs, now: now)
+    }
+
+    /// Keep the swims, drop the footage: delete exactly the clips in
+    /// `selection` and leave every session itself untouched.
+    ///
+    /// Takes the priced `Selection` rather than a cutoff to re-derive. The
+    /// user agreed to a specific count and a specific number of megabytes, and
+    /// re-running the age filter here against a fresh listing and a fresh
+    /// `now` could quietly widen that set — a clip that crossed the boundary
+    /// while the dialog was open, or a session saved since the screen was
+    /// priced, would be deleted without ever having been offered. So the set
+    /// the UI showed is the set that goes.
+    ///
+    /// Deliberately NOT a sweep, for the same reason `removeAll` is not one —
+    /// but the hazard here is the mirror image. `pruneOrphans` deletes only
+    /// *unclaimed, expired* files, so routing this through it would delete
+    /// nothing the user asked for and quite possibly a take they wanted. This
+    /// goes through `delete(fileName:)` per file instead.
+    ///
+    /// Why this cannot reopen the erase-resurrection bug (v1.45.3):
+    ///  • `VideoStorage.claimedNames` re-checks every name against the live
+    ///    session ids HERE, at the deletion site, rather than trusting the
+    ///    selection it was handed. A name no session claims is dropped, so an
+    ///    unfinished take can never be deleted through this door — not by a
+    ///    stale selection, not by a caller that built one wrongly.
+    ///  • That check can only shrink the set, never grow it, so nothing
+    ///    outside what the user was shown is ever removed.
+    ///  • No `SwimSession` is deleted or edited, so the referenced set is the
+    ///    same after this runs as before it. Nothing becomes unclaimed.
+    ///  • A deleted file is absent from the next `storedFiles()` listing, so
+    ///    `UnfinishedTakes.classify` can never see it again at any age.
+    ///
+    /// Returns the names actually removed, so the caller can report them.
+    @discardableResult
+    static func deleteSessionClips(_ selection: VideoStorage.Selection,
+                                   referencedIDs: Set<String>) -> [String] {
+        let removable = VideoStorage.claimedNames(among: selection.fileNames,
+                                                  referencedIDs: referencedIDs)
+        for name in removable {
+            delete(fileName: name)
+        }
+        AppLog.storage.info(
+            "Deleted \(removable.count) of \(selection.count) offered session clip(s), cutoff \(selection.cutoff.label)")
+        return removable
+    }
+
     // MARK: - Unfinished takes
 
     /// Clips the store adopted that no session ever claimed, still inside
