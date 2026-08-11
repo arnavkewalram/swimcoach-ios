@@ -30,35 +30,47 @@ struct ClipStorageSection: View {
 
     // MARK: - Body
 
-    /// Hidden entirely when the store is empty — there is nothing to report
-    /// and nothing to delete. When files exist but none of them belongs to a
-    /// saved session (only unfinished takes are waiting), the total is still
-    /// worth showing but the delete control is not offered: every age it could
-    /// name would delete nothing.
+    /// The root is deliberately unconditional.
+    ///
+    /// Wrapping the whole section in an `if` takes the `.task` with it —
+    /// SwiftUI applies a modifier to the branch that renders, and a branch that
+    /// renders nothing has no lifecycle to attach to. The section would then
+    /// never read the store, so it would never stop being empty, so the `if`
+    /// would never flip: a control that is invisible precisely because it has
+    /// something to show. About only places this once it has sessions to talk
+    /// about, which is the condition that actually belongs to the caller.
+    ///
+    /// When files exist but none of them belongs to a saved session (only
+    /// unfinished takes are waiting), the total is still worth showing but the
+    /// delete control is not offered: every age it could name would delete
+    /// nothing.
     var body: some View {
-        Group {
-            if !storage.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    SectionHeader(title: "Clip storage")
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: "Clip storage")
 
-                    headline
+            if storage.isEmpty {
+                Text("No video is stored on this iPhone.")
+                    .font(.footnote)
+                    .foregroundStyle(DS.inkSecondary)
+                    .accessibilityIdentifier("clipStorageEmptyNote")
+            } else {
+                headline
 
-                    Text(breakdown)
+                Text(breakdown)
+                    .font(.footnote)
+                    .lineSpacing(4)
+                    .foregroundStyle(DS.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if storage.hasDeletableClips {
+                    deleteControl
+                } else {
+                    Text("No saved swim has a clip to play. What is here is waiting to be scored — the Takes screen decides those.")
                         .font(.footnote)
                         .lineSpacing(4)
                         .foregroundStyle(DS.inkSecondary)
                         .fixedSize(horizontal: false, vertical: true)
-
-                    if storage.hasDeletableClips {
-                        deleteControl
-                    } else {
-                        Text("No saved swim has a clip to play. What is here is waiting to be scored — the Takes screen decides those.")
-                            .font(.footnote)
-                            .lineSpacing(4)
-                            .foregroundStyle(DS.inkSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityIdentifier("clipStorageEmptyNote")
-                    }
+                        .accessibilityIdentifier("clipStorageEmptyNote")
                 }
             }
         }

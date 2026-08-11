@@ -674,14 +674,17 @@ struct HomeView: View {
     /// real relationship end to end: Results plays these clips before the
     /// delete and drops its video section after it.
     ///
-    /// Fetches rather than reading `sessions`: `-seedTrainingLog` runs a few
-    /// lines above and the `@Query` snapshot still predates it, the same
-    /// reason `-demoResultsSaved` fetches.
+    /// Saves and then fetches rather than reading `sessions`: `-seedTrainingLog`
+    /// runs a few lines above, so the `@Query` snapshot still predates it and
+    /// its inserts are not yet on disk. Without the save the fetch comes back
+    /// empty and the fixture silently writes nothing.
     private func seedStoredClips() {
+        try? modelContext.save()
         guard let source = Bundle.main.url(forResource: "swim_test", withExtension: "mp4"),
               let saved = try? modelContext.fetch(FetchDescriptor<SwimSession>(
-                  sortBy: [SortDescriptor(\.analyzedAt, order: .reverse)]))
-        else { return }
+                  sortBy: [SortDescriptor(\.analyzedAt, order: .reverse)])),
+              !saved.isEmpty
+        else { return AppLog.storage.error("-seedStoredClips found no sessions to claim clips") }
         for (session, daysAgo) in zip(saved, [1, 45, 120, 500]) {
             let name = "\(session.id.uuidString).mp4"
             let dest = SessionVideoStore.directory.appendingPathComponent(name)

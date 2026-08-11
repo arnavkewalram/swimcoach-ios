@@ -85,9 +85,12 @@ struct AboutView: View {
                                                 tint: DS.severityMajor)
                             }
                         }
-                    }
 
-                    ClipStorageSection(referencedIDs: referencedSessionIDs)
+                        // Inside the same condition "Your data" uses: with no
+                        // sessions there is no footage to account for, and the
+                        // section owns everything below that line itself.
+                        ClipStorageSection(referencedIDs: referencedSessionIDs)
+                    }
 
                     VStack(alignment: .leading, spacing: 10) {
                         SectionHeader(title: "Type")
