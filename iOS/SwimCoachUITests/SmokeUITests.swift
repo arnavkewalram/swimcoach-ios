@@ -158,6 +158,49 @@ final class SmokeUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Threshold Tuesday"].exists)
     }
 
+    /// COMMON ISSUES used to be the one chart in the app that answered a
+    /// question and then offered nowhere to ask another. A bar is now a way
+    /// in, and only a rendered assertion can prove the overlay is wired —
+    /// the tap target is an invisible `Rectangle`.
+    func testTappingACommonIssuesBarOpensThatFaultsPage() {
+        let app = launch(["-seedTrainingLog", "-openHistory"])
+        XCTAssertTrue(app.staticTexts["SCORE TREND"].waitForExistence(timeout: 10))
+
+        // Charts publishes each `BarMark` as a labelled container, not a
+        // static text — addressing it by label keeps this test off the
+        // element-type detail SwiftUI is free to change.
+        let bar = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Body Sag")).firstMatch
+        XCTAssertTrue(scroll(app, to: bar), "COMMON ISSUES never came into view")
+        bar.tap()
+
+        XCTAssertTrue(app.staticTexts["HOW OFTEN"].waitForExistence(timeout: 10),
+                      "Tapping a bar must open that fault's own page")
+        XCTAssertTrue(app.staticTexts["DETECTION STRENGTH"].exists)
+        XCTAssertTrue(app.staticTexts["SWIMS IT SHOWED UP IN"].exists)
+    }
+
+    /// The Focus panel gained a second action. The first one — the whole
+    /// card opening the drill library — is the route users already have,
+    /// and adding to a panel must not quietly reassign it.
+    func testFocusPanelKeepsItsDrillRouteAndGainsAFaultRoute() {
+        let app = launch(["-seedTrainingLog"])
+        XCTAssertTrue(app.staticTexts["SwimCoach"].waitForExistence(timeout: 10))
+
+        let drillsLink = app.staticTexts["DRILLS FOR THIS"]
+        XCTAssertTrue(scroll(app, to: drillsLink), "Focus panel never came into view")
+        drillsLink.tap()
+        XCTAssertTrue(app.staticTexts["Fingertip Drag"].waitForExistence(timeout: 10),
+                      "The card must still open the drill library")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        let historyLink = app.staticTexts["SEE ITS FULL HISTORY"]
+        XCTAssertTrue(scroll(app, to: historyLink))
+        historyLink.tap()
+        XCTAssertTrue(app.staticTexts["HOW OFTEN"].waitForExistence(timeout: 10),
+                      "The new link must open the fault page, not the drills")
+    }
+
     func testDrillsRendersLibrary() {
         let app = launch(["-openDrills"])
         XCTAssertTrue(app.staticTexts["Fingertip Drag"].waitForExistence(timeout: 10))

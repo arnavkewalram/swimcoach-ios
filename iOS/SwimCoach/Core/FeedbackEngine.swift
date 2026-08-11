@@ -64,6 +64,17 @@ struct FeedbackEngine {
         catalog.first { $0.name == name }.map { ($0.display, $0.baseSev) }
     }
 
+    /// The whole catalog entry for a fault name. The fault page says what
+    /// the fault IS, not just what it is called, and a fault the swimmer
+    /// has never had still has to describe itself — so this reads the
+    /// catalog rather than a detected `TechniqueIssue`.
+    static func catalogEntry(for name: String)
+        -> (display: String, severity: TechniqueIssue.Severity,
+            description: String, tip: String)? {
+        catalog.first { $0.name == name }
+            .map { ($0.display, $0.baseSev, $0.desc, $0.tip) }
+    }
+
     static func decode(probabilities: [Float]) -> [TechniqueIssue] {
         probabilities.enumerated().compactMap { i, prob in
             guard i < catalog.count, prob >= threshold else { return nil }

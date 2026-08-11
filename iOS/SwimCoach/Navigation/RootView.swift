@@ -25,6 +25,8 @@ struct RootView: View {
                         CompareView(earlier: earlier, later: later)
                     case .drills(let highlightIssue):
                         DrillsView(highlightIssue: highlightIssue)
+                    case .fault(let name):
+                        FaultDetailView(faultName: name)
                     case .unfinishedTakes:
                         UnfinishedTakesView()
                     case .about:
