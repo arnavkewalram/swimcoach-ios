@@ -3,25 +3,135 @@ import SwiftData
 
 // MARK: - First-run welcome card
 
+/// The zero-session state. It used to be a dead end: it described a technique
+/// score, detected faults and drills to somebody who could not see any of
+/// them without first going to a pool, and there was no other way to find out
+/// what the app did.
+///
+/// The footer fixes that without softening the ask. Filming is still the
+/// headline and still the point — the sample swims are offered underneath it,
+/// in the quiet register, as the thing to do while you are not at the water.
 struct FirstRunCard: View {
+    /// Opens the sample swims.
+    let onTrySample: () -> Void
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("FIRST SESSION")
-                .font(.sectionLabel)
-                .tracking(1.6)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("FIRST SESSION")
+                    .font(.sectionLabel)
+                    .tracking(1.6)
+                    .foregroundStyle(DS.accent)
+                Text("Film your first swim")
+                    .font(.grotesk(22, .bold))
+                    .foregroundStyle(DS.ink)
+                Text("Record a side-on video from the pool deck, 3–6 m from the swimmer. You'll get a technique score, detected faults, and drills in under a minute.")
+                    .font(.footnote)
+                    .lineSpacing(3)
+                    .foregroundStyle(DS.inkSecondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+
+            Rectangle().fill(DS.border).frame(height: 1)
+                .padding(.top, 4)
+
+            Button(action: onTrySample) {
+                HStack(spacing: 5) {
+                    Text("OR TRY A SAMPLE SWIM")
+                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                        .tracking(1.2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Image(systemName: "arrow.right")
+                        .font(.caption2.weight(.semibold))
+                        .accessibilityHidden(true)
+                    Spacer(minLength: 0)
+                }
                 .foregroundStyle(DS.accent)
-            Text("Film your first swim")
-                .font(.grotesk(22, .bold))
-                .foregroundStyle(DS.ink)
-            Text("Record a side-on video from the pool deck, 3–6 m from the swimmer. You'll get a technique score, detected faults, and drills in under a minute.")
-                .font(.footnote)
-                .lineSpacing(3)
-                .foregroundStyle(DS.inkSecondary)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(ScaleButtonStyle())
+            .accessibilityLabel("Try a sample swim")
+            .accessibilityHint("Analyzes one of four clips that ship with the app. Nothing is saved to your history.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
+        .padding(.bottom, -6)
         .glassCard()
-        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Home index row
+
+/// One line of Home's index: where it goes, the count that justifies going
+/// there, and a rule underneath. History, the drill library and the sample
+/// swims all sit at this weight — none of them is the move the page is
+/// asking for, and none may out-shout "Analyze a swim".
+///
+/// Extracted when the third one arrived: the two that existed had been
+/// copied line for line, and a third copy would have been the point at which
+/// they started drifting apart.
+///
+/// At accessibility text sizes the count drops to its own line instead of
+/// fighting the title for one that can no longer hold both.
+struct HomeIndexRow: View {
+    let title: String
+    /// Register text, already in its final casing ("12 SESSIONS", "4 CLIPS").
+    let count: String
+    let action: () -> Void
+
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: 6) {
+                        titleText
+                        HStack(spacing: 8) {
+                            countText
+                            Spacer(minLength: 0)
+                            arrow
+                        }
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        titleText
+                        Spacer(minLength: 0)
+                        countText
+                        arrow
+                    }
+                }
+            }
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(alignment: .bottom) { Rectangle().fill(DS.border).frame(height: 1) }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+
+    private var titleText: some View {
+        Text(title)
+            .font(.grotesk(15, .medium))
+            .foregroundStyle(DS.ink)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var countText: some View {
+        Text(count)
+            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+            .tracking(1.2)
+            .foregroundStyle(DS.inkTertiary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var arrow: some View {
+        Image(systemName: "arrow.right")
+            .font(.caption.weight(.medium))
+            .foregroundStyle(DS.inkTertiary)
+            .accessibilityHidden(true)
     }
 }
 

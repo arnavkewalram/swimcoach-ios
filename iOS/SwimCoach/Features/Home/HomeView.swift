@@ -14,6 +14,14 @@ struct HomeView: View {
     @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
     @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
     @State private var showWhatsNew = false
+    @State private var showSamples = false
+    /// Set by the samples sheet on the way out, consumed by its `onDismiss`.
+    ///
+    /// The push has to happen *after* the sheet is gone: presenting a sheet
+    /// and pushing onto the stack underneath it in the same runloop turn is
+    /// a race, and the loser is the navigation. Handing the choice back
+    /// through state makes the order explicit instead of hoping for it.
+    @State private var sampleToAnalyze: SampleClip? = nil
     @State private var showPhotoPicker = false
     @State private var photoItem: PhotosPickerItem? = nil
     @State private var isImporting = false
@@ -121,7 +129,9 @@ struct HomeView: View {
                         }
                         .padding(.bottom, 16)
                     } else {
-                        FirstRunCard()
+                        // Zero sessions: the card that used to describe what
+                        // the app would do can now show it. See FirstRunCard.
+                        FirstRunCard { showSamples = true }
                             .padding(.bottom, 16)
                     }
 
@@ -184,53 +194,30 @@ struct HomeView: View {
                     .padding(.bottom, 4)
 
                     if !sessions.isEmpty {
-                        Button {
+                        HomeIndexRow(title: "History",
+                                     count: "\(sessions.count) SESSIONS") {
                             router.push(.history)
-                        } label: {
-                            HStack {
-                                Text("History")
-                                    .font(.grotesk(15, .medium))
-                                    .foregroundStyle(DS.ink)
-                                Spacer()
-                                Text("\(sessions.count) SESSIONS")
-                                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                                    .tracking(1.2)
-                                    .foregroundStyle(DS.inkTertiary)
-                                Image(systemName: "arrow.right")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(DS.inkTertiary)
-                                    .accessibilityHidden(true)
-                            }
-                            .padding(.vertical, 16)
-                            .overlay(alignment: .bottom) { Rectangle().fill(DS.border).frame(height: 1) }
-                            .contentShape(Rectangle())
                         }
-                        .buttonStyle(ScaleButtonStyle())
                         .padding(.top, 6)
                     }
 
-                    Button {
-                        router.push(.drills(highlightIssue: nil))
-                    } label: {
-                        HStack {
-                            Text("Drill library")
-                                .font(.grotesk(15, .medium))
-                                .foregroundStyle(DS.ink)
-                            Spacer()
-                            Text("\(DrillCatalog.all.count) DRILLS")
-                                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                                .tracking(1.2)
-                                .foregroundStyle(DS.inkTertiary)
-                            Image(systemName: "arrow.right")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(DS.inkTertiary)
-                                .accessibilityHidden(true)
-                        }
-                        .padding(.vertical, 16)
-                        .overlay(alignment: .bottom) { Rectangle().fill(DS.border).frame(height: 1) }
-                        .contentShape(Rectangle())
+                    // Permanent, not empty-state-only. The first-run card
+                    // offers samples too, but that card disappears the moment
+                    // a swim is saved — and the reason to open a sample does
+                    // not: it is how you see a fault you have never had, and
+                    // the only footage on the phone that is guaranteed to
+                    // analyze. Leaving the only entry point in a card that
+                    // self-destructs would make this a thing you can find
+                    // exactly once.
+                    HomeIndexRow(title: "Sample swims",
+                                 count: "\(SampleClipCatalog.all.count) CLIPS") {
+                        showSamples = true
                     }
-                    .buttonStyle(ScaleButtonStyle())
+
+                    HomeIndexRow(title: "Drill library",
+                                 count: "\(DrillCatalog.all.count) DRILLS") {
+                        router.push(.drills(highlightIssue: nil))
+                    }
 
                     // ── Dev tools (DEBUG builds only) ─────────────────────
                     #if DEBUG
@@ -275,6 +262,17 @@ struct HomeView: View {
                 } catch {
                     AppLog.storage.error("Photo import failed: \(error.localizedDescription)")
                 }
+            }
+        }
+        // Sheet, not a push: `AppDestination` has no sample case, and the run
+        // a sample starts has to land on THIS stack so that Back from Results
+        // goes home exactly as it does for a filmed swim. The choice comes
+        // back through `sampleToAnalyze` and is acted on after the sheet is
+        // gone — see that property.
+        .sheet(isPresented: $showSamples, onDismiss: startPendingSample) {
+            SampleSwimsView { clip in
+                sampleToAnalyze = clip
+                showSamples = false
             }
         }
         .fullScreenCover(isPresented: .constant(!hasSeenOnboarding)) { OnboardingView() }
@@ -360,6 +358,13 @@ struct HomeView: View {
                     if let url = Bundle.main.url(forResource: "swim_test", withExtension: "mp4") {
                         router.push(.review(PendingClip(external: url)))
                     }
+                } else if args.contains("-openSamples") {
+                    // A sheet, so it needs the same deferral the what's-new
+                    // sheet does: presented synchronously from this first
+                    // onAppear it silently no-ops.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        showSamples = true
+                    }
                 } else if args.contains("-openTakes") {
                     router.push(.unfinishedTakes)
                 } else if args.contains("-openHistory") {
@@ -385,6 +390,27 @@ struct HomeView: View {
             }
             #endif
         }
+    }
+
+    /// Hand the chosen sample to the ordinary analysis route, once the sheet
+    /// that chose it has closed.
+    ///
+    /// `PendingClip(external:)` is the right constructor and not a special
+    /// case: a bundled clip is a source the session store does not own, the
+    /// same as a photo-library import. It mints the result id up front, and
+    /// `SessionVideoStore.persist` recognises the bundle URL and hands back
+    /// the resource name rather than copying the file — so a sample costs the
+    /// user's Documents directory nothing and can never surface as an
+    /// unfinished take. Whether the run is saved is decided in `AnalyzingView`
+    /// off the clip's own identity, not here.
+    private func startPendingSample() {
+        guard let clip = sampleToAnalyze else { return }
+        sampleToAnalyze = nil
+        guard let url = clip.bundleURL() else {
+            AppLog.storage.error("Sample clip missing from bundle: \(clip.fileName)")
+            return
+        }
+        router.push(.analyzing(PendingClip(external: url)))
     }
 
     /// A directory listing plus the session-id column the @Query already

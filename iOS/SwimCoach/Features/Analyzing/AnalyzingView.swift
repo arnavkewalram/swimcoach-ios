@@ -9,6 +9,19 @@ struct AnalyzingView: View {
     /// like an orphan the moment it was saved.
     let clip: PendingClip
     private var videoURL: URL { clip.url }
+
+    /// The bundled sample this run is analyzing, or nil for the user's own
+    /// footage. The ONE thing that differs about a sample run — see step 7.
+    ///
+    /// Derived from the clip rather than handed in as a flag, for two
+    /// reasons. `AppDestination.analyzing` carries only a `PendingClip`, so a
+    /// flag would have to be threaded through navigation and could arrive
+    /// describing footage it does not match. And bundle identity is already
+    /// this screen's idiom for exactly this question — the demo-cartoon check
+    /// in `body` below asks it the same way, and for the same reason: a swim
+    /// the user filmed must never be mistaken for one we shipped just because
+    /// the two share a file name.
+    private var sample: SampleClip? { SampleClipCatalog.sample(for: videoURL) }
     @Environment(AppRouter.self) private var router
     @Environment(\.modelContext) private var modelContext
     @AppStorage("activeSwimmer") private var activeSwimmer: String = ""
@@ -516,23 +529,44 @@ struct AnalyzingView: View {
 
             // 7 — Auto-save session (Results reads saved-state from SwiftData,
             // so a failed save is shown honestly instead of a false checkmark)
+            //
+            // …unless this was a sample swim, which is the only branch in
+            // this whole method. Everything above ran identically: the same
+            // pose extraction, the same windows, the same SwimTCN weights,
+            // the same decode. The numbers on the next screen are real model
+            // output on real footage and are presented as such. What stops
+            // here is ownership — a sample is somebody else's lap, and
+            // writing it would hand a stranger's swim to the weekly goal,
+            // the streak, the score trend, `FocusFault`, and every
+            // `DrillEffect` before/after split, none of which can tell it
+            // apart once it is in the store. There is no honest badge to add
+            // later, because the aggregations count rows, not badges.
+            //
+            // Results derives `isSaved` from SwiftData, so an unsaved result
+            // already renders truthfully — no session label, no compare row.
+            // Nothing here has to fake that.
             guard !Task.isCancelled else { return }
-            await MainActor.run {
-                let session = SwimSession(result: result)
-                session.swimmer = activeSwimmer
-                modelContext.insert(session)
-                do {
-                    try modelContext.save()
-                    // The session now owns the stored clip: its id matches the
-                    // file's name, so the sweeper reads it as claimed and the
-                    // take drops off the unfinished list. A failed save leaves
-                    // it unclaimed — and therefore recoverable — instead.
-                    // A new session changes this week's count — refresh the
-                    // goal reminder copy (and skip the week if now met).
-                    GoalReminder.reschedule(context: modelContext)
-                } catch {
-                    AppLog.analysis.error("Session save failed: \(error.localizedDescription)")
+            if sample == nil {
+                await MainActor.run {
+                    let session = SwimSession(result: result)
+                    session.swimmer = activeSwimmer
+                    modelContext.insert(session)
+                    do {
+                        try modelContext.save()
+                        // The session now owns the stored clip: its id matches
+                        // the file's name, so the sweeper reads it as claimed
+                        // and the take drops off the unfinished list. A failed
+                        // save leaves it unclaimed — and therefore recoverable
+                        // — instead. A new session changes this week's count —
+                        // refresh the goal reminder copy (and skip the week if
+                        // now met).
+                        GoalReminder.reschedule(context: modelContext)
+                    } catch {
+                        AppLog.analysis.error("Session save failed: \(error.localizedDescription)")
+                    }
                 }
+            } else {
+                AppLog.analysis.info("Sample swim analyzed; not saved to history")
             }
 
             guard !Task.isCancelled else { return }
