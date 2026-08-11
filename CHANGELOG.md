@@ -3,6 +3,26 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.50.0] — 2026-08-10 — "Room to Swim"
+
+### Added
+- **You can now drop old footage without losing the swims.** Video from a
+  saved swim was kept forever, at any age, and the only way to reclaim the
+  space was to erase everything — scores, faults, notes and trends included.
+  About now shows what the clips actually cost and lets you delete those
+  older than an age you pick.
+- The swims stay. Their score, faults, notes and trends are untouched;
+  only the video goes, so those sessions simply have no clip to play. Clips
+  still waiting to be scored are never touched.
+- The confirmation says exactly what is freed, what is kept and what is
+  lost, before you commit to it.
+
+### Fixed
+- Compare's explanation for a swim with no clip said the take had been
+  "removed" — but a *take* is this app's word for a clip still waiting to be
+  scored, which a compared swim's clip never is. It now says the footage was
+  deleted or damaged, matching the words the delete control uses.
+
 ## [1.49.0] — 2026-08-10 — "One Fault at a Time"
 
 ### Added
