@@ -234,6 +234,15 @@ struct ResultsView: View {
                         .staggerIn(sectionsVisible, delay: 0.18)
                     }
 
+                    // ── Full read-out ─────────────────────────────────────
+                    // All ten scored faults, not just the ones that fired.
+                    // Hides itself for legacy sessions (nil windows); its own
+                    // bottom padding lives inside that branch so a hidden
+                    // section leaves no gap.
+                    FullReadoutSection(windows: result.issueWindows,
+                                       issues: result.issues)
+                        .staggerIn(sectionsVisible, delay: 0.21)
+
                     // ── Tips ──────────────────────────────────────────────
                     if !result.tips.isEmpty {
                         SectionHeader(title: "Coaching tips")

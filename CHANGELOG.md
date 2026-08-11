@@ -3,6 +3,21 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.48.0] — 2026-08-10 — "The Other Seven"
+
+### Added
+- **Results now says what happened to the checks it didn't flag.** The app
+  scores ten faults on every swim and only ever told you about the ones that
+  crossed the line. A new full read-out lists all ten with their detection
+  strength, grouped into flagged, close-but-not-flagged, and clear.
+- The close band is the point: a fault at 44% and one at 4% used to look
+  identical, because both were simply absent. Now you can see what nearly
+  registered — stated as a non-finding, in four ways at once, so it can't be
+  mistaken for something the app detected.
+- This works on every swim already in your history. The numbers were always
+  stored; nothing was recomputed and nothing needed re-filming. Swims saved
+  before the app kept them simply don't show the section.
+
 ## [1.47.3] — 2026-08-08
 
 ### Changed
