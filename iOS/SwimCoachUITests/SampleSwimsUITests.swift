@@ -13,6 +13,63 @@ final class SampleSwimsUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+        XCUIDevice.shared.appearance = .light
+    }
+
+    override func tearDownWithError() throws {
+        XCUIDevice.shared.appearance = .light
+    }
+
+    /// Mean relative luminance of a small patch of the screenshot, in the
+    /// page's left margin where nothing but the ground is ever drawn.
+    ///
+    /// This exists because the first version of the dark test set
+    /// `-UIUserInterfaceStyle Dark` as a launch argument, which does nothing,
+    /// and passed anyway — it had been screenshotting the light appearance
+    /// and asserting on text that is present in both. An appearance test that
+    /// cannot tell the two apart is not a test, so this one measures.
+    private func groundLuminance() throws -> Double {
+        let shot = XCUIScreen.main.screenshot().image
+        let cg = try XCTUnwrap(shot.cgImage)
+        // Left margin (page padding is 24pt), just past the vertical middle.
+        let x = Int(Double(cg.width) * 0.02)
+        let y = Int(Double(cg.height) * 0.55)
+        let patch = try XCTUnwrap(cg.cropping(
+            to: CGRect(x: x, y: y, width: 8, height: 8)))
+
+        var pixels = [UInt8](repeating: 0, count: 8 * 8 * 4)
+        let context = try XCTUnwrap(CGContext(
+            data: &pixels, width: 8, height: 8, bitsPerComponent: 8,
+            bytesPerRow: 8 * 4, space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        context.draw(patch, in: CGRect(x: 0, y: 0, width: 8, height: 8))
+
+        var total = 0.0
+        var count = 0
+        for i in stride(from: 0, to: pixels.count, by: 4) {
+            // Rec. 709 luma is plenty here: the two grounds are #F7F5EF and
+            // #121820, which no weighting confuses.
+            let r = Double(pixels[i]) / 255.0
+            let g = Double(pixels[i + 1]) / 255.0
+            let b = Double(pixels[i + 2]) / 255.0
+            total += 0.2126 * r + 0.7152 * g + 0.0722 * b
+            count += 1
+        }
+        return count == 0 ? 0 : total / Double(count)
+    }
+
+    /// Poll `groundLuminance()` until it drops below `threshold`, then return
+    /// it. Returns the last reading either way, so the caller's assertion
+    /// reports the real number rather than a timeout.
+    private func waitForGroundLuminance(below threshold: Double,
+                                        timeout: TimeInterval = 5) throws -> Double {
+        let deadline = Date().addingTimeInterval(timeout)
+        var luma = try groundLuminance()
+        while luma >= threshold && Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.25)
+            luma = try groundLuminance()
+        }
+        return luma
     }
 
     private func launch(_ args: [String] = []) -> XCUIApplication {
@@ -104,13 +161,34 @@ final class SampleSwimsUITests: XCTestCase {
 
     // MARK: - Dark
 
-    func testSampleSwimsHoldsUpInTheDarkAppearance() {
-        let app = launch(["-openSamples", "-UIUserInterfaceStyle", "Dark"])
+    func testSampleSwimsHoldsUpInTheDarkAppearance() throws {
+        let app = launch(["-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
+
+        // Switched with the screen already up, then waited for: the change
+        // travels through the simulator and back into the app's trait
+        // collection asynchronously, and setting it before `launch()` does
+        // not survive the launch at all on this runtime.
+        XCUIDevice.shared.appearance = .dark
+        let dark = try waitForGroundLuminance(below: 0.25)
+        XCTAssertLessThan(dark, 0.25,
+                          "the screen is not rendering the dark appearance (ground luma \(dark))")
+
         XCTAssertTrue(labelled(app, "Real numbers").exists)
         attach("samples-dark-top")
         assertEveryClipRowIsPresent(app)
         attach("samples-dark-clips")
+    }
+
+    /// The other half of the pair: light has to be measurably light, or the
+    /// dark assertion above proves nothing about a difference.
+    func testSampleSwimsRendersTheLightAppearance() throws {
+        XCUIDevice.shared.appearance = .light
+        let app = launch(["-openSamples"])
+        XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
+        let light = try groundLuminance()
+        XCTAssertGreaterThan(light, 0.75,
+                             "the screen is not rendering the light appearance (ground luma \(light))")
     }
 
     // MARK: - Accessibility text sizes
