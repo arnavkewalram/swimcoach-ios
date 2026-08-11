@@ -56,13 +56,13 @@ struct ClipStorageSection: View {
             } else {
                 headline
 
-                Text(breakdown)
-                    .font(.footnote)
-                    .lineSpacing(4)
-                    .foregroundStyle(DS.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
                 if storage.hasDeletableClips {
+                    Text(breakdown)
+                        .font(.footnote)
+                        .lineSpacing(4)
+                        .foregroundStyle(DS.inkSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
                     deleteControl
                 } else {
                     Text("No saved swim has a clip to play. What is here is waiting to be scored — the Takes screen decides those.")
@@ -126,6 +126,11 @@ struct ClipStorageSection: View {
             .foregroundStyle(DS.inkTertiary)
     }
 
+    /// Splits the headline total into the two populations. Only shown when
+    /// some clip is deletable — which, because the ANY AGE offer covers every
+    /// session clip whatever its age, is exactly when `sessionClipCount > 0`.
+    /// With none, "0 clips belong to saved swims" would say in numbers what
+    /// the note underneath already says in words.
     private var breakdown: String {
         let claimed = "\(VideoStorage.clipCountText(storage.sessionClipCount)) belong to saved swims"
         guard storage.unscoredCount > 0 else { return "\(claimed)." }
