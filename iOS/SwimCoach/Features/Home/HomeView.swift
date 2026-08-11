@@ -313,6 +313,16 @@ struct HomeView: View {
             }
             // Launch-argument hooks for automated screenshot capture / testing
             let args = ProcessInfo.processInfo.arguments
+            // Back to a genuinely fresh install. The store outlives the app
+            // between launches, so a UI test that needs the zero-session
+            // state cannot get there just by not seeding — whatever the
+            // previous test seeded is still sitting there. Runs first so a
+            // seed argument on the same launch still wins.
+            if args.contains("-seedFirstRun") {
+                sessions.forEach { modelContext.delete($0) }
+                try? modelContext.delete(model: DrillPracticeEvent.self)
+                SessionVideoStore.removeAll()
+            }
             if args.contains("-seedTrainingLog") {
                 seedTrainingLog()
             }

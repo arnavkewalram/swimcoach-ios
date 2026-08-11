@@ -143,7 +143,9 @@ final class SampleSwimsUITests: XCTestCase {
     /// permanent; the first-run footer only exists while there is nothing
     /// else on the page to look at.
     func testHomeOffersSamplesPermanentlyAndInTheEmptyState() {
-        let empty = launch()
+        // The store survives between launches, so "don't seed" is not the
+        // same as "empty" — a previous test's fixture would still be here.
+        let empty = launch(["-seedFirstRun"])
         XCTAssertTrue(empty.staticTexts["SwimCoach"].waitForExistence(timeout: 10))
         XCTAssertTrue(empty.staticTexts["Film your first swim"].exists,
                       "expected the zero-session state")
@@ -188,7 +190,7 @@ final class SampleSwimsUITests: XCTestCase {
     /// real faults, and the no-save rule taking effect on a result that
     /// actually exists all need a device.
     func testTappingASampleRunsTheRealPipelineAndNotTheDemoShortcut() {
-        let app = launch(["-openSamples"])
+        let app = launch(["-seedFirstRun", "-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
 
         let row = element(app, "sampleClipRow-sample_poolside")
@@ -206,8 +208,9 @@ final class SampleSwimsUITests: XCTestCase {
         attach("samples-analyzing-simulator")
 
         // And it did not quietly bank the attempt: back on Home the app is
-        // still in its zero-session state.
-        app.buttons["Back to Home"].tap()
+        // still in its zero-session state. (The escape hatch is addressed by
+        // its accessibility label, not its rendered "BACK TO HOME" caps.)
+        app.buttons["Go back to Home"].tap()
         XCTAssertTrue(app.staticTexts["Film your first swim"].waitForExistence(timeout: 10),
                       "a sample run left something behind in the user's history")
     }

@@ -107,7 +107,11 @@ struct SampleSwimsView: View {
     /// confession that the numbers are fake, which would be its own lie.
     private var terms: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "What you get")
+            // singleLine: the lane rule is greedy, and without this the
+            // header breaks mid-word at accessibility sizes ("FOOTAG / E").
+            // These titles are short enough to hold one line at the largest
+            // size the app renders, so the rule simply gives up its slack.
+            SectionHeader(title: "What you get", singleLine: true)
 
             VStack(alignment: .leading, spacing: 0) {
                 TermRow(
@@ -126,7 +130,7 @@ struct SampleSwimsView: View {
 
     private var clipList: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Clips")
+            SectionHeader(title: "Clips", singleLine: true)
 
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(clips.enumerated()), id: \.element.id) { index, clip in
@@ -164,7 +168,7 @@ struct SampleSwimsView: View {
     /// the credit is visible to anyone who sees the thing it is crediting.
     private var footageCredit: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: "Footage")
+            SectionHeader(title: "Footage", singleLine: true)
 
             Text(credit.creditLine)
                 .font(.footnote)
@@ -173,19 +177,21 @@ struct SampleSwimsView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             Link(destination: credit.licenseURL) {
-                HStack(spacing: 6) {
-                    Text("VIEW \(credit.licenseShortName) LICENCE")
-                        .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                        .tracking(1.2)
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 9, weight: .semibold))
-                        .accessibilityHidden(true)
-                }
-                .foregroundStyle(DS.accent)
-                // The pill stays compact; the frame lifts the tap target to
-                // the 44pt HIG minimum before contentShape claims it.
-                .frame(minHeight: 44)
-                .contentShape(Rectangle())
+                // The glyph is interpolated INTO the text rather than set
+                // beside it in an HStack: at accessibility sizes the label
+                // wraps, and an HStack sibling stayed pinned to the trailing
+                // edge with the arrow floating off on its own line. Inline,
+                // it travels with the last word.
+                Text("VIEW \(credit.licenseShortName) LICENCE \(Image(systemName: "arrow.up.right"))")
+                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                    .tracking(1.2)
+                    .foregroundStyle(DS.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    // The label stays compact; the frame lifts the tap target
+                    // to the 44pt HIG minimum before contentShape claims it.
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .accessibilityLabel("View the \(credit.licenseName) licence")
             .accessibilityAddTraits(.isLink)
