@@ -116,7 +116,9 @@ struct HistoryView: View {
                             if swimmerScopedSessions.count >= 2 && !commonIssues.isEmpty {
                                 IssueFrequencyChart(
                                     sessionCount: swimmerScopedSessions.count,
-                                    issues: commonIssues)
+                                    issues: commonIssues) { name in
+                                    router.push(.fault(name: name))
+                                }
                             }
 
                             SectionHeader(title: "Sessions")
@@ -739,6 +741,9 @@ private struct IssueFrequencyChart: View {
     let sessionCount: Int
     /// Top faults, highest count first, carrying raw catalog names.
     let issues: [IssueFrequency.Item]
+    /// Opens one fault's own page. Same overlay + tap treatment the score
+    /// trend above already uses, so the two charts behave alike.
+    let onSelect: (String) -> Void
 
     /// Raw fault name → catalog label. A table lookup per bar (five at
     /// most), which is why the rollup can stay on raw names.
@@ -749,11 +754,11 @@ private struct IssueFrequencyChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Common issues")
-            if sessionCount >= IssueTrend.minSessions {
-                Text("Arrows compare your recent sessions to earlier ones")
-                    .font(.caption)
-                    .foregroundStyle(DS.inkTertiary)
-            }
+            Text(sessionCount >= IssueTrend.minSessions
+                 ? "Tap a bar to open that fault · arrows compare recent sessions to earlier ones"
+                 : "Tap a bar to open that fault")
+                .font(.caption)
+                .foregroundStyle(DS.inkTertiary)
 
             Chart(issues, id: \.name) { item in
                 BarMark(
@@ -797,6 +802,28 @@ private struct IssueFrequencyChart: View {
                 }
             }
             .frame(height: CGFloat(issues.count) * 34 + 16)
+            .chartOverlay { proxy in
+                GeometryReader { geo in
+                    Rectangle()
+                        .fill(Color.clear)
+                        .contentShape(Rectangle())
+                        .onTapGesture { location in
+                            guard let plotFrame = proxy.plotFrame else { return }
+                            let y = location.y - geo[plotFrame].origin.y
+                            guard let tapped = proxy.value(atY: y, as: String.self),
+                                  let item = issues.first(where: { label(for: $0.name) == tapped })
+                            else { return }
+                            onSelect(item.name)
+                        }
+                }
+            }
+            // The overlay is invisible to VoiceOver, so each bar also gets a
+            // named action on the card.
+            .accessibilityActions {
+                ForEach(issues, id: \.name) { item in
+                    Button("Open \(label(for: item.name))") { onSelect(item.name) }
+                }
+            }
         }
         .padding(16)
         .glassCard()

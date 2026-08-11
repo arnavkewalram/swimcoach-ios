@@ -158,9 +158,13 @@ struct HomeView: View {
                     if let focus = focusFault {
                         FocusPanel(faultName: focus.name,
                                    occurrences: focus.occurrences,
-                                   windowSize: focus.window) {
-                            router.push(.drills(highlightIssue: focus.name))
-                        }
+                                   windowSize: focus.window,
+                                   onDrills: {
+                                       router.push(.drills(highlightIssue: focus.name))
+                                   },
+                                   onHistory: {
+                                       router.push(.fault(name: focus.name))
+                                   })
                         .padding(.bottom, 24)
                     }
 
@@ -361,6 +365,10 @@ struct HomeView: View {
                     let issue = i + 1 < args.count && !args[i + 1].hasPrefix("-")
                         ? args[i + 1] : nil
                     router.push(.drills(highlightIssue: issue))
+                } else if let i = args.firstIndex(of: "-openFault"), i + 1 < args.count {
+                    // A fault page is otherwise only reachable by tapping a
+                    // bar in a chart, which automated capture cannot aim at.
+                    router.push(.fault(name: args[i + 1]))
                 } else if let i = args.firstIndex(of: "-analyzeDocs"), i + 1 < args.count,
                           let docsDir = FileManager.default.urls(
                               for: .documentDirectory, in: .userDomainMask).first {

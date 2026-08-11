@@ -8,6 +8,10 @@ struct FocusPanel: View {
     let occurrences: Int
     let windowSize: Int
     let onDrills: () -> Void
+    /// Opens the fault's own page. A SIBLING of the card button, never
+    /// nested inside it: the whole card still opens the drill library,
+    /// which is the route this panel has always had and users rely on.
+    var onHistory: (() -> Void)? = nil
 
     private var info: (display: String, severity: TechniqueIssue.Severity)? {
         FeedbackEngine.displayInfo(for: faultName)
@@ -22,6 +26,34 @@ struct FocusPanel: View {
     }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            card
+            if let onHistory {
+                Rectangle().fill(DS.border).frame(height: 1)
+                    .padding(.top, 10)
+                    .accessibilityHidden(true)
+                Button(action: onHistory) {
+                    HStack(spacing: 5) {
+                        Text("SEE ITS FULL HISTORY")
+                            .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                            .tracking(1.2)
+                        Image(systemName: "arrow.right")
+                            .font(.caption2.weight(.semibold))
+                            .accessibilityHidden(true)
+                    }
+                    .foregroundStyle(DS.accent)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    "Open the full history of \(info?.display ?? faultName)")
+            }
+        }
+    }
+
+    private var card: some View {
         Button(action: onDrills) {
             VStack(alignment: .leading, spacing: 8) {
                 SectionHeader(title: "Focus")

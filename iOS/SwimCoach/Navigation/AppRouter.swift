@@ -32,6 +32,10 @@ enum AppDestination: Hashable {
     case compare(earlier: AnalysisResult, later: AnalysisResult)
     case report(AnalysisResult)
     case drills(highlightIssue: String?)
+    /// One fault's own page: when it started, how often it recurs, how the
+    /// model's confidence in it has moved, and which swims carried it.
+    /// Carries the raw `FeedbackEngine` issue name, like `drills`.
+    case fault(name: String)
     /// Clips adopted into the store that no session ever claimed, still inside
     /// their retention window.
     case unfinishedTakes
