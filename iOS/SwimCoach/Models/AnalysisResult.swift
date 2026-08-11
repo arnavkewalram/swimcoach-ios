@@ -106,15 +106,34 @@ struct AnalysisResult: Hashable, Codable, Sendable {
         analyzedAt: Date(),
         videoFileName: "swim_test.mp4",
         keypointFrames: demoKeypointFrames,
+        // Ten channels, DEBUG-only. Two things are pinned here, both by
+        // `FaultReadoutTests`, because the Results full read-out is the first
+        // surface that prints these numbers rather than only threshold-testing
+        // them:
+        //
+        //  • Range. `SwimTCN.forward()` clamps its logits to ±1.9, so real
+        //    probabilities are bounded to (0.13, 0.87). Every value below sits
+        //    inside that; the old 0.10 / 0.90 / 0.95 entries were readings the
+        //    model cannot emit, harmless while nothing displayed them.
+        //  • Bands. Channels 0 (left_elbow_overextension) and 7
+        //    (stroke_asymmetry) average to 32% and 39% — under FeedbackEngine's
+        //    45% bar but within reach of it — so `-demoResults` exercises the
+        //    "close, not flagged" band. Channel 7 also peaks at 46% in a single
+        //    window while its clip average stays under: the case whose copy
+        //    must not be readable as a detection.
+        //
+        // The three decoded channels (2, 6, 8) still cross the bar in exactly
+        // the windows they did before, so the demo's issues, score, severities
+        // and timeline strip are unchanged.
         issueWindows: [
             IssueWindow(start: 0.0, end: 3.0,
-                        probs: [0.2, 0.1, 0.3, 0.1, 0.1, 0.1, 0.55, 0.2, 0.35, 0.1]),
+                        probs: [0.28, 0.14, 0.30, 0.16, 0.14, 0.15, 0.55, 0.30, 0.35, 0.14]),
             IssueWindow(start: 1.5, end: 4.5,
-                        probs: [0.2, 0.1, 0.6, 0.1, 0.1, 0.1, 0.85, 0.2, 0.50, 0.1]),
+                        probs: [0.34, 0.15, 0.60, 0.15, 0.16, 0.14, 0.80, 0.42, 0.50, 0.16]),
             IssueWindow(start: 3.0, end: 6.0,
-                        probs: [0.2, 0.1, 0.7, 0.1, 0.1, 0.1, 0.95, 0.2, 0.60, 0.1]),
+                        probs: [0.31, 0.15, 0.70, 0.17, 0.15, 0.16, 0.86, 0.46, 0.60, 0.15]),
             IssueWindow(start: 4.5, end: 7.5,
-                        probs: [0.2, 0.1, 0.5, 0.1, 0.1, 0.1, 0.90, 0.2, 0.55, 0.1]),
+                        probs: [0.35, 0.15, 0.50, 0.16, 0.14, 0.15, 0.84, 0.38, 0.55, 0.18]),
         ],
         durationSeconds: 60
     )
