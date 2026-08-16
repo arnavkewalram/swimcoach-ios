@@ -51,8 +51,23 @@ targets:
           - SpaceGrotesk-Medium.ttf
           - SpaceGrotesk-Bold.ttf
         NSCameraUsageDescription: "SwimCoach records swimming videos to analyze your stroke technique."
-        NSMicrophoneUsageDescription: "SwimCoach records audio alongside video."
-        NSPhotoLibraryUsageDescription: "SwimCoach can analyze swimming videos from your photo library."
+        # Purpose strings must say what the data is used for, not just that it
+        # is captured (App Store Review Guideline 5.1.1). The mic input is
+        # optional in CameraManager.configureSession, so this describes the
+        # only thing the audio is ever used for.
+        NSMicrophoneUsageDescription: "SwimCoach captures audio with your swim recording so poolside coaching notes are still there when you play the clip back or share it. Audio is never analyzed and never leaves your device."
+        # No NSPhotoLibraryUsageDescription: importing goes through SwiftUI's
+        # .photosPicker, which runs out of process and hands back only the item
+        # the user picked. The app never touches PHPhotoLibrary or PHAsset, so
+        # declaring library access would ask for a permission it does not use.
+        #
+        # Nothing is written back to the library either — every export is a
+        # ShareLink — so NSPhotoLibraryAddUsageDescription is not needed.
+
+        # Declared so App Store Connect stops asking for export-compliance
+        # answers on every single upload. The app makes no network calls at
+        # all and ships no cryptography beyond what the OS provides.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: LaunchBackground
         # Never expose Documents (users' swim videos live there) via Finder /

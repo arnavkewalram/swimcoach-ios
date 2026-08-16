@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import UIKit   // UIApplication.openSettingsURLString, for the permission-denied state
 
 struct CameraView: View {
     @StateObject private var camera = CameraManager()
@@ -80,6 +81,21 @@ struct CameraView: View {
                     Text(err)
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.white)
+
+                    // Only for refused permission — the sole error on this
+                    // screen the user can resolve. Offering "Open Settings"
+                    // for a missing camera would just be a dead end.
+                    if camera.isCameraAccessDenied,
+                       let settings = URL(string: UIApplication.openSettingsURLString) {
+                        Link("Open Settings", destination: settings)
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.white.opacity(0.18),
+                                        in: Capsule())
+                            .accessibilityHint("Opens SwimCoach's settings so you can turn on camera access")
+                    }
                 }
                 .padding(32)
                 .background(.ultraThinMaterial)

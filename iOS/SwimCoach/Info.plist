@@ -18,14 +18,14 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>SwimCoach records swimming videos to analyze your stroke technique.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>SwimCoach records audio alongside video.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>SwimCoach can analyze swimming videos from your photo library.</string>
+	<string>SwimCoach captures audio with your swim recording so poolside coaching notes are still there when you play the clip back or share it. Audio is never analyzed and never leaves your device.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>SpaceGrotesk-Regular.ttf</string>
