@@ -9,7 +9,7 @@ options:
 settings:
   SWIFT_VERSION: "5"
   IPHONEOS_DEPLOYMENT_TARGET: "17.0"
-  DEVELOPMENT_TEAM: 4VH58A4KM6
+  DEVELOPMENT_TEAM: NH96D7GY86   # paid Individual team (Rakhi Chhatani); 4VH58A4KM6 was a free Personal Team and cannot publish
   CODE_SIGN_STYLE: Automatic
   MARKETING_VERSION: 1.51.0
   CURRENT_PROJECT_VERSION: 94
