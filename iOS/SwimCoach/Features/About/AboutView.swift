@@ -93,6 +93,14 @@ struct AboutView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 10) {
+                        SectionHeader(title: "Made by")
+                        Text("Built by Arnav Kewalram — the app, the SwimTCN model, and the training pipeline behind it.")
+                            .font(.footnote)
+                            .lineSpacing(4)
+                            .foregroundStyle(DS.inkSecondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 10) {
                         SectionHeader(title: "Type")
                         Text("Set in Space Grotesk by Florian Karsten, used under the SIL Open Font License 1.1.")
                             .font(.footnote)

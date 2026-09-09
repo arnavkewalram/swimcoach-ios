@@ -48,14 +48,19 @@ final class SampleClipCatalogTests: XCTestCase {
     /// but it can check that no fault the app can actually detect has been
     /// pre-announced next to a clip nobody has analyzed yet.
     func testNoRowPreAnnouncesAFault() {
-        let faultWords = FeedbackEngine.issueNames
-            .flatMap { $0.split(separator: "_").map(String.init) }
-            .filter { $0.count > 3 }
+        // Whole phrases, not tokens. Splitting "stroke_asymmetry" on the
+        // underscore forbids the word "stroke" everywhere — and "stroke",
+        // "body", "kick" and "rate" are ordinary swimming vocabulary. The
+        // app's own camera purpose string says "analyze your stroke
+        // technique". What must not appear next to an unanalyzed clip is the
+        // finding itself: "body sag", "stroke asymmetry".
+        let faultPhrases = FeedbackEngine.issueNames
+            .map { $0.replacingOccurrences(of: "_", with: " ").lowercased() }
         for clip in SampleClipCatalog.all {
             let copy = "\(clip.title) \(clip.vantage) \(clip.footage)".lowercased()
-            for word in faultWords {
-                XCTAssertFalse(copy.contains(word),
-                               "\(clip.fileName) names the fault term '\(word)' in copy the app has not measured")
+            for phrase in faultPhrases {
+                XCTAssertFalse(copy.contains(phrase),
+                               "\(clip.fileName) names the fault '\(phrase)' in copy the app has not measured")
             }
         }
     }
@@ -99,7 +104,7 @@ final class SampleClipCatalogTests: XCTestCase {
 
     /// The reason the seam is an identity check and not a filename match: a
     /// swim the user filmed must get real analysis and a saved session even
-    /// when it happens to be called `sample_poolside.mp4`.
+    /// when it happens to be called `sample_crawl_deck.mp4`.
     func testAUserFileSharingASampleNameIsNotASample() throws {
         let clip = try XCTUnwrap(SampleClipCatalog.all.first)
         let impostor = SessionVideoStore.directory
@@ -156,13 +161,13 @@ final class SampleClipCatalogTests: XCTestCase {
 
     func testAttributionNamesTheAuthorTheWorkAndTheLicence() {
         let credit = SampleClipCatalog.attribution
-        XCTAssertEqual(credit.author, "koolkatkari")
-        XCTAssertEqual(credit.work, "Mary's Swim Boot Camp")
-        XCTAssertEqual(credit.licenseShortName, "CC BY 3.0")
+        XCTAssertEqual(credit.author, "It is a wonderful world")
+        XCTAssertEqual(credit.work, "Front Crawl Above Water, Front Crawl Underwater and Sprint Front Crawl Underwater")
+        XCTAssertEqual(credit.licenseShortName, "CC BY-SA 4.0")
         XCTAssertEqual(credit.licenseURL.absoluteString,
-                       "https://creativecommons.org/licenses/by/3.0")
+                       "https://creativecommons.org/licenses/by-sa/4.0")
 
-        // The rendered sentence is what actually discharges CC BY 3.0 §4(c),
+        // The rendered sentence is what actually discharges CC BY-SA 4.0 §3(a),
         // so assert on it rather than on the parts alone.
         let line = credit.creditLine
         XCTAssertTrue(line.contains(credit.author), "credit line drops the author")
