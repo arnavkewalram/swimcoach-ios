@@ -22,9 +22,9 @@ Film a lap, score your form
 ## Promotional text (170 max, editable without a new build)
 
 ```
-Four real swims are built in, so you can see exactly what SwimCoach measures before you ever take it to the pool.
+Three real swims are built in, so you can see exactly what SwimCoach measures before you ever take it to the pool.
 ```
-[112]
+[114]
 
 ## Description (4000 max)
 
@@ -45,7 +45,7 @@ WHAT YOU GET
 
 TRY IT WITHOUT A POOL
 
-Four real swims ship inside the app — freestyle filmed from the deck and from
+Three real swims ship inside the app — freestyle filmed from the deck and from
 underwater. Running one puts it through the identical analysis your own footage
 gets. The score and the faults are what the model genuinely found on those
 frames. Sample swims stay out of your history, so they cannot move your trends
@@ -120,7 +120,7 @@ SwimCoach analyses freestyle swimming technique from video, so it normally
 requires pool footage.
 
 FOR REVIEW WITHOUT A POOL: tap "Try a sample swim" on the Home screen. The app
-ships four real swims, filmed from the deck and from underwater. Running one
+ships three real swims, filmed from the deck and from underwater. Running one
 performs the identical on-device analysis a user's own recording receives — the
 technique score and detected faults are the model's genuine output on those
 frames, not canned data.

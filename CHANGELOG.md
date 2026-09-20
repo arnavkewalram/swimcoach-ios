@@ -3,6 +3,36 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.51.1] — 2026-09-19 — "Sample Swims That Score"
+
+First App Store submission.
+
+### Fixed
+- **The four sample swims never scored on a real iPhone.** They passed the
+  Python pipeline's gate, but on device Vision fitted a near-vertical body
+  to a swimmer that filled only 0.05–0.06 of the frame, and every clip was
+  rejected for too few usable observations. Replaced with three front-crawl
+  clips — deck-level, underwater, and underwater at sprint tempo — that
+  measure a 0.11–0.18 torso and clear the gate with margin. Candidates are
+  now probed through Vision, not MediaPipe, before they are added.
+- Only freestyle footage is bundled. The model knows ten front-crawl
+  faults and nothing else; breaststroke and butterfly from the same source
+  pass the gate and would score confidently against faults they cannot
+  have.
+- Footage is now "Front Crawl Above Water", "Front Crawl Underwater" and
+  "Sprint Front Crawl Underwater" by *It is a wonderful world* via Wikimedia
+  Commons, used under CC BY-SA 4.0. The in-app credit names the work, the
+  author and the licence, links to it, and states that the clips were
+  trimmed and rescaled, as ShareAlike requires. The previous CC BY 3.0
+  credit is gone with the footage it described.
+- The Home hint, the samples screen and the App Store review notes all say
+  three clips; the app no longer promises a fourth.
+
+### Changed
+- Signed against the paid Apple Developer team so the build can be
+  uploaded; `ITSAppUsesNonExemptEncryption`, `UIFileSharingEnabled` and the
+  privacy manifest are pinned by `AppStoreConfigurationTests`.
+
 ## [1.51.0] — 2026-08-11 — "Try a Sample Swim"
 
 ### Added

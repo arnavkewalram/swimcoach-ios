@@ -8,8 +8,8 @@ Facts this guide relies on:
 | | |
 |---|---|
 | Bundle ID | `com.arnavkewalram.SwimCoach` |
-| Team ID | `4VH58A4KM6` |
-| Version / build | `1.51.0` / `94` (in `iOS/project.yml`) |
+| Team ID | `NH96D7GY86` — the paid Individual team (Rakhi Chhatani). `4VH58A4KM6` is a free Personal Team and cannot publish. |
+| Version / build | `1.51.1` / `96` (in `iOS/project.yml`) |
 | Deployment target | iOS 17.0, iPhone only, portrait only |
 | Network use | None. No accounts, no analytics, no IAP. |
 
@@ -20,22 +20,25 @@ Facts this guide relies on:
 Do not start the submission machinery until these are done. Each one either
 fails the upload or draws a rejection.
 
-### 0.1 Resolve the sample-clip licence contradiction
+### 0.1 Sample-clip licence — resolved (v1.51.1)
 
-Three places disagree about the licence on the bundled swim footage:
+The bundled footage is three clips by *It is a wonderful world* on Wikimedia
+Commons (`File:Front Crawl Above Water.webm`, `File:Front Crawl
+Underwater.webm`, `File:Sprint Front Crawl Underwater.webm`), all **CC BY-SA
+4.0** — verified against the Commons `extmetadata` API on 2026-09-19. The
+catalog, the unit tests, the UI tests, `project.yml` and the CHANGELOG now
+agree, and the in-app credit states that the clips were trimmed and rescaled,
+which ShareAlike §3(a)(1)(B) requires for modified material.
 
-| Where | Claims |
-|---|---|
-| `iOS/SwimCoach/Models/SampleClipCatalog.swift:87` | CC BY-SA **4.0** |
-| `iOS/SwimCoachTests/SampleClipCatalogTests.swift:163` | CC BY **3.0** |
-| `iOS/project.yml` (resources comment) | CC BY **3.0** |
+ShareAlike attaches to the *clips* (they are separable adaptations), not to
+the app around them; distributing them under the same licence, with the
+credit and the licence link on the screen that plays them, discharges it.
 
-You are redistributing someone else's video inside a commercial app. If the
-app displays the wrong licence that is a Guideline 5.2 (intellectual property)
-problem, and BY-SA carries share-alike obligations that BY 3.0 does not.
+If you ever swap footage again, confirm the licence at the source first:
 
-Find where the clips came from, confirm the real licence, then make all three
-agree. Two tests currently fail on this.
+```bash
+curl -s "https://commons.wikimedia.org/w/api.php?action=query&titles=File:<name>&prop=imageinfo&iiprop=extmetadata&format=json"
+```
 
 ### 0.2 Get the test suite green
 
@@ -45,14 +48,17 @@ xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
-Last run: 556 tests, 3 failures — 2 from the licence mismatch above, 1 from
-`testNoRowPreAnnouncesAFault` (two sample rows use the word "stroke" in copy
-the app has not measured; that is your own guardrail firing).
+Green as of v1.51.1 (2026-09-19). CI runs the same suite on every PR; do not
+upload a build from a red branch.
 
-### 0.3 Commit and push
+### 0.3 Commit, push, merge
 
-`fix/app-store-readiness` is committed locally with no upstream. The
-sample-swims work is still uncommitted.
+`fix/app-store-readiness` carries the sample-swim feature, the v1.51.0 and
+v1.51.1 release commits and all the App Store configuration. Open the PR,
+let CI go green, squash-merge, then tag `v1.51.1` on `main` and cut the
+GitHub release from the CHANGELOG section — the release cycle in
+`CLAUDE.md`. Archive from the tagged commit so the build in the store is
+the build in git.
 
 ---
 
@@ -63,16 +69,17 @@ sample-swims work is still uncommitted.
 <https://developer.apple.com/account> → Membership. It must say **Apple
 Developer Program**, active, not expired. A free/personal team cannot submit.
 
-### 1.2 Create an Apple Distribution certificate
+### 1.2 Apple Distribution certificate — done
 
-This machine currently has only:
+This machine now has:
 
 ```
-Apple Development: arnav.kewalram@gmail.com (GKAKZJK9JN)
+Apple Distribution: Rakhi Chhatani (NH96D7GY86)
 ```
 
-A Development certificate builds to your own device. Uploading needs
-**Apple Distribution**. Xcode will make one:
+which is the one a Release archive signs with (`project.yml` sets
+`DEVELOPMENT_TEAM: NH96D7GY86`, automatic signing). If it ever disappears —
+new Mac, expired, revoked — Xcode will make another:
 
 > Xcode → Settings → Accounts → select your Apple ID → **Manage Certificates**
 > → **+** → **Apple Distribution**
@@ -196,7 +203,7 @@ if you point at it. Paste into App Review Notes:
 > requires pool footage.
 >
 > For review, tap **"Try a sample swim"** on the Home screen. The app ships
-> four real swims (deck and underwater). Running one performs the identical
+> three real swims (deck and underwater). Running one performs the identical
 > on-device analysis a user's own recording receives — the technique score and
 > detected faults are the model's genuine output on those frames, not canned
 > data.
@@ -219,7 +226,7 @@ blank, which reads as an oversight.
 ### 4.1 Bump the build number
 
 App Store Connect rejects a build number it has already seen. In
-`iOS/project.yml`, increment `CURRENT_PROJECT_VERSION` (currently `94`) for
+`iOS/project.yml`, increment `CURRENT_PROJECT_VERSION` (currently `96`) for
 **every** upload, including re-uploads after a failure. `MARKETING_VERSION`
 only changes when the user-facing version does.
 
