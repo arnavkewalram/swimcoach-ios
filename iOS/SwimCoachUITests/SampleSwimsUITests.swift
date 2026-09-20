@@ -5,7 +5,7 @@ import XCTest
 ///
 /// Vision pose extraction does not work in the simulator, so nothing here
 /// analyzes a clip — that end of the feature needs a device. What these tests
-/// can hold, and do, is everything up to the tap: that all four rows render,
+/// can hold, and do, is everything up to the tap: that all three rows render,
 /// that the licence credit is on the screen the clips are on rather than
 /// three taps away, and that neither of those survives only at the default
 /// text size.
@@ -108,8 +108,8 @@ final class SampleSwimsUITests: XCTestCase {
     private func assertEveryClipRowIsPresent(_ app: XCUIApplication,
                                              file: StaticString = #filePath,
                                              line: UInt = #line) {
-        for name in ["sample_poolside", "sample_underwater_a",
-                     "sample_underwater_b", "sample_underwater_c"] {
+        for name in ["sample_crawl_deck", "sample_crawl_underwater",
+                     "sample_crawl_sprint"] {
             let row = element(app, "sampleClipRow-\(name)")
             XCTAssertTrue(scroll(app, to: row),
                           "\(name) never came into view on the samples screen",
@@ -138,22 +138,22 @@ final class SampleSwimsUITests: XCTestCase {
         attach("samples-light-clips")
     }
 
-    /// CC BY 3.0 §4(c) is a shipping condition, not a nicety: the author, the
+    /// CC BY-SA 4.0 §3(a) is a shipping condition, not a nicety: the author, the
     /// work and the licence have to be visible to whoever sees the footage.
     /// If a later refactor quietly drops the credit block, this fails.
     func testFootageCreditNamesTheAuthorTheWorkAndTheLicence() {
         let app = launch(["-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
 
-        let credit = labelled(app, "koolkatkari")
+        let credit = labelled(app, "It is a wonderful world")
         XCTAssertTrue(scroll(app, to: credit),
                       "the footage author is not credited anywhere on this screen")
-        XCTAssertTrue(labelled(app, "Mary's Swim Boot Camp").exists,
+        XCTAssertTrue(labelled(app, "Front Crawl Above Water").exists,
                       "the credited work is missing from the attribution")
-        XCTAssertTrue(labelled(app, "Creative Commons Attribution 3.0").exists,
+        XCTAssertTrue(labelled(app, "Creative Commons Attribution-ShareAlike 4.0").exists,
                       "the licence is not named in the attribution")
 
-        let link = labelled(app, "View the Creative Commons Attribution 3.0 licence")
+        let link = labelled(app, "View the Creative Commons Attribution-ShareAlike 4.0 licence")
         XCTAssertTrue(scroll(app, to: link),
                       "the licence link is not reachable")
         attach("samples-credit")
@@ -209,7 +209,7 @@ final class SampleSwimsUITests: XCTestCase {
 
         // The last thing on the page, at the largest type the app renders:
         // if anything clips, it clips here.
-        let link = labelled(app, "View the Creative Commons Attribution 3.0 licence")
+        let link = labelled(app, "View the Creative Commons Attribution-ShareAlike 4.0 licence")
         XCTAssertTrue(scroll(app, to: link, maxSwipes: 20),
                       "the licence credit is unreachable at accessibility text sizes")
         attach("samples-ax-credit")
@@ -290,7 +290,7 @@ final class SampleSwimsUITests: XCTestCase {
         let app = launch(["-seedFirstRun", "-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
 
-        let row = element(app, "sampleClipRow-sample_poolside")
+        let row = element(app, "sampleClipRow-sample_crawl_deck")
         XCTAssertTrue(scroll(app, to: row))
         row.tap()
 

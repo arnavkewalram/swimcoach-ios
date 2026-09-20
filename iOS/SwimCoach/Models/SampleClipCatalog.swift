@@ -61,48 +61,70 @@ struct SampleClipAttribution: Hashable, Sendable {
     let licenseShortName: String
     let licenseURL: URL
 
-    /// The one sentence that carries every element CC BY 3.0 §4(c) asks for:
-    /// the title of the work, the author's name, and the licence.
+    /// The one sentence that carries every element CC BY-SA 4.0 §3(a)(1) asks
+    /// for: the title of the work, the author's name, the licence — and,
+    /// because ShareAlike obliges it, an indication that the material was
+    /// modified. Every clip here was trimmed and rescaled to ship, so that
+    /// last clause is not optional boilerplate.
     var creditLine: String {
-        "\"\(work)\" by \(author), via \(source), used under the \(licenseName) licence."
+        "\"\(work)\" by \(author), via \(source), used under the "
+            + "\(licenseName) licence. Trimmed and rescaled for this app."
     }
 }
 
 enum SampleClipCatalog {
 
-    /// All four clips come from one work, so this is a property of the
-    /// catalog rather than of each row.
+    /// All three clips are one author's, under one licence, so this is a
+    /// property of the catalog rather than of each row.
     static let attribution = SampleClipAttribution(
-        work: "Mary's Swim Boot Camp",
-        author: "koolkatkari",
+        work: "Front Crawl Above Water, Front Crawl Underwater and Sprint Front Crawl Underwater",
+        author: "It is a wonderful world",
         source: "Wikimedia Commons",
-        licenseName: "Creative Commons Attribution 3.0",
-        licenseShortName: "CC BY 3.0",
+        licenseName: "Creative Commons Attribution-ShareAlike 4.0",
+        licenseShortName: "CC BY-SA 4.0",
         // Force-unwrap on a compile-time constant that is either valid
         // forever or caught by `SampleClipCatalogTests` on the first run.
-        licenseURL: URL(string: "https://creativecommons.org/licenses/by/3.0")!)
+        licenseURL: URL(string: "https://creativecommons.org/licenses/by-sa/4.0")!)
 
+    /// ── Why these three, and why front crawl only ───────────────────────
+    ///
+    /// Two filters decided this list, and the first one is not obvious.
+    ///
+    /// **Vision has to be able to see the swimmer.** The app's gate needs ten
+    /// usable observations (`AnalyzingView`), where usable means a body that
+    /// is horizontal-or-unknown AND of plausible torso size
+    /// (`PoseAnalyzer.minTorsoLength`, 0.09 of frame height). An earlier set
+    /// of clips passed MediaPipe in `ml/` and scored 0, 0, 3 and 1 here —
+    /// every one rejected on device — because the swimmer sat 0.05–0.06 of
+    /// the frame and Vision fitted a near-vertical body to them. MediaPipe
+    /// tolerates a distant swimmer; Vision does not. **Probe a candidate
+    /// through Vision before adding it, not through the Python pipeline** —
+    /// the Python gate is a mirror of the thresholds, not of the detector.
+    /// These three measure a 0.11–0.18 median torso and 14, 18 and 41 usable
+    /// observations respectively.
+    ///
+    /// **The model only knows freestyle.** `FeedbackEngine.catalog` is ten
+    /// front-crawl faults — elbow collapse, knee overbend, kick rate, body
+    /// sag, asymmetry. Breaststroke and butterfly footage from the same
+    /// source passes the gate perfectly well and would produce confident,
+    /// meaningless output: freestyle faults scored against a stroke that
+    /// never claimed to have them.
     static let all: [SampleClip] = [
         SampleClip(
-            fileName: "sample_poolside.mp4",
+            fileName: "sample_crawl_deck.mp4",
             title: "Deck level, side on",
             vantage: "Above water",
-            footage: "Filmed from the pool deck with the camera down at the waterline, panning with the swimmer — the framing SwimCoach asks you for."),
+            footage: "Filmed from the pool deck with the camera down at the waterline, tracking the swimmer past — the framing SwimCoach asks you for."),
         SampleClip(
-            fileName: "sample_underwater_a.mp4",
-            title: "Underwater, close pass",
+            fileName: "sample_crawl_underwater.mp4",
+            title: "Underwater, side on",
             vantage: "Underwater",
-            footage: "Side on from under the surface, held against the lane rope as the swimmer goes by within arm's reach."),
+            footage: "Side on from under the surface, holding the swimmer in frame for several full stroke cycles."),
         SampleClip(
-            fileName: "sample_underwater_b.mp4",
-            title: "Underwater, whole length",
+            fileName: "sample_crawl_sprint.mp4",
+            title: "Underwater, sprint tempo",
             vantage: "Underwater",
-            footage: "Side on from under the surface, picking the swimmer up at distance and holding them all the way past the camera."),
-        SampleClip(
-            fileName: "sample_underwater_c.mp4",
-            title: "Underwater, down the lane",
-            vantage: "Underwater",
-            footage: "From under the surface looking along the lane — the swimmer comes head on toward the camera and passes it."),
+            footage: "The same vantage at racing turnover, where the stroke is faster and the catch is harder to hold."),
     ]
 
     /// The sample this URL *is*, or nil for footage the user supplied.
@@ -112,7 +134,7 @@ enum SampleClipCatalog {
     /// same reason `AnalyzingView` already checks the demo clip that way: a
     /// swim the user filmed and a swim we shipped must not become
     /// interchangeable because they happen to share a name. A user file
-    /// called `sample_poolside.mp4` lives in the session store or the photo
+    /// called `sample_crawl_deck.mp4` lives in the session store or the photo
     /// library, resolves to a different URL, and gets the full treatment —
     /// real analysis, saved to history.
     ///

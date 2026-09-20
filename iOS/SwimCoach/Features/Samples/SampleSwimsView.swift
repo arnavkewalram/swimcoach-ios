@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// "Try a sample swim" — four real clips the app can analyze for a swimmer
+/// "Try a sample swim" — three real clips the app can analyze for a swimmer
 /// who has not filmed anything yet.
 ///
 /// ── The two things this screen has to keep straight ─────────────────────
@@ -161,7 +161,7 @@ struct SampleSwimsView: View {
 
     // MARK: - Attribution
 
-    /// A licence condition, not a courtesy — CC BY 3.0 §4(c) requires the
+    /// A licence condition, not a courtesy — CC BY-SA 4.0 §3(a) requires the
     /// work, the author and the licence to travel with the footage. Set in
     /// the same register About uses for the SIL OFL type credit, and placed
     /// on the screen that plays the clips rather than three taps away, so

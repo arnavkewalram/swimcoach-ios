@@ -3,8 +3,8 @@ import AVFoundation
 
 /// A still lifted out of a bundled sample clip.
 ///
-/// Generated from the asset rather than shipped as a second image: four PNGs
-/// would be four more files to keep in step with the clips they claim to
+/// Generated from the asset rather than shipped as a second image: three PNGs
+/// would be three more files to keep in step with the clips they claim to
 /// show, and the first one to drift would be a thumbnail advertising footage
 /// the row does not play.
 ///
@@ -56,9 +56,9 @@ struct SampleClipThumbnail: View {
     /// Proportional rather than a fixed offset, and deliberately not frame
     /// zero. These clips are handheld: they open with the swimmer at distance,
     /// half out of shot or not yet in it, and a first-second still gave two of
-    /// the four rows a thumbnail of empty water. Taking the point at
-    /// `midSwimFraction` puts the swimmer in frame in all four, and keeps
-    /// doing so for a fifth clip of some other length.
+    /// the three rows a thumbnail of empty water. Taking the point at
+    /// `midSwimFraction` puts the swimmer in frame in all three, and keeps
+    /// doing so for a fourth clip of some other length.
     private static let midSwimFraction = 0.6
 
     private func loadFrame() async {

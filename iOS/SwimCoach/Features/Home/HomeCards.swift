@@ -53,7 +53,7 @@ struct FirstRunCard: View {
             }
             .buttonStyle(ScaleButtonStyle())
             .accessibilityLabel("Try a sample swim")
-            .accessibilityHint("Analyzes one of four clips that ship with the app. Nothing is saved to your history.")
+            .accessibilityHint("Analyzes one of three clips that ship with the app. Nothing is saved to your history.")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)

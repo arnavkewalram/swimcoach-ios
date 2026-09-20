@@ -14,7 +14,7 @@ import AVFoundation
 ///
 ///  2. **The no-save rule losing its grip.** `AnalyzingView` decides whether
 ///     to write a `SwimSession` by asking `SampleClipCatalog.isSample`. If
-///     that ever stopped recognising a bundled sample, four strangers' swims
+///     that ever stopped recognising a bundled sample, three strangers' swims
 ///     would start landing in the user's history, trends and streaks — and
 ///     the app would look entirely correct while doing it.
 final class SampleClipCatalogTests: XCTestCase {
