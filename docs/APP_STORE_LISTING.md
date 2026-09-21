@@ -77,22 +77,26 @@ swim,swimming,freestyle,stroke,technique,coach,training,form,analysis,video,pose
 ## Support URL
 
 ```
-https://arnavkewalram.github.io/swimcoach/support
+https://arnavkewalram.github.io/swimcoach-site/support/
 ```
 
 ## Marketing URL (optional)
 
 ```
-https://arnavkewalram.github.io/swimcoach
+https://arnavkewalram.github.io/swimcoach-site/
 ```
 
 ## Privacy Policy URL — required
 
 ```
-https://arnavkewalram.github.io/swimcoach/privacy
+https://arnavkewalram.github.io/swimcoach-site/privacy/
 ```
-Host `docs/privacy-policy.html` at that address before submitting. The URL must
-resolve when review runs, or the submission is rejected.
+Live — served by GitHub Pages from the public
+[swimcoach-site](https://github.com/arnavkewalram/swimcoach-site) repo, which
+is deliberately separate from this one so the URL survives this repo going
+private. `docs/privacy-policy.html` here is a mirror; edit both when the
+policy changes. The URL must keep resolving for as long as the app is on the
+store.
 
 ## Copyright
 

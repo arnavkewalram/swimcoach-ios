@@ -126,15 +126,19 @@ version is in review.
 All of this is entered in App Store Connect, not in the repo. Everything here
 is required before the Submit button activates.
 
-### 3.1 Privacy policy URL — required
+### 3.1 Privacy policy URL — live
 
-Required for **every** app, including ones that collect nothing. It must be a
-live public URL when you submit.
+Required for **every** app, including ones that collect nothing, and it must
+resolve when you submit and for as long as the app is on sale.
 
-You already have `arnavkewalram.github.io` in your workspace — hosting a page
-there is the shortest path. The policy must accurately describe what the app
-does: video and results stay on the device, no account, no network
-transmission, no analytics, no third-party SDKs.
+<https://arnavkewalram.github.io/swimcoach-site/privacy/> — GitHub Pages from
+the public [swimcoach-site](https://github.com/arnavkewalram/swimcoach-site)
+repo (also serves the support and marketing URLs). It is a separate repo on
+purpose: Pages on a free plan stops working the day a repo goes private, and
+this one is slated to. The policy describes what the app does — video and
+results stay on the device, no account, no network transmission, no
+analytics, no third-party SDKs — and `docs/privacy-policy.html` here mirrors
+it.
 
 ### 3.2 App Privacy questionnaire
 
