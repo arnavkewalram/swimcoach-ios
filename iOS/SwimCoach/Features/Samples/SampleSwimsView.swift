@@ -88,7 +88,7 @@ struct SampleSwimsView: View {
             LaneRule()
                 .padding(.bottom, 16)
 
-            Text("\(clips.count) real clips from an open-licensed swimming lesson. Tap one and SwimCoach analyzes it the same way it analyzes a swim you film.")
+            Text("\(clips.count) real front crawl clips, open-licensed and credited below. Tap one and SwimCoach analyzes it the same way it analyzes a swim you film.")
                 .font(.footnote)
                 .lineSpacing(4)
                 .foregroundStyle(DS.inkSecondary)

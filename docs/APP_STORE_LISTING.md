@@ -149,9 +149,10 @@ size Apple requires:
 | `01-home.png` | Score gauge, training log trend, streak, focus fault |
 | `02-results.png` | Technique score, skeleton overlay, issue timeline, detected faults |
 | `03-report.png` | Shareable report card |
+| `04-samples.png` | Sample swims — the screen App Review is pointed at, with real swimmer thumbnails |
 
-Three is the minimum; up to ten are allowed. Worth adding: the sample swims
-screen and a fault detail page with drills.
+Three is the minimum; up to ten are allowed. Worth adding: a fault detail
+page with drills.
 
 One caveat — these were captured in the Simulator using the app's demo seed
 arguments, so the video frame shows synthetic footage rather than a real
