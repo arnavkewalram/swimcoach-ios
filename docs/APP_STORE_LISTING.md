@@ -70,9 +70,13 @@ diagnostic tool.
 ## Keywords (100 max total, comma-separated, no spaces)
 
 ```
-swim,swimming,freestyle,stroke,technique,coach,training,form,analysis,video,pose,drills,lap,triathlon
+swim,swimming,freestyle,technique,coach,training,video,pose,drills,triathlon,swimmer,fitness,kick
 ```
-[97] — do not repeat words already in the name or subtitle; Apple indexes those separately.
+[97] — this is the string entered in App Store Connect. The previous draft
+(`…,stroke,…,form,analysis,…,lap,…`) was **101 characters, one over the limit**,
+and spent four slots on words already in the name and subtitle, which Apple
+indexes separately. Dropping those four freed room for `swimmer`, `fitness`
+and `kick`.
 
 ## Support URL
 

@@ -260,6 +260,36 @@ blank, which reads as an oversight.
 
 ---
 
+## Phase 3.7 — What is already entered (as of 2026-09-23)
+
+Done in App Store Connect, verified on screen:
+
+| Section | State |
+|---|---|
+| Version number | `1.51.1`, matching build 96 |
+| Name / Subtitle | SwimCoach: Stroke Analysis / Film a lap, score your form |
+| Promotional text, description, keywords | Entered from `APP_STORE_LISTING.md` |
+| Support / Marketing / Privacy URLs | The three `swimcoach-site` pages |
+| Copyright | 2026 Arnav Kewalram |
+| Category | Health & Fitness, secondary Sports |
+| Age rating | Questionnaire answered, **4+** in 172 regions, no override |
+| App Privacy | **Data Not Collected**, published |
+| Content Rights | Yes — third-party content with the necessary rights (the CC BY-SA clips) |
+| Screenshots | 4 × 1320 × 2868 in the 6.9" slot |
+| App Review notes | Entered, pointing at "Try a sample swim" |
+| Sign-in required | Unchecked — the app has no login |
+| Release | Manual |
+
+**Keywords were 101 characters in an earlier draft of the listing doc** — one
+over Apple's limit — and spent four of its slots on `stroke`, `analysis`,
+`lap` and `form`, which are already in the name and subtitle and indexed
+separately. The string in use is the corrected 97-character one.
+
+Outstanding: the review contact **phone number** (required, blocks Save on the
+version page), the build, and the submission itself.
+
+---
+
 ## Phase 4 — Build and upload
 
 ### 4.1 Bump the build number
