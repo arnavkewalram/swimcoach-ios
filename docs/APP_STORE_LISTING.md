@@ -10,7 +10,7 @@ are Apple's; the counts in brackets are what these drafts actually use.
 ```
 SwimCoach: Stroke Analysis
 ```
-[25] — plain `SwimCoach` is likely taken. Alternates: `SwimCoach — Swim Technique` [26], `SwimCoach Stroke Lab` [20].
+[25] — **registered 2026-09-21**; this is the name on the App Store Connect record. (Plain `SwimCoach` was the likely collision. Unused alternates: `SwimCoach — Swim Technique` [26], `SwimCoach Stroke Lab` [20].)
 
 ## Subtitle (30 max)
 
@@ -110,6 +110,11 @@ account. See "Attribution" below.
 ## Age rating
 
 Every questionnaire answer is **None**. Expected result: **4+**.
+
+This now includes a set of questions about social-media capabilities. SwimCoach
+has no accounts, no messaging, no user-generated content feed and no in-app
+browser — the only sharing is the system share sheet, which the user initiates.
+All **No**.
 
 ## Category
 

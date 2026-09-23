@@ -119,6 +119,41 @@ entitlement mismatch at upload.
 The name is not permanently locked, but it can only be changed while no
 version is in review.
 
+**Record created 2026-09-21** as *SwimCoach: Stroke Analysis* — the name was
+available, so no alternate was needed.
+
+### 2.1 The version number must match the build
+
+App Store Connect creates the first version as **1.0**, and it groups uploaded
+builds by their `CFBundleShortVersionString`. A build that declares `1.51.1`
+will process fine and then simply not appear in the Build picker for a 1.0
+version record.
+
+Set the version number on the version page to **1.51.1** — it is a plain text
+field, editable right up until you submit. Do not solve this by renumbering the
+app: `MARKETING_VERSION` in `iOS/project.yml` is the source of truth for git
+tags and the CHANGELOG, and a store that disagrees with it means tracking two
+numbering schemes forever.
+
+The same applies to every later release: create the version in App Store
+Connect with the number the build already has.
+
+### 2.2 Two banners on the Apps page
+
+**Trader status (EU).** The Digital Services Act requires a declared trader
+status to distribute in the EU. Without it the app is removed from the EU App
+Store — this does not block submission elsewhere, but it does block Europe, and
+verification is not instant, so start it early. It lives under **Business** and
+can only be set by an Admin or the Account Holder, which is the person on the
+paid membership (Rakhi Chhatani), not necessarily whoever is filling in this
+listing.
+
+**New age-rating questions about social-media capabilities.** They appear in
+App Information → Age Rating. SwimCoach has no accounts, no messaging, no
+user-generated content feed and no in-app browser; the only sharing is the
+system share sheet, which the user initiates. Every one of these is **No**, and
+the rating stays 4+.
+
 ---
 
 ## Phase 3 — Prepare metadata and assets
