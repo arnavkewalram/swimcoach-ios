@@ -10,6 +10,13 @@ final class CameraManager: NSObject, ObservableObject, AVCaptureFileOutputRecord
     @Published private(set) var isReady = false
     @Published private(set) var recordingDuration: TimeInterval = 0
 
+    /// True only when the camera is unusable because permission was refused —
+    /// the one error here the user can actually do something about, and the
+    /// one App Review reliably exercises by denying the prompt. Telling
+    /// someone to "enable it in Settings" without taking them there leaves
+    /// them to find a nested toggle by hand.
+    @Published private(set) var isCameraAccessDenied = false
+
     private(set) var previewLayer: AVCaptureVideoPreviewLayer?
     private let session      = AVCaptureSession()
     private let movieOutput  = AVCaptureMovieFileOutput()
@@ -22,7 +29,8 @@ final class CameraManager: NSObject, ObservableObject, AVCaptureFileOutputRecord
         AVCaptureDevice.requestAccess(for: .video) { [weak self] videoGranted in
             guard videoGranted else {
                 DispatchQueue.main.async {
-                    self?.errorMessage = "Camera access required. Enable it in Settings → Privacy."
+                    self?.errorMessage = "SwimCoach needs camera access to record your swim."
+                    self?.isCameraAccessDenied = true
                 }
                 return
             }

@@ -3,6 +3,54 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.51.1] — 2026-09-19 — "Sample Swims That Score"
+
+First App Store submission.
+
+### Fixed
+- **The four sample swims never scored on a real iPhone.** They passed the
+  Python pipeline's gate, but on device Vision fitted a near-vertical body
+  to a swimmer that filled only 0.05–0.06 of the frame, and every clip was
+  rejected for too few usable observations. Replaced with three front-crawl
+  clips — deck-level, underwater, and underwater at sprint tempo — that
+  measure a 0.11–0.18 torso and clear the gate with margin. Candidates are
+  now probed through Vision, not MediaPipe, before they are added.
+- Only freestyle footage is bundled. The model knows ten front-crawl
+  faults and nothing else; breaststroke and butterfly from the same source
+  pass the gate and would score confidently against faults they cannot
+  have.
+- Footage is now "Front Crawl Above Water", "Front Crawl Underwater" and
+  "Sprint Front Crawl Underwater" by *It is a wonderful world* via Wikimedia
+  Commons, used under CC BY-SA 4.0. The in-app credit names the work, the
+  author and the licence, links to it, and states that the clips were
+  trimmed and rescaled, as ShareAlike requires. The previous CC BY 3.0
+  credit is gone with the footage it described.
+- The Home hint, the samples screen and the App Store review notes all say
+  three clips; the app no longer promises a fourth.
+
+### Changed
+- Signed against the paid Apple Developer team so the build can be
+  uploaded; `ITSAppUsesNonExemptEncryption`, `UIFileSharingEnabled` and the
+  privacy manifest are pinned by `AppStoreConfigurationTests`.
+
+## [1.51.0] — 2026-08-11 — "Try a Sample Swim"
+
+### Added
+- **Four real swims you can analyze without going to a pool.** The app now
+  ships sample footage — actual swimmers doing freestyle, filmed from the
+  deck and from underwater — and running one puts it through the same
+  analysis your own clips get. The score and the faults are what the model
+  actually found on those frames, on your iPhone.
+- Reachable from Home, and offered on the first-run card, which until now
+  described a technique score, detected faults and drills to somebody who
+  had no way to see any of them yet.
+- Samples are somebody else's laps, so they are not written to your
+  history: they cannot move your trends, your streak, your weekly goal or
+  your drill statistics. The screen says so before you tap, alongside the
+  fact that the numbers are real.
+- Footage is "Mary's Swim Boot Camp" by koolkatkari via Wikimedia Commons,
+  used under CC BY 3.0 and credited in the app.
+
 ## [1.50.0] — 2026-08-10 — "Room to Swim"
 
 ### Added
