@@ -291,8 +291,37 @@ availability was unchecked** — the app's primary flow is filming a swimmer
 poolside with a rear camera, it is portrait-only, and it has never been run on
 macOS. Vision Pro is moot; the build is reported incompatible.
 
-Outstanding: the build must finish processing and be attached to the version,
-EU trader status (Account Holder only), and the submission itself.
+**Build 96 is uploaded and attached** to version 1.51.1. The CLI path works
+and is faster than Organizer — no GUI, no waiting on Xcode:
+
+```bash
+# ExportOptions.plist with method=app-store-connect AND destination=upload
+xcodebuild -exportArchive -archivePath "<archive>" \
+  -exportOptionsPlist UploadOptions.plist -allowProvisioningUpdates
+```
+
+The log prints a scary `No provider associated with App Store Connect user`
+line for the store-configuration lookup and then uploads successfully anyway —
+that message is not the upload result. Look for `Upload succeeded.` Processing
+took about seven minutes, after which the build appears in TestFlight and in
+the version's Build picker.
+
+### Two requirements that only appear late
+
+**Regulated Medical Device declaration.** A banner demanding this appeared on
+the version page only *after* the build was attached, and it blocks EU/EEA, UK
+and US distribution. It is triggered by the Health & Fitness category. It
+lives in App Information → App Store Regulations & Permits → Regulated Medical
+Devices. Declared **No**: the app makes no diagnosis, prevention, monitoring or
+treatment claim, and the description says so explicitly.
+
+**Digital Services Act trader status** sits in that same Regulations & Permits
+block (not only under Business). It requires verifying account identity
+details, so the Account Holder has to do it, and without it the app is removed
+from sale in the EU. It does not block submitting elsewhere.
+
+Outstanding: EU trader status, device validation through TestFlight, and the
+submission itself.
 
 ---
 
