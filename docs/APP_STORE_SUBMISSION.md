@@ -285,8 +285,14 @@ over Apple's limit — and spent four of its slots on `stroke`, `analysis`,
 `lap` and `form`, which are already in the name and subtitle and indexed
 separately. The string in use is the corrected 97-character one.
 
-Outstanding: the review contact **phone number** (required, blocks Save on the
-version page), the build, and the submission itself.
+Also set: **price Free** in 175 regions, availability all regions, tax
+category App Store software, distribution method Public. **Apple Silicon Mac
+availability was unchecked** — the app's primary flow is filming a swimmer
+poolside with a rear camera, it is portrait-only, and it has never been run on
+macOS. Vision Pro is moot; the build is reported incompatible.
+
+Outstanding: the build must finish processing and be attached to the version,
+EU trader status (Account Holder only), and the submission itself.
 
 ---
 
@@ -345,8 +351,25 @@ Already handled — `ITSAppUsesNonExemptEncryption: false` is declared in
 2. Confirm every section has a green check.
 3. **Add for Review** → **Submit for Review**.
 
-Choose whether to release automatically on approval or manually. Manual is
-better for a first release — you decide when it goes live.
+**Release timing.** This app is set to **automatically release** on approval.
+Manual release buys you control of the go-live moment, which matters when a
+launch post or a site update has to land with it; it also introduces the most
+common own-goal, a version sitting approved in "Pending Developer Release"
+because nobody saw the email. There is nothing here to coordinate, so
+automatic is the better trade.
+
+Do not reach for manual as a way to get a last look at the build on real
+hardware — that is what TestFlight is for (below), and it works regardless of
+the release setting.
+
+### Validate on a device first — TestFlight, not the release toggle
+
+Vision pose extraction does not run in the simulator, so the analysis path is
+only ever exercised for real on hardware. Once an uploaded build finishes
+processing it is installable through **TestFlight** immediately, without any
+review. Install it, film an actual swim, and confirm the score and faults come
+back before you submit. This is the only step in the whole process that tests
+the thing the app is actually for.
 
 ### What to expect
 
