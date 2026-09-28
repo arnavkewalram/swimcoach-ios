@@ -3,6 +3,20 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.51.2] — unreleased — "Back to the Source"
+
+### Fixed
+- **The sample footage credit now links each clip's source page.** CC BY-SA
+  4.0 asks for a link to the licensed material itself, not only to the
+  licence. The samples screen named the three Wikimedia Commons files and
+  linked the licence, but never the files; each clip's Commons page is now
+  one tap away under the credit line, labelled with the work it opens and
+  set in the same style and 44pt target as the licence link. The catalog
+  tests pin each clip to the file it was cut from.
+- At accessibility text sizes the licence link centred its wrapped lines,
+  leaving each continuation line indented off the page edge. It and the
+  new source links now wrap flush left, with a gap between one link and
+  the next once they outgrow their 44pt targets.
 ## [1.51.2] — unreleased
 
 ### Fixed

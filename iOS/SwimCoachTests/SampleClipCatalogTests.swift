@@ -37,6 +37,7 @@ final class SampleClipCatalogTests: XCTestCase {
             XCTAssertFalse(clip.title.isEmpty, "\(clip.fileName) has no title")
             XCTAssertFalse(clip.vantage.isEmpty, "\(clip.fileName) has no vantage")
             XCTAssertFalse(clip.footage.isEmpty, "\(clip.fileName) has no description")
+            XCTAssertFalse(clip.work.isEmpty, "\(clip.fileName) names no source work")
             XCTAssertFalse(clip.resourceName.isEmpty, "\(clip.fileName) has no resource name")
             XCTAssertEqual(clip.resourceExtension, "mp4",
                            "\(clip.fileName) is not the container the pipeline expects")
@@ -177,5 +178,72 @@ final class SampleClipCatalogTests: XCTestCase {
 
     func testLicenceURLIsHTTPS() {
         XCTAssertEqual(SampleClipCatalog.attribution.licenseURL.scheme, "https")
+    }
+
+    // MARK: - Source pages (§3(a)(1)(A)(v): link the material, not just the licence)
+
+    func testEveryClipLinksAnHTTPSCommonsFilePage() {
+        for clip in SampleClipCatalog.all {
+            let url = clip.sourceURL
+            XCTAssertEqual(url.scheme, "https", "\(clip.fileName) links its source over plain HTTP")
+            XCTAssertEqual(url.host, "commons.wikimedia.org",
+                           "\(clip.fileName) links somewhere other than Wikimedia Commons")
+            XCTAssertTrue(url.path.hasPrefix("/wiki/File:"),
+                          "\(clip.fileName) links a Commons page that is not a file page: \(url.path)")
+        }
+    }
+
+    func testEveryClipLinksADistinctSourcePage() {
+        let urls = SampleClipCatalog.all.map(\.sourceURL)
+        XCTAssertEqual(Set(urls).count, urls.count,
+                       "two clips link the same Commons file, so one clip's source is uncredited")
+    }
+
+    /// Distinctness cannot catch two links swapped between rows, and a
+    /// swapped pair would label one file with another's title. So pin the
+    /// mapping — clip to the Commons file it was cut from — the same way the
+    /// attribution test pins the author.
+    func testEachClipLinksTheCommonsFileItWasCutFrom() {
+        let expected = [
+            "sample_crawl_deck.mp4":
+                "https://commons.wikimedia.org/wiki/File:Front_Crawl_Above_Water.webm",
+            "sample_crawl_underwater.mp4":
+                "https://commons.wikimedia.org/wiki/File:Front_Crawl_Underwater.webm",
+            "sample_crawl_sprint.mp4":
+                "https://commons.wikimedia.org/wiki/File:Sprint_Front_Crawl_Underwater.webm",
+        ]
+        XCTAssertEqual(Set(SampleClipCatalog.all.map(\.fileName)), Set(expected.keys),
+                       "the catalog changed; pin the new clip's source page here")
+        for clip in SampleClipCatalog.all {
+            XCTAssertEqual(clip.sourceURL.absoluteString, expected[clip.fileName],
+                           "\(clip.fileName) links the wrong Commons file")
+
+            // The link is labelled with `work`, so the page it opens has to
+            // be the file of that name — Commons titles are the work with
+            // spaces as underscores.
+            let fileTitle = clip.work.replacingOccurrences(of: " ", with: "_")
+            XCTAssertEqual(clip.sourceURL.lastPathComponent, "File:\(fileTitle).webm",
+                           "\(clip.fileName)'s source link is labelled '\(clip.work)' but opens another file")
+        }
+    }
+
+    /// The credit line and the source links are two halves of one notice. A
+    /// clip whose work has a link but no mention in the sentence is credited
+    /// by a bare URL, which is not what the licence asked for.
+    func testTheCreditLineNamesEveryLinkedWork() {
+        let line = SampleClipCatalog.attribution.creditLine
+        let works = SampleClipCatalog.all.map(\.work)
+        for clip in SampleClipCatalog.all {
+            // "Front Crawl Underwater" sits inside "Sprint Front Crawl
+            // Underwater", so a plain `contains` would pass with the shorter
+            // title dropped. Strike the longer titles out first, so what is
+            // left can only match the work named in its own right.
+            let enclosing = works.filter { $0 != clip.work && $0.contains(clip.work) }
+            let remainder = enclosing.reduce(line) {
+                $0.replacingOccurrences(of: $1, with: "")
+            }
+            XCTAssertTrue(remainder.contains(clip.work),
+                          "the credit line never names '\(clip.work)', the work \(clip.fileName) links to")
+        }
     }
 }
