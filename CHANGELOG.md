@@ -3,9 +3,22 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
-## [1.51.2] — unreleased — "Back to the Source"
+## [1.51.2] — 2026-09-28 — "Not Your Swim, Not an Error"
+
+Resubmission after App Review asked for more information (Guideline 2.1,
+new developer account). Replaces the 1.51.1 submission, which never shipped.
 
 ### Fixed
+- **Every sample swim ended with "Session not saved — a storage error
+  occurred."** Samples are kept out of your history on purpose, but the
+  Results footer only knew "saved" and "not saved", so a deliberate skip read
+  as a failure — on the exact flow the App Review notes point reviewers to.
+  It now says "Sample swim — not saved to your history", and a genuine failed
+  save still reports the error. Found on a physical iPhone; the simulator
+  never reaches Results.
+- A sample swim could claim a **new personal best** when it outscored your
+  own best, and it was appended to the trend line on the shareable report
+  card. Somebody else's lap now plays no part in either.
 - **The sample footage credit now links each clip's source page.** CC BY-SA
   4.0 asks for a link to the licensed material itself, not only to the
   licence. The samples screen named the three Wikimedia Commons files and
@@ -17,19 +30,6 @@ follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
   leaving each continuation line indented off the page edge. It and the
   new source links now wrap flush left, with a gap between one link and
   the next once they outgrow their 44pt targets.
-## [1.51.2] — unreleased
-
-### Fixed
-- **Every sample swim ended with "Session not saved — a storage error
-  occurred."** Samples are kept out of your history on purpose, but the
-  Results footer only knew "saved" and "not saved", so a deliberate skip read
-  as a failure — on the exact flow the App Review notes point reviewers to.
-  It now says "Sample swim — not saved to your history", and a genuine failed
-  save still reports the error.
-- A sample swim could claim a **new personal best** when it outscored your
-  own best, and it was appended to the trend line on the shareable report
-  card. Somebody else's lap now plays no part in either.
-## [Unreleased]
 
 ### Tests
 - **Sample swims are now tested end to end on a real iPhone.**
@@ -43,6 +43,10 @@ follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 - The sample-tap UI test that proves the real pipeline runs (by catching
   the simulator's Vision failure) now skips on hardware instead of failing
   there for the right reason.
+- `AppReviewWalkthroughUITests` and `iOS/scripts/record-review-walkthrough.sh`
+  produce the device screen recording App Review asks new accounts for: a
+  Release build driven from the Home Screen through a sample swim, Results,
+  a fault's drills and About, captured with XCTest's own screen recording.
 
 ## [1.51.1] — 2026-09-19 — "Sample Swims That Score"
 
