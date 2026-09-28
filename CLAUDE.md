@@ -36,6 +36,14 @@ cd ml && .venv/bin/python coreml_convert.py   # writes into iOS/SwimCoach/Resour
 cd iOS && xcodegen generate
 cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+
+# On a paired iPhone (Developer Mode + Settings → Developer → UI Automation on):
+# runs the three sample swims through the REAL pipeline, which the simulator can't.
+# Drop -only-testing to run the unit suite on device too (incl. CoreML parity).
+cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
+  -destination 'id=<device-udid>' -allowProvisioningUpdates \
+  -allowProvisioningDeviceRegistration \
+  -only-testing:SwimCoachUITests/DeviceSampleAnalysisUITests
 ```
 
 ## Contracts that must stay in sync (breakage is silent)
@@ -58,7 +66,9 @@ cd iOS && xcodebuild test -project SwimCoach.xcodeproj -scheme SwimCoach \
   use `.venv/bin/python -m pip`.
 - mediapipe must stay `<0.10.30` (legacy `mp.solutions` API removed after).
 - Vision pose extraction DOES NOT WORK in the iOS simulator (error 9 every
-  frame; no workaround). Camera-path testing needs a physical device.
+  frame, on the iOS 26 and 27 runtimes; no workaround). Analysis and
+  camera-path testing need a physical device — `DeviceSampleAnalysisUITests`
+  (skips in the simulator) is the automated device check.
   Simulator testing uses DEBUG launch args and the unit/parity tests.
   Launch args: `-demoResults` (unsaved demo Results), `-demoResultsSaved`
   (seeds the store, opens a saved session — label/compare/NEW BEST rows),

@@ -3,6 +3,21 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [Unreleased]
+
+### Tests
+- **Sample swims are now tested end to end on a real iPhone.**
+  `DeviceSampleAnalysisUITests` opens each of the three bundled clips, runs
+  the real Vision → SwimTCN pipeline and asserts it reaches Results, logging
+  every fault's reading. It skips in the simulator, where Vision cannot run.
+  First device run (iPhone 15, iOS 26.5.2): all three clips reach Results —
+  deck 80 B, underwater 75 C, underwater sprint 75 C — and all 556 unit
+  tests pass on device, including CoreML-vs-PyTorch parity on the Neural
+  Engine.
+- The sample-tap UI test that proves the real pipeline runs (by catching
+  the simulator's Vision failure) now skips on hardware instead of failing
+  there for the right reason.
+
 ## [1.51.1] — 2026-09-19 — "Sample Swims That Score"
 
 First App Store submission.
