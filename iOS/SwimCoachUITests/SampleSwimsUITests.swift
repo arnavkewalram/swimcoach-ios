@@ -117,6 +117,33 @@ final class SampleSwimsUITests: XCTestCase {
         }
     }
 
+    /// The source pages, in page order — `scroll(_:to:)` only swipes
+    /// forward, and they sit between the credit line and the licence link.
+    private let sourceLinks: [(clip: String, work: String)] = [
+        ("sample_crawl_deck", "Front Crawl Above Water"),
+        ("sample_crawl_underwater", "Front Crawl Underwater"),
+        ("sample_crawl_sprint", "Sprint Front Crawl Underwater"),
+    ]
+
+    /// Walk every clip's source link into view and check what VoiceOver
+    /// reads for it. Addressed by identifier, then checked by label, because
+    /// "Front Crawl Underwater" is a substring of the sprint clip's title and
+    /// a label search alone could land on the wrong link and pass.
+    private func assertEverySourceLinkIsReachable(_ app: XCUIApplication,
+                                                  maxSwipes: Int = 8,
+                                                  file: StaticString = #filePath,
+                                                  line: UInt = #line) {
+        for source in sourceLinks {
+            let link = element(app, "sampleSourceLink-\(source.clip)")
+            XCTAssertTrue(scroll(app, to: link, maxSwipes: maxSwipes),
+                          "the source page for \(source.clip) is not linked on this screen",
+                          file: file, line: line)
+            XCTAssertEqual(link.label, "View \(source.work) on Wikimedia Commons",
+                           "the source link for \(source.clip) does not name its work",
+                           file: file, line: line)
+        }
+    }
+
     // MARK: - Light
 
     func testSampleSwimsListsEveryClipAndStatesBothHalvesOfTheDeal() {
@@ -157,6 +184,18 @@ final class SampleSwimsUITests: XCTestCase {
         XCTAssertTrue(scroll(app, to: link),
                       "the licence link is not reachable")
         attach("samples-credit")
+    }
+
+    /// CC BY-SA 4.0 §3(a)(1)(A)(v) asks for a link to the licensed material
+    /// itself, not only to the licence — and each clip is cut from a
+    /// different Commons file, so each needs its own. Naming the files in
+    /// the credit line without linking them is exactly the gap this closes.
+    func testFootageCreditLinksEachClipsSourcePage() {
+        let app = launch(["-openSamples"])
+        XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
+
+        assertEverySourceLinkIsReachable(app)
+        attach("samples-credit-sources")
     }
 
     // MARK: - Dark
@@ -206,6 +245,10 @@ final class SampleSwimsUITests: XCTestCase {
         attach("samples-ax-top")
 
         assertEveryClipRowIsPresent(app, line: #line)
+
+        // The longest link labels on the page, which wrap at this size —
+        // the arrow has to travel with them rather than strand the link.
+        assertEverySourceLinkIsReachable(app, maxSwipes: 20, line: #line)
 
         // The last thing on the page, at the largest type the app renders:
         // if anything clips, it clips here.
@@ -286,7 +329,12 @@ final class SampleSwimsUITests: XCTestCase {
     /// What the simulator cannot show is a run that succeeds. Real scores,
     /// real faults, and the no-save rule taking effect on a result that
     /// actually exists all need a device.
-    func testTappingASampleRunsTheRealPipelineAndNotTheDemoShortcut() {
+    func testTappingASampleRunsTheRealPipelineAndNotTheDemoShortcut() throws {
+        // The proof below is the simulator's Vision failure. On hardware the
+        // clip analyzes, which `DeviceSampleAnalysisUITests` asserts instead.
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Relies on Vision failing in the simulator; see DeviceSampleAnalysisUITests.")
+        #endif
         let app = launch(["-seedFirstRun", "-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
 

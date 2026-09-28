@@ -9,7 +9,7 @@ Facts this guide relies on:
 |---|---|
 | Bundle ID | `com.arnavkewalram.SwimCoach` |
 | Team ID | `NH96D7GY86` — the paid Individual team (Rakhi Chhatani). `4VH58A4KM6` is a free Personal Team and cannot publish. |
-| Version / build | `1.51.1` / `96` (in `iOS/project.yml`) |
+| Version / build | `1.51.2` / `97` (in `iOS/project.yml`) — resubmission after the 1.51.1 rejection below |
 | Deployment target | iOS 17.0, iPhone only, portrait only |
 | Network use | None. No accounts, no analytics, no IAP. |
 
@@ -278,7 +278,7 @@ Done in App Store Connect, verified on screen:
 | Screenshots | 4 × 1320 × 2868 in the 6.9" slot |
 | App Review notes | Entered, pointing at "Try a sample swim" |
 | Sign-in required | Unchecked — the app has no login |
-| Release | Manual |
+| Release | Automatic (see Phase 5) |
 
 **Keywords were 101 characters in an earlier draft of the listing doc** — one
 over Apple's limit — and spent four of its slots on `stroke`, `analysis`,
@@ -415,6 +415,44 @@ again at the sample-swim path. You do not need a new build to reply.
 
 If it needs a code change: fix, bump `CURRENT_PROJECT_VERSION`, archive,
 upload, resubmit.
+
+### Rejection 1 — 2026-09-24: Guideline 2.1, Information Needed
+
+Not a bug report. Apple sends this to developer accounts with little review
+history, and asks for six things — both as a reply in App Review and pasted
+into the App Review Information → Notes field:
+
+1. A screen recording on a physical device running the latest iOS, starting
+   with launching the app and showing the typical flow.
+2. The app's purpose and audience. 3. Setup and access instructions.
+4. External services used. 5. Regional differences.
+6. Documentation for regulated content or protected third-party material.
+
+The answers are in `APP_STORE_LISTING.md` → *App Review Notes* (under the
+4,000-character Notes limit). Two facts they rest on that are easy to get
+wrong: the three coaching tips are written by Apple's on-device **Foundation
+Models** where Apple Intelligence is available (an AI service, and the one
+regional difference), and the sample clips need their Commons source links,
+not just the licence.
+
+Scripting the recording on hardware found a real bug: every sample swim's
+Results said **"a storage error occurred"** — the flow the review notes send
+reviewers to. Fixed in 1.51.2 (build 97), which replaces 1.51.1 in the same
+submission (edit the version string in App Store Connect to match the build).
+
+**Making the recording** (phone: Developer Mode + Settings → Developer → UI
+Automation on, unlocked, untouched):
+
+```bash
+iOS/scripts/record-review-walkthrough.sh <device-udid> SwimCoach-walkthrough.mp4
+```
+
+It drives `AppReviewWalkthroughUITests` against a **Release** build (the
+Debug build's Home shows a DEV TOOLS panel) and captures video with XCTest's
+own screen recording — `devicectl device capture screen-record` reports
+"not supported" on an iOS 26 iPhone. The take starts on the phone's real Home
+Screen, so tidy its first page first if that matters to you. Attach the .mp4
+to the App Review reply.
 
 ---
 
