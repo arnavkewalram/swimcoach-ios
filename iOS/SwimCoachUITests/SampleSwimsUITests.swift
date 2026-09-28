@@ -58,14 +58,19 @@ final class SampleSwimsUITests: XCTestCase {
         return count == 0 ? 0 : total / Double(count)
     }
 
-    /// Poll `groundLuminance()` until it drops below `threshold`, then return
-    /// it. Returns the last reading either way, so the caller's assertion
-    /// reports the real number rather than a timeout.
-    private func waitForGroundLuminance(below threshold: Double,
-                                        timeout: TimeInterval = 5) throws -> Double {
+    /// Poll `groundLuminance()` until `isSettled` accepts it, then return it.
+    /// Returns the last reading either way, so the caller's assertion reports
+    /// the real number rather than a timeout.
+    ///
+    /// Waiting covers the ordinary case, where an appearance change reaches
+    /// the app within a second. It cannot cover a simulator's first boot, where
+    /// the change never arrives at all — `scripts/prime-simulator-appearance.sh`
+    /// handles that before the run starts.
+    private func waitForGroundLuminance(timeout: TimeInterval = 5,
+                                        until isSettled: (Double) -> Bool) throws -> Double {
         let deadline = Date().addingTimeInterval(timeout)
         var luma = try groundLuminance()
-        while luma >= threshold && Date() < deadline {
+        while !isSettled(luma) && Date() < deadline {
             Thread.sleep(forTimeInterval: 0.25)
             luma = try groundLuminance()
         }
@@ -170,9 +175,14 @@ final class SampleSwimsUITests: XCTestCase {
         // collection asynchronously, and setting it before `launch()` does
         // not survive the launch at all on this runtime.
         XCUIDevice.shared.appearance = .dark
-        let dark = try waitForGroundLuminance(below: 0.25)
+        let dark = try waitForGroundLuminance { $0 < 0.25 }
         XCTAssertLessThan(dark, 0.25,
-                          "the screen is not rendering the dark appearance (ground luma \(dark))")
+                          """
+                          the screen is not rendering the dark appearance (ground luma \(dark)). \
+                          On a simulator's first boot XCUIDevice.appearance is dropped without \
+                          an error unless scripts/prime-simulator-appearance.sh ran first — the \
+                          scheme's test pre-action does that, test-without-building does not
+                          """)
 
         XCTAssertTrue(labelled(app, "Real numbers").exists)
         attach("samples-dark-top")
@@ -186,7 +196,9 @@ final class SampleSwimsUITests: XCTestCase {
         XCUIDevice.shared.appearance = .light
         let app = launch(["-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
-        let light = try groundLuminance()
+        // Waited for like the dark reading, so this does not depend on how
+        // quickly the dark test's switch back to light has settled.
+        let light = try waitForGroundLuminance { $0 > 0.75 }
         XCTAssertGreaterThan(light, 0.75,
                              "the screen is not rendering the light appearance (ground luma \(light))")
     }

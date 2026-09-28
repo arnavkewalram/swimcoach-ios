@@ -3,6 +3,24 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [Unreleased]
+
+### Tests
+- **The dark-appearance sample-swims test no longer fails on a freshly
+  created simulator.** On a simulator's first boot, `XCUIDevice.appearance`
+  is dropped without an error: testmanagerd logs that it timed out waiting
+  for the style to change, and XCTest reports success. Waiting (150 s),
+  relaunching the app and flipping Settings' own Dark Appearance switch all
+  leave the screen light for the rest of that boot; a reboot or one change
+  made from the host through `simctl ui` fixes it. The scheme's test
+  pre-action now runs `iOS/scripts/prime-simulator-appearance.sh`, which
+  makes that host-side change on the destination simulator before tests
+  start. The luma threshold and assertion are unchanged, and the failure
+  message now names this cause. `test-without-building` skips scheme
+  pre-actions, so run the script by hand there.
+- The light-appearance test now waits for its reading the same way the dark
+  test does, instead of sampling once straight after launch.
+
 ## [1.51.1] — 2026-09-19 — "Sample Swims That Score"
 
 First App Store submission.
