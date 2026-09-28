@@ -122,6 +122,13 @@ schemes:
       targets:
         - SwimCoachTests
         - SwimCoachUITests
+      # A fresh simulator ignores XCUIDevice.appearance until its appearance
+      # has changed once from the host; see the script.
+      preActions:
+        - name: Prime simulator appearance
+          settingsTarget: SwimCoach
+          script: |
+            "$SRCROOT/scripts/prime-simulator-appearance.sh"
     run:
       config: Debug
     archive:
