@@ -286,7 +286,12 @@ final class SampleSwimsUITests: XCTestCase {
     /// What the simulator cannot show is a run that succeeds. Real scores,
     /// real faults, and the no-save rule taking effect on a result that
     /// actually exists all need a device.
-    func testTappingASampleRunsTheRealPipelineAndNotTheDemoShortcut() {
+    func testTappingASampleRunsTheRealPipelineAndNotTheDemoShortcut() throws {
+        // The proof below is the simulator's Vision failure. On hardware the
+        // clip analyzes, which `DeviceSampleAnalysisUITests` asserts instead.
+        #if !targetEnvironment(simulator)
+        throw XCTSkip("Relies on Vision failing in the simulator; see DeviceSampleAnalysisUITests.")
+        #endif
         let app = launch(["-seedFirstRun", "-openSamples"])
         XCTAssertTrue(element(app, "sampleSwimsScreen").waitForExistence(timeout: 10))
 
