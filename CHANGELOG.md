@@ -3,6 +3,16 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [Unreleased]
+
+### Tests
+- The App Review walkthrough now opens from the phone's last Home Screen
+  page rather than the first, so the recording shows no one's apps or
+  unread counts; it falls back to activating the Home Screen directly when
+  a foreground app swallows the simulated Home press (the Claude app did,
+  on every take), and steps back to Home if the app is not there when the
+  flow needs it.
+
 ## [1.51.2] — 2026-09-28 — "Not Your Swim, Not an Error"
 
 Resubmission after App Review asked for more information (Guideline 2.1,
