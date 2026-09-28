@@ -25,9 +25,20 @@ final class AppReviewWalkthroughUITests: XCTestCase {
     }
 
     func testTypicalUserFlow() {
-        // 1 — Launch from the Home Screen, as a user would.
+        // 1 — Launch from the Home Screen, as a user would. From its last
+        // page, which is usually empty: the footage goes to Apple, and the
+        // first page is somebody's apps and unread counts.
         XCUIDevice.shared.press(.home)
-        pause(2)
+        pause(1)
+        // Some foreground apps swallow the simulated Home press; bring the
+        // Home Screen forward directly when the page dots never appear.
+        if !springboard.pageIndicators.firstMatch.waitForExistence(timeout: 2) {
+            springboard.activate()
+            pause(1)
+        }
+        showLastHomeScreenPage()
+        pause(3)
+        attach("00-home-screen")
         let app = XCUIApplication()
         // Not a DEBUG hook: keeps the What's New sheet from covering Home.
         app.launchArguments = ["-suppressWhatsNew"]
@@ -43,6 +54,7 @@ final class AppReviewWalkthroughUITests: XCTestCase {
         attach("02-home")
 
         // 3 — Recording screen: framing guide and level indicator.
+        if !app.buttons["Analyze a swim"].exists { goBack(app) }
         app.buttons["Analyze a swim"].tap()
         pause(2)
         answerPermissionPrompts()
@@ -125,6 +137,21 @@ final class AppReviewWalkthroughUITests: XCTestCase {
                 .firstMatch.tap()
         }
         pause(2)
+    }
+
+    /// Swipes to the last Home Screen page, reading "page X of N" off the
+    /// page dots rather than swiping blind: one swipe too many opens the App
+    /// Library, which lists every app on the phone.
+    private func showLastHomeScreenPage() {
+        let dots = springboard.pageIndicators.firstMatch
+        guard dots.waitForExistence(timeout: 3),
+              let value = dots.value as? String else { return }
+        let numbers = value.split(separator: " ").compactMap { Int($0) }
+        guard numbers.count == 2, numbers[1] > numbers[0] else { return }
+        for _ in numbers[0]..<numbers[1] {
+            springboard.swipeLeft()
+            pause(0.8)
+        }
     }
 
     private func openSampleSwims(_ app: XCUIApplication) {
