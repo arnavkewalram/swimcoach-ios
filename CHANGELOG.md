@@ -3,6 +3,18 @@
 All notable changes to SwimCoach. Format follows Keep a Changelog; versions
 follow semver (MARKETING_VERSION in `iOS/project.yml` is the source of truth).
 
+## [1.51.2] — unreleased
+
+### Fixed
+- **Every sample swim ended with "Session not saved — a storage error
+  occurred."** Samples are kept out of your history on purpose, but the
+  Results footer only knew "saved" and "not saved", so a deliberate skip read
+  as a failure — on the exact flow the App Review notes point reviewers to.
+  It now says "Sample swim — not saved to your history", and a genuine failed
+  save still reports the error.
+- A sample swim could claim a **new personal best** when it outscored your
+  own best, and it was appended to the trend line on the shareable report
+  card. Somebody else's lap now plays no part in either.
 ## [Unreleased]
 
 ### Tests

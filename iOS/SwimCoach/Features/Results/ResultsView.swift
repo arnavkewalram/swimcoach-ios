@@ -27,9 +27,19 @@ struct ResultsView: View {
 
     var isSaved: Bool { !savedSessions.isEmpty }
 
+    /// A bundled sample swim: analyzed for real, never saved by design
+    /// (`AnalyzingView`). Everything here that measures this result against
+    /// the user's own history has to ask, or somebody else's lap earns a
+    /// personal best and a point on the user's trend.
+    var isSample: Bool {
+        result.videoURL.map { SampleClipCatalog.isSample($0) } ?? false
+    }
+
     /// Chronological recent scores for the report sparkline, ending with
     /// this session (appended manually when it isn't in the store yet).
+    /// None for a sample — the user's trend has no place for it.
     private var reportTrendScores: [Int]? {
+        guard !isSample else { return nil }
         var scores = TrainingLog.recentScores(
             from: allSessions.map { TrainingLog.Entry(date: $0.analyzedAt, score: $0.score) })
         if savedSessions.isEmpty { scores = Array((scores + [result.score]).suffix(10)) }
@@ -45,6 +55,7 @@ struct ResultsView: View {
     }
 
     var isNewBest: Bool {
+        guard !isSample else { return false }
         let prior = allSessions.filter { $0.id != result.id }.map(\.score).max()
         return TrainingLog.isNewBest(score: result.score, priorBest: prior)
     }
