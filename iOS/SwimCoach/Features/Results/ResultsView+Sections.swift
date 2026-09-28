@@ -142,18 +142,28 @@ extension ResultsView {
 
     // MARK: - Footer
 
+    var saveStatus: ResultsSaveStatus {
+        ResultsSaveStatus(isSaved: isSaved, isSample: isSample)
+    }
+
+    private var saveStatusSymbolColor: Color {
+        switch saveStatus {
+        case .saved: return DS.severityMinor
+        case .sample: return DS.inkTertiary
+        case .failed: return DS.severityModerate
+        }
+    }
+
     var footer: some View {
         VStack(spacing: 14) {
             HStack(spacing: 6) {
-                Image(systemName: isSaved ? "checkmark" : "exclamationmark.triangle")
+                Image(systemName: saveStatus.symbolName)
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(isSaved ? DS.severityMinor : DS.severityModerate)
+                    .foregroundStyle(saveStatusSymbolColor)
                     .accessibilityHidden(true)
-                Text(isSaved
-                     ? "Session saved"
-                     : "Session not saved — a storage error occurred")
+                Text(saveStatus.message)
                     .font(.footnote)
-                    .foregroundStyle(isSaved ? DS.inkSecondary : DS.severityModerate)
+                    .foregroundStyle(saveStatus.isError ? DS.severityModerate : DS.inkSecondary)
             }
             .frame(maxWidth: .infinity)
 
