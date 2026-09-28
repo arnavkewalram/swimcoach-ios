@@ -162,10 +162,11 @@ struct SampleSwimsView: View {
     // MARK: - Attribution
 
     /// A licence condition, not a courtesy — CC BY-SA 4.0 §3(a) requires the
-    /// work, the author and the licence to travel with the footage. Set in
-    /// the same register About uses for the SIL OFL type credit, and placed
-    /// on the screen that plays the clips rather than three taps away, so
-    /// the credit is visible to anyone who sees the thing it is crediting.
+    /// work, the author and the licence to travel with the footage, and a
+    /// link back to the material itself. Set in the same register About uses
+    /// for the SIL OFL type credit, and placed on the screen that plays the
+    /// clips rather than three taps away, so the credit is visible to anyone
+    /// who sees the thing it is crediting.
     private var footageCredit: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "Footage", singleLine: true)
@@ -176,27 +177,69 @@ struct SampleSwimsView: View {
                 .foregroundStyle(DS.inkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Link(destination: credit.licenseURL) {
-                // The glyph is interpolated INTO the text rather than set
-                // beside it in an HStack: at accessibility sizes the label
-                // wraps, and an HStack sibling stayed pinned to the trailing
-                // edge with the arrow floating off on its own line. Inline,
-                // it travels with the last word.
-                Text("VIEW \(credit.licenseShortName) LICENCE \(Image(systemName: "arrow.up.right"))")
-                    .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
-                    .tracking(1.2)
-                    .foregroundStyle(DS.accent)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    // The label stays compact; the frame lifts the tap target
-                    // to the 44pt HIG minimum before contentShape claims it.
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
+            // No spacing: every link already carries its own gap inside its
+            // 44pt target (see `CreditLink`). The source pages come first,
+            // one per clip in list order, labelled with the work the line
+            // above names, so each link reads as a footnote to that sentence.
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(clips) { clip in
+                    CreditLink(
+                        title: clip.work.uppercased(),
+                        destination: clip.sourceURL,
+                        accessibilityLabel: "View \(clip.work) on \(credit.source)")
+                    .accessibilityIdentifier("sampleSourceLink-\(clip.resourceName)")
+                }
+
+                CreditLink(
+                    title: "VIEW \(credit.licenseShortName) LICENCE",
+                    destination: credit.licenseURL,
+                    accessibilityLabel: "View the \(credit.licenseName) licence")
             }
-            .accessibilityLabel("View the \(credit.licenseName) licence")
-            .accessibilityAddTraits(.isLink)
         }
         .accessibilityElement(children: .contain)
+    }
+}
+
+// MARK: - Credit link
+
+/// One outbound link in the footage credit: tracked caps in the accent, with
+/// an arrow that says it leaves the app. Shared by the source pages and the
+/// licence so the four cannot drift apart in type, colour or tap target.
+private struct CreditLink: View {
+    /// Already cased by the caller — this view does not decide the wording.
+    let title: String
+    let destination: URL
+    let accessibilityLabel: String
+
+    var body: some View {
+        Link(destination: destination) {
+            // The glyph is interpolated INTO the text rather than set
+            // beside it in an HStack: at accessibility sizes the label
+            // wraps, and an HStack sibling stayed pinned to the trailing
+            // edge with the arrow floating off on its own line. Inline,
+            // it travels with the last word.
+            Text("\(title) \(Image(systemName: "arrow.up.right"))")
+                .font(.custom(GroteskWeight.medium.postScriptName, size: 10))
+                .tracking(1.2)
+                .foregroundStyle(DS.accent)
+                // Set explicitly: a Link centres a wrapped label the way a
+                // Button does, so at accessibility sizes every continuation
+                // line sat indented under the first, off the page's edge.
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                // Invisible at default sizes, where the label sits well
+                // inside the 44pt floor. Once it wraps past that floor at
+                // accessibility sizes, this is the only thing keeping one
+                // link from running straight into the next.
+                .padding(.vertical, 8)
+                // The label stays compact; the frame lifts the tap target
+                // to the 44pt HIG minimum before contentShape claims it.
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityAddTraits(.isLink)
     }
 }
 
