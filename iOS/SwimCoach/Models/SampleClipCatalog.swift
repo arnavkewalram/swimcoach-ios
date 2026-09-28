@@ -16,10 +16,11 @@ import Foundation
 ///
 /// ── Adding a fifth clip ─────────────────────────────────────────────────
 ///
-/// Drop the file into `Resources/SampleClips/` and add one entry to `all`.
-/// Nothing else: the list screen, the bundle-resolution test and the
-/// no-save rule in `AnalyzingView` all read this catalog rather than
-/// enumerating clips of their own.
+/// Drop the file into `Resources/SampleClips/` and add one entry to `all`,
+/// then name its work in `attribution.work` (`SampleClipCatalogTests` holds
+/// the two together). Nothing else: the list screen, the credit's source
+/// links, the bundle-resolution test and the no-save rule in `AnalyzingView`
+/// all read this catalog rather than enumerating clips of their own.
 struct SampleClip: Identifiable, Hashable, Sendable {
     /// Bundle resource name, extension included. Doubles as the identity —
     /// two rows cannot name the same file without colliding here first.
@@ -30,6 +31,14 @@ struct SampleClip: Identifiable, Hashable, Sendable {
     let vantage: String
     /// One sentence on what the clip actually shows.
     let footage: String
+    /// The title of the Commons file this clip was cut from — one of the
+    /// works the credit names, and the label on this clip's source link.
+    let work: String
+    /// That file's page on Wikimedia Commons. CC BY-SA 4.0 §3(a)(1)(A)(v)
+    /// asks for a link to the licensed material itself, not only to the
+    /// licence, and each clip is a different file — so this lives on the
+    /// row, not on the catalog-wide `SampleClipAttribution`.
+    let sourceURL: URL
 
     var id: String { fileName }
 
@@ -62,10 +71,12 @@ struct SampleClipAttribution: Hashable, Sendable {
     let licenseURL: URL
 
     /// The one sentence that carries every element CC BY-SA 4.0 §3(a)(1) asks
-    /// for: the title of the work, the author's name, the licence — and,
-    /// because ShareAlike obliges it, an indication that the material was
-    /// modified. Every clip here was trimmed and rescaled to ship, so that
-    /// last clause is not optional boilerplate.
+    /// for in prose: the title of the work, the author's name, the licence —
+    /// and, because ShareAlike obliges it, an indication that the material
+    /// was modified. Every clip here was trimmed and rescaled to ship, so
+    /// that last clause is not optional boilerplate. The two elements that
+    /// are links — the licence and each clip's `sourceURL` — are set beside
+    /// it on the samples screen rather than spelled out in it.
     var creditLine: String {
         "\"\(work)\" by \(author), via \(source), used under the "
             + "\(licenseName) licence. Trimmed and rescaled for this app."
@@ -110,21 +121,30 @@ enum SampleClipCatalog {
     /// meaningless output: freestyle faults scored against a stroke that
     /// never claimed to have them.
     static let all: [SampleClip] = [
+        // Each `sourceURL` force-unwraps a compile-time constant, as
+        // `licenseURL` does: valid forever or caught by
+        // `SampleClipCatalogTests` on the first run.
         SampleClip(
             fileName: "sample_crawl_deck.mp4",
             title: "Deck level, side on",
             vantage: "Above water",
-            footage: "Filmed from the pool deck with the camera down at the waterline, tracking the swimmer past — the framing SwimCoach asks you for."),
+            footage: "Filmed from the pool deck with the camera down at the waterline, tracking the swimmer past — the framing SwimCoach asks you for.",
+            work: "Front Crawl Above Water",
+            sourceURL: URL(string: "https://commons.wikimedia.org/wiki/File:Front_Crawl_Above_Water.webm")!),
         SampleClip(
             fileName: "sample_crawl_underwater.mp4",
             title: "Underwater, side on",
             vantage: "Underwater",
-            footage: "Side on from under the surface, holding the swimmer in frame for several full stroke cycles."),
+            footage: "Side on from under the surface, holding the swimmer in frame for several full stroke cycles.",
+            work: "Front Crawl Underwater",
+            sourceURL: URL(string: "https://commons.wikimedia.org/wiki/File:Front_Crawl_Underwater.webm")!),
         SampleClip(
             fileName: "sample_crawl_sprint.mp4",
             title: "Underwater, sprint tempo",
             vantage: "Underwater",
-            footage: "The same vantage at racing turnover, where the stroke is faster and the catch is harder to hold."),
+            footage: "The same vantage at racing turnover, where the stroke is faster and the catch is harder to hold.",
+            work: "Sprint Front Crawl Underwater",
+            sourceURL: URL(string: "https://commons.wikimedia.org/wiki/File:Sprint_Front_Crawl_Underwater.webm")!),
     ]
 
     /// The sample this URL *is*, or nil for footage the user supplied.

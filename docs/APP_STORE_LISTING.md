@@ -128,26 +128,52 @@ Primary **Health & Fitness**. Secondary **Sports**.
 
 ## App Review Notes — paste verbatim
 
+Also the reply to App Review for the 2026-09-24 Guideline 2.1 "Information
+Needed" request (see `APP_STORE_SUBMISSION.md`). Fill in the iOS version the
+recording was made on; the whole block stays under Notes' 4,000 characters.
+
 ```
-SwimCoach analyses freestyle swimming technique from video, so it normally
-requires pool footage.
+Thank you for reviewing SwimCoach. The information you asked for is below. The same text is in the App Review Notes field.
 
-FOR REVIEW WITHOUT A POOL: tap "Try a sample swim" on the Home screen. The app
-ships three real swims, filmed from the deck and from underwater. Running one
-performs the identical on-device analysis a user's own recording receives — the
-technique score and detected faults are the model's genuine output on those
-frames, not canned data.
+1. SCREEN RECORDING
+Attached: SwimCoach-walkthrough.mp4, recorded on an iPhone 15 running iOS <iOS version the recording was made on>. It starts on the Home Screen with launching the app. It then shows the typical flow: Home, the recording screen, a bundled sample swim analyzed on the device, Results, a detected fault and its drills, and About. The app has no account registration, login or account deletion. It has no user-generated content shared with others and no paid content.
 
-- No account or login is required. There is no sign-in of any kind, so no demo
-  credentials are needed.
-- All analysis runs on device. The app makes no network requests.
-- Pose detection uses the Vision framework, which does NOT function in the iOS
-  Simulator. Please review on physical hardware.
-- Camera access records a swim. Microphone audio is captured alongside the
-  video so poolside coaching notes are audible on playback; audio is never
-  analysed and never leaves the device.
-- The bundled sample footage is used under CC BY-SA 4.0 and is credited in the
-  app on the sample swims screen.
+2. PURPOSE AND AUDIENCE
+SwimCoach is a technique coach for freestyle (front crawl) swimmers: triathletes, masters and fitness swimmers, and the coaches who film them. Filming a swim is easy; knowing what is wrong with the stroke is not, and coaching is expensive. SwimCoach analyzes a side-on video of a swimmer on the iPhone itself. It returns:
+- a 0–100 technique score
+- the specific faults detected, such as body sag, elbow collapse, knee overbend, kick rate and left/right asymmetry
+- when in the clip each fault occurred
+- drills that address each fault
+It is a training aid, not a medical or diagnostic tool.
+
+3. SETUP AND ACCESS
+No account, login or configuration is needed.
+- To see the core feature without a pool: on Home, tap "Try a sample swim" (it's also on Home as "Sample swims"). Choose any of the three bundled clips and tap "Analyze this clip". The app runs the same on-device analysis a user's own recording gets. Results shows the score, the detected faults, an issue timeline, a skeleton overlay on the video and matching drills. Sample results are deliberately not saved to the user's history.
+- For a user's own swim: "Analyze a swim" opens the camera (film side-on from the pool deck, 3–6 m from the swimmer), or "Import a video" picks a clip from Photos.
+- Pose detection uses Apple's Vision framework, which does not run in the iOS Simulator. Please review on a physical iPhone.
+
+4. EXTERNAL SERVICES
+None. The app makes no network requests. It uses no third-party SDKs, analytics, authentication, payment processors, or cloud or third-party AI services. All processing happens on the device, using Apple frameworks:
+- Vision: body pose detection.
+- Core ML: SwimTCN, a model we trained ourselves and bundle in the app.
+- AVFoundation: camera and playback.
+- SwiftData: local history.
+- Foundation Models: on iPhones where Apple Intelligence is available, Apple's on-device model writes three coaching tips. Elsewhere those tips come from built-in text.
+
+5. REGIONAL DIFFERENCES
+The app works the same in all regions. The only variation is the three coaching tips on Results. Apple's on-device model writes them where Apple Intelligence is available for the user's region and language, and built-in text is used otherwise. Scores, detected faults, drills and history are identical everywhere. The app is in English.
+
+6. REGULATION AND THIRD-PARTY MATERIAL
+The app is not in a regulated industry. It gives swimming technique feedback, makes no medical, injury-prevention or diagnostic claims, and is not a medical device.
+It bundles three short sample videos by "It is a wonderful world", used under Creative Commons Attribution-ShareAlike 4.0 from Wikimedia Commons:
+- https://commons.wikimedia.org/wiki/File:Front_Crawl_Above_Water.webm
+- https://commons.wikimedia.org/wiki/File:Front_Crawl_Underwater.webm
+- https://commons.wikimedia.org/wiki/File:Sprint_Front_Crawl_Underwater.webm
+Licence: https://creativecommons.org/licenses/by-sa/4.0/
+The Sample Swims screen credits the author, the work and the licence, and links to the licence and to each source page. The Space Grotesk typeface is used under the SIL Open Font License 1.1 and credited in About.
+
+ALSO IN THIS BUILD
+Build 97 fixes an issue we found in our own device testing. Results for a sample swim wrongly said "a storage error occurred". It now says that samples are not saved to your history.
 ```
 
 ---
@@ -182,4 +208,5 @@ else's membership cannot display a different seller name. Showing your own name
 there requires your own Apple Developer Program membership.
 
 What you control: the copyright string above, the description, and the app's
-own About screen — which currently credits the typeface designer but not you.
+own About screen, which credits you: "Built by Arnav Kewalram — the app, the
+SwimTCN model, and the training pipeline behind it."
